@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#11151b">
+<meta name="description" content="Intervallklocka för CrossCage-pass: stationer, övningar, set, varv, uppvärmning och genomgång.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CrossCage">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+button,input,select{touch-action:manipulation}
+</style>
+<title>CrossCage Passklocka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: one-column gym clock. Plan tab (inputs + session strip) and Kör tab (huge countdown). Deliberately single dark theme, like a box clock on the wall. */
+:root{
+  --bg:#11151b; --panel:#1a2029; --line:#2b3440; --fg:#eef1f4; --muted:#8d98a6;
+  --work:#ffb020; --work-ink:#1d1300; --rest:#3fc1c9; --rest-ink:#00191b;
+  --round:#a78bfa; --setup:#e58fb0; --danger:#ff6b5a;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 32px}
+.wrap{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.02em;margin:0;text-transform:uppercase;line-height:1}
+h1 span{color:var(--work)}
+.sub{color:var(--muted);font-size:13px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--panel);border-radius:10px;padding:4px;gap:4px}
+.tabs button{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.06em;text-transform:uppercase;
+  background:none;border:0;color:var(--muted);padding:10px;border-radius:7px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--work);outline-offset:2px}
+section{display:flex;flex-direction:column;gap:14px}
+.lang{display:flex;gap:2px;background:var(--panel);border-radius:7px;padding:3px;margin-left:auto}
+.lang button{background:none;border:0;color:var(--muted);font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.08em;padding:4px 9px;border-radius:5px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.label{font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.block{display:flex;flex-direction:column;gap:12px;padding-block:14px;border-top:1px solid var(--line)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.row label{flex:1;min-width:0}
+.row small{display:block;color:var(--muted);font-size:12px}
+.mode{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mode button{line-height:1.25;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:9px 6px;font:inherit;font-size:13px;cursor:pointer}
+.mode button[aria-pressed="true"]{border-color:var(--work);color:var(--work)}
+.num{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.num button{width:36px;height:40px;background:none;border:0;color:var(--fg);font-size:20px;cursor:pointer}
+.num input{width:58px;height:40px;border:0;background:none;color:var(--fg);text-align:center;font-family:var(--display);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.num input::-webkit-inner-spin-button{-webkit-appearance:none}
+.unit{color:var(--muted);font-size:12px;width:22px}
+input[type=range]{width:100%;accent-color:var(--work)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{background:none;border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer;font-variant-numeric:tabular-nums}
+.chips button.on{background:var(--work);border-color:var(--work);color:var(--work-ink)}
+.result{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-radius:10px;overflow:hidden}
+.result div{background:var(--panel);padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.result b{font-family:var(--display);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.result span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.result .w b{color:var(--work)} .result .r b{color:var(--rest)}
+@media (max-width:420px){.result{grid-template-columns:repeat(2,1fr)}}
+.totals{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.totals strong{color:var(--fg);font-weight:600}
+.warn{color:var(--danger);font-size:13px}
+.strip{display:flex;flex-direction:column;gap:6px}
+.bar{display:flex;height:22px;border-radius:5px;overflow:hidden;gap:1px;background:var(--bg)}
+.bar i{display:block;min-width:1px}
+.bar .w{background:var(--work)} .bar .p{background:var(--rest);opacity:.55} .bar .e{background:var(--rest);opacity:.8} .bar .s{background:var(--rest)} .bar .R{background:var(--round)} .bar .warm{background:var(--setup)} .bar .instr{background:var(--setup);opacity:.5}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c);opacity:var(--o,1)}
+details{border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.ex{display:grid;grid-template-columns:28px repeat(var(--n),minmax(0,1fr));gap:6px;align-items:center;margin-top:8px}
+.ex b{font-family:var(--display);font-size:18px;color:var(--muted);text-align:center}
+.ex input{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;color:var(--fg);padding:8px;font:inherit;font-size:14px}
+.passrow{display:flex;gap:6px}
+.passrow select,.passrow input,.snd select{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--fg);padding:9px 8px;font:inherit;font-size:14px}
+.btn{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:9px 12px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--work);border-color:var(--work);color:var(--work-ink);font-weight:600}
+.btn.danger{border-color:var(--danger);color:var(--danger)}
+.snd{display:grid;grid-template-columns:minmax(0,7.5em) minmax(0,1fr) auto;gap:6px;align-items:center}
+.snd label{font-size:14px}
+.snd .btn{padding:9px 11px}
+.go{background:var(--work);color:var(--work-ink);border:0;border-radius:10px;padding:14px;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+
+/* Run view */
+.run{gap:12px}
+.face{border-radius:16px;padding:18px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;background:var(--panel);transition:background .25s}
+.face.work{background:var(--work);color:var(--work-ink)}
+.face.rest{background:var(--rest);color:var(--rest-ink)}
+.face.round{background:var(--round);color:#160a33}
+.face.setup{background:var(--setup);color:#2a0716}
+.face.done{background:var(--panel)}
+.flash{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.12em;text-transform:uppercase;background:var(--bg);color:var(--fg);border-radius:8px;padding:2px 14px}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.face.hit{animation:pulse .35s 2}
+@media (prefers-reduced-motion:reduce){.face.hit{animation:none}}
+.phase{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:.14em;text-transform:uppercase}
+.clock{font-family:var(--display);font-weight:800;font-size:clamp(96px,32vw,180px);line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.what{font-family:var(--display);font-weight:700;font-size:26px;line-height:1.1;text-wrap:balance}
+.where{font-size:14px;font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
+.prog{width:100%;height:6px;border-radius:3px;background:rgba(0,0,0,.18);overflow:hidden}
+.prog i{display:block;height:100%;background:currentColor;opacity:.75}
+.next{display:flex;justify-content:space-between;gap:10px;background:var(--panel);border-radius:10px;padding:12px 14px;align-items:center}
+.next div{min-width:0}
+.next .t{font-family:var(--display);font-weight:700;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.next .d{font-family:var(--display);font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.ctrls{display:grid;grid-template-columns:1fr 2fr 1fr;gap:8px}
+.ctrls button{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:14px 6px;font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.ctrls .main{background:var(--fg);color:var(--bg);border-color:var(--fg);font-size:22px}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.meta strong{color:var(--fg)}
+.tiny{display:flex;gap:16px;justify-content:center;font-size:13px}
+.tiny button{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit}
+@media (prefers-reduced-motion:reduce){.face{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Cross<span>Cage</span> klocka</h1>
+    <div class="sub" id="sub"></div>
+    <div class="lang" role="group" aria-label="Språk"><button data-lang="sv">SV</button><button data-lang="en">EN</button></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button id="tabPlan" role="tab" aria-selected="true">Plan</button>
+    <button id="tabRun" role="tab" aria-selected="false">Kör</button>
+  </div>
+
+  <!-- PLAN -->
+  <section id="plan">
+    <div class="block" style="border-top:0;padding-top:0">
+      <div class="label">Sparade pass</div>
+      <div class="passrow"><select id="passSel" aria-label="Sparade pass"><option value="">Inga sparade pass än</option></select><button class="btn" id="passLoad">Ladda</button><button class="btn" id="passDel">Ta bort</button></div>
+      <div class="passrow"><input id="passName" maxlength="40" placeholder="Namn, t.ex. Ben 45 min" aria-label="Passets namn"><button class="btn primary" id="passSave">Spara</button></div>
+      <div class="sub" id="passMsg">Laddar sparade pass…</div>
+    </div>
+
+    <div class="block">
+      <div class="label">Upplägg</div>
+      <div class="row">
+        <label for="st">Stationer</label>
+        <div class="num"><button data-step="st:-1" aria-label="Minska">−</button><input id="st" type="number" inputmode="numeric" min="1" max="20"><button data-step="st:1" aria-label="Öka">+</button></div><span class="unit">st</span>
+      </div>
+      <div class="row">
+        <label for="ex">Övningar per station</label>
+        <div class="num"><button data-step="ex:-1" aria-label="Minska">−</button><input id="ex" type="number" inputmode="numeric" min="1" max="4"><button data-step="ex:1" aria-label="Öka">+</button></div><span class="unit">st</span>
+      </div>
+      <div class="row">
+        <label for="sets">Set per övning</label>
+        <div class="num"><button data-step="sets:-1" aria-label="Minska">−</button><input id="sets" type="number" inputmode="numeric" min="1" max="6"><button data-step="sets:1" aria-label="Öka">+</button></div><span class="unit">st</span>
+      </div>
+      <div class="row">
+        <label for="rd">Varv</label>
+        <div class="num"><button data-step="rd:-1" aria-label="Minska">−</button><input id="rd" type="number" inputmode="numeric" min="1" max="6"><button data-step="rd:1" aria-label="Öka">+</button></div><span class="unit">st</span>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="label">Uppvärmning och genomgång</div>
+      <div class="row">
+        <label for="warm">Uppvärmning<small>i början av passet</small></label>
+        <div class="num"><button data-step="warm:-1" aria-label="Minska">−</button><input id="warm" type="number" inputmode="numeric" min="0" max="60"><button data-step="warm:1" aria-label="Öka">+</button></div><span class="unit">min</span>
+      </div>
+      <div class="row">
+        <label for="instr">Instruktion per övning<small id="instrSum"></small></label>
+        <div class="num"><button data-step="instr:-5" aria-label="Minska">−</button><input id="instr" type="number" inputmode="numeric" min="0" max="300"><button data-step="instr:5" aria-label="Öka">+</button></div><span class="unit">s</span>
+      </div>
+      <div class="mode" role="group" aria-label="När instruktionen ges">
+        <button id="instrBlock" aria-pressed="true">Samlad genomgång efter uppvärmning</button>
+        <button id="instrStation" aria-pressed="false">Vid varje station i varv 1</button>
+      </div>
+    </div>
+
+    <div class="label" style="margin-top:4px">Fördelning arbete och vila</div>
+    <div class="mode" role="group" aria-label="Läge">
+      <button id="modeAuto" aria-pressed="true">Räkna från totaltid</button>
+      <button id="modeManual" aria-pressed="false">Sätt arbetstid själv</button>
+    </div>
+
+    <div class="block" id="autoBlock">
+      <div class="row">
+        <label for="total">Total tid för passet<small>inkl. alla pauser</small></label>
+        <div class="num"><button data-step="total:-1" aria-label="Minska">−</button><input id="total" type="number" inputmode="numeric" min="10" max="180"><button data-step="total:1" aria-label="Öka">+</button></div><span class="unit">min</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="row"><label for="ratio">Arbete vs setvila<small>andel arbete i varje set</small></label><strong id="ratioOut" style="font-family:var(--display);font-size:20px"></strong></div>
+        <input id="ratio" type="range" min="30" max="95" step="1">
+        <div class="chips" id="ratioChips">
+          <button data-r="50">30/30</button><button data-r="67">40/20</button><button data-r="75">45/15</button><button data-r="83">50/10</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="block" id="manualBlock" hidden>
+      <div class="row">
+        <label for="work">Arbete per set</label>
+        <div class="num"><button data-step="work:-5" aria-label="Minska">−</button><input id="work" type="number" inputmode="numeric" min="5" max="300"><button data-step="work:5" aria-label="Öka">+</button></div><span class="unit">s</span>
+      </div>
+      <div class="row">
+        <label for="setRest">Vila mellan set<small>samma övning, set 1 → 2</small></label>
+        <div class="num"><button data-step="setRest:-5" aria-label="Minska">−</button><input id="setRest" type="number" inputmode="numeric" min="0" max="300"><button data-step="setRest:5" aria-label="Öka">+</button></div><span class="unit">s</span>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="label">Pauser vid byten</div>
+      <div class="row">
+        <label for="exRest">Byte övning A → B<small>inom stationen</small></label>
+        <div class="num"><button data-step="exRest:-5" aria-label="Minska">−</button><input id="exRest" type="number" inputmode="numeric" min="0" max="300"><button data-step="exRest:5" aria-label="Öka">+</button></div><span class="unit">s</span>
+      </div>
+      <div class="row">
+        <label for="stRest">Byte station<small id="stRestSub"></small></label>
+        <div class="num"><button data-step="stRest:-5" aria-label="Minska">−</button><input id="stRest" type="number" inputmode="numeric" min="0" max="300"><button data-step="stRest:5" aria-label="Öka">+</button></div><span class="unit">s</span>
+      </div>
+      <div class="row">
+        <label for="rdRest">Vila mellan varv</label>
+        <div class="num"><button data-step="rdRest:-15" aria-label="Minska">−</button><input id="rdRest" type="number" inputmode="numeric" min="0" max="600"><button data-step="rdRest:15" aria-label="Öka">+</button></div><span class="unit">s</span>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="result">
+        <div class="w"><b id="oWork">–</b><span>Arbete/set</span></div>
+        <div class="r"><b id="oSet">–</b><span>Setvila</span></div>
+        <div><b id="oStation">–</b><span>Per station</span></div>
+        <div><b id="oRound">–</b><span>Per varv</span></div>
+      </div>
+      <div class="totals">
+        <span>Passet: <strong id="oTotal">–</strong></span>
+        <span>Arbete <strong id="oWorkTot">–</strong></span>
+        <span>Vila <strong id="oRestTot">–</strong></span>
+        <span>Uppv. + genomgång <strong id="oSetup">–</strong></span>
+      </div>
+      <div class="warn" id="warn" hidden></div>
+      <div class="strip">
+        <div class="bar" id="bar" aria-label="Hela passet som tidslinje"></div>
+        <div class="legend">
+          <span style="--c:var(--work)">Arbete</span>
+          <span style="--c:var(--rest);--o:.55">Setvila</span>
+          <span style="--c:var(--rest);--o:.8">Byte övning</span>
+          <span style="--c:var(--rest)">Byte station</span>
+          <span style="--c:var(--round)">Varvvila</span>
+          <span style="--c:var(--setup)">Uppvärmning</span>
+          <span style="--c:var(--setup);--o:.5">Genomgång</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="label">Ljud</div>
+      <div class="row">
+        <label for="countdown">Nedräkning före slut<small>pip varje sekund de sista sekunderna av övningen</small></label>
+        <div class="num"><button data-step="countdown:-1" aria-label="Minska">−</button><input id="countdown" type="number" inputmode="numeric" min="0" max="15"><button data-step="countdown:1" aria-label="Öka">+</button></div><span class="unit">s</span>
+      </div>
+      <div class="mode" role="group" aria-label="Nedräkning i vila">
+        <button id="cdWorkOnly" aria-pressed="true">Nedräkning bara i övning</button>
+        <button id="cdAll" aria-pressed="false">Även i vila och byten</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="row"><label for="vol">Volym</label><strong id="volOut" style="font-family:var(--display);font-size:20px"></strong></div>
+        <input id="vol" type="range" min="10" max="100" step="5">
+      </div>
+      <div class="label">Välj ljud</div>
+      <div id="sndList" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="mode" role="group" aria-label="Halvtidssignal">
+        <button id="halfOn" aria-pressed="true">Halvtidssignal på (byt sida)</button>
+        <button id="halfOff" aria-pressed="false">Ingen halvtidssignal</button>
+      </div>
+      <div class="label">Med musik i bakgrunden</div>
+      <div class="mode" role="group" aria-label="Ljud tillsammans med musik">
+        <button id="mixAmb" aria-pressed="true">Blanda med musiken</button>
+        <button id="mixDuck" aria-pressed="false">Sänk musiken vid signal</button>
+      </div>
+      <div class="sub">Starta musiken i Spotify först och tryck sedan Start här. På iPhone: stäng av ljudlös-reglaget på sidan av telefonen, annars hörs inte klockan. Om det ändå är tyst, prova "Sänk musiken vid signal".</div>
+    </div>
+
+    <details>
+      <summary>Namnge övningar (valfritt)</summary>
+      <div id="exList"></div>
+    </details>
+
+    <button class="go" id="goBtn">Till klockan →</button>
+    <button class="btn" id="installBtn" hidden style="padding:12px">Installera appen</button>
+  </section>
+
+  <!-- RUN -->
+  <section id="run" class="run" hidden>
+    <button class="btn danger" id="audioWarn" hidden style="width:100%;padding:12px">Klockans ljud har stoppats av en annan app. Tryck här för att slå på ljudet igen.</button>
+    <div class="face" id="face">
+      <div class="phase" id="rPhase">Redo</div>
+      <div class="clock" id="rClock">0:00</div>
+      <div class="flash" id="rFlash" hidden>Byt sida</div>
+      <div class="what" id="rWhat">Tryck Start</div>
+      <div class="where" id="rWhere"></div>
+      <div class="prog"><i id="rProg" style="width:0%"></i></div>
+    </div>
+    <div class="next">
+      <div><div class="label">Härnäst</div><div class="t" id="nWhat">–</div></div>
+      <div class="d" id="nDur"></div>
+    </div>
+    <div class="ctrls">
+      <button id="bPrev" aria-label="Föregående intervall">◀ Bak</button>
+      <button id="bMain" class="main">Start</button>
+      <button id="bNext" aria-label="Nästa intervall">Fram ▶</button>
+    </div>
+    <div class="meta"><span>Gått <strong id="mEl">0:00</strong></span><span>Intervall <strong id="mIdx">0/0</strong></span><span>Kvar <strong id="mLeft">0:00</strong></span></div>
+    <div class="tiny"><button id="bReset">Börja om</button><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
+    <div class="sub" id="wakeMsg" style="text-align:center" hidden></div>
+  </section>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const EN={
+"Plan":"Plan","Kör":"Run","Sparade pass":"Saved workouts","Inga sparade pass än":"No saved workouts yet","Ladda":"Load","Ta bort":"Delete",
+"Namn, t.ex. Ben 45 min":"Name, e.g. Legs 45 min","Passets namn":"Workout name","Spara":"Save","Laddar sparade pass…":"Loading saved workouts…",
+"Upplägg":"Structure","Stationer":"Stations","Minska":"Decrease","Öka":"Increase","st":"","Övningar per station":"Exercises per station",
+"Set per övning":"Sets per exercise","Varv":"Rounds","Uppvärmning och genomgång":"Warm-up and demos","Uppvärmning":"Warm-up",
+"i början av passet":"at the start of the workout","Instruktion per övning":"Demo per exercise","När instruktionen ges":"When demos happen",
+"Samlad genomgång efter uppvärmning":"All demos after warm-up","Vid varje station i varv 1":"At each station in round 1",
+"Fördelning arbete och vila":"Work and rest split","Läge":"Mode","Räkna från totaltid":"Calculate from total time","Sätt arbetstid själv":"Set work time myself",
+"Total tid för passet":"Total workout time","inkl. alla pauser":"incl. all breaks","Arbete vs setvila":"Work vs set rest","andel arbete i varje set":"share of work in each set",
+"Arbete per set":"Work per set","Vila mellan set":"Rest between sets","samma övning, set 1 → 2":"same exercise, set 1 → 2","Pauser vid byten":"Transition breaks",
+"Byte övning A → B":"Switch exercise A → B","inom stationen":"within the station","Byte station":"Switch station","Vila mellan varv":"Rest between rounds",
+"Arbete/set":"Work/set","Setvila":"Set rest","Per station":"Per station","Per varv":"Per round","Passet:":"Workout:","Arbete":"Work","Vila":"Rest",
+"Uppv. + genomgång":"Warm-up + demos","Hela passet som tidslinje":"Whole workout as a timeline","Byte övning":"Exercise switch","Varvvila":"Round rest",
+"Genomgång":"Demo","Ljud":"Sound","Nedräkning före slut":"Countdown before end","pip varje sekund de sista sekunderna av övningen":"a beep every second in the final seconds of the exercise",
+"Nedräkning i vila":"Countdown during rest","Nedräkning bara i övning":"Countdown only during exercise","Även i vila och byten":"Also during rest and switches",
+"Volym":"Volume","Välj ljud":"Choose sounds","Halvtidssignal":"Halfway signal","Halvtidssignal på (byt sida)":"Halfway signal on (switch sides)","Ingen halvtidssignal":"No halfway signal",
+"Med musik i bakgrunden":"With music in the background","Ljud tillsammans med musik":"Sound with music","Blanda med musiken":"Mix with the music","Sänk musiken vid signal":"Lower the music during signals",
+"Starta musiken i Spotify först och tryck sedan Start här. På iPhone: stäng av ljudlös-reglaget på sidan av telefonen, annars hörs inte klockan. Om det ändå är tyst, prova \"Sänk musiken vid signal\".":"Start the music in Spotify first, then press Start here. On iPhone, turn off the silent switch on the side of the phone, or the timer will not be heard. If it is still silent, try \"Lower the music during signals\".",
+"Namnge övningar (valfritt)":"Name exercises (optional)","Till klockan →":"Go to timer →",
+"Klockans ljud har stoppats av en annan app. Tryck här för att slå på ljudet igen.":"Another app has stopped the timer's sound. Tap here to turn it back on.",
+"Redo":"Ready","Byt sida":"Switch sides","Tryck Start":"Press Start","Härnäst":"Up next","Föregående intervall":"Previous interval","◀ Bak":"◀ Back","Start":"Start",
+"Nästa intervall":"Next interval","Fram ▶":"Next ▶","Gått":"Elapsed","Intervall":"Interval","Kvar":"Left","Börja om":"Restart","Öppna Spotify":"Open Spotify","Språk":"Language",
+"Station {s} – övning {l}":"Station {s} – exercise {l}","Övning {l}":"Exercise {l}",
+"Pauser, uppvärmning och genomgång tar nästan hela tiden. Öka totaltiden eller dra ner på något av dem.":"Breaks, warm-up and demos take up almost all the time. Increase the total time or shorten one of them.",
+"Avrundat till hela sekunder: {d} s mot {t} min.":"Rounded to whole seconds: {d} s vs {t} min.",
+"{st} stationer · {ex} övn · {sets} set · {rd} varv":"{st} stations · {ex} ex · {sets} sets · {rd} rounds",
+"{n} övningar = {t}":"{n} exercises = {t}","{n} per varv":"{n} per round","{p} % arbete":"{p} % work",
+"Ringklocka, tre slag":"Bell, three strikes","Ringklocka, ett slag":"Bell, one strike","Visselpipa":"Whistle","Tuta":"Horn","Summer":"Buzzer","Gong":"Gong",
+"Trumslag":"Drum hits","Stigande pip":"Rising beeps","Fallande pip":"Falling beeps","Dubbelpip":"Double beep","Klockspel":"Chimes","Laser":"Laser","Inget ljud":"No sound",
+"Pip":"Beep","Träkloss":"Wood block","Klick":"Click","Trumma":"Drum","Pling":"Ding",
+"Övning startar":"Exercise starts","Halvtid":"Halfway","Nedräkning":"Countdown","Övning slut":"Exercise ends","Passet klart":"Workout done","Testa {x}":"Test {x}",
+"Ljud: på":"Sound: on","Ljud: av":"Sound: off","Klart":"Done","Bra jobbat!":"Great work!","Varv {r}/{n}":"Round {r}/{n}",
+"Gör dig redo":"Get ready","Passet startar":"Workout starting","Värm upp":"Warm up","Station {s} · före första set":"Station {s} · before the first set",
+"Övning {n} av {t}":"Exercise {n} of {t}","Byt övning":"Switch exercise","Byt station":"Switch station",
+"Varv {n} börjar med {x}":"Round {n} starts with {x}","Varv {n} klart":"Round {n} done","Genomgång: {x}":"Demo: {x}","Paus":"Pause","Fortsätt":"Resume",
+"☀ Skärmen hålls tänd under passet.":"☀ The screen stays on during the workout.",
+"Telefonen kan släcka skärmen. Stäng av automatiskt lås i telefonens inställningar under passet.":"The phone may turn off the screen. Turn off auto-lock in the phone's settings during the workout.",
+"Sparas i ditt Claude-konto och följer med till andra enheter.":"Saved to your Claude account and available on your other devices.",
+"Sparas i den här webbläsaren.":"Saved in this browser.",
+"Kunde inte hämta sparade pass. Kontrollera anslutningen och ladda om sidan.":"Could not load saved workouts. Check your connection and reload the page.",
+"Välj ett sparat pass…":"Choose a saved workout…","Passet kunde inte läsas.":"The workout could not be read.","Laddade {x}.":"Loaded {x}.",
+"Skriv ett namn på passet först.":"Enter a name for the workout first.","Uppdaterade {x}.":"Updated {x}.","Sparade {x}.":"Saved {x}.",
+"Passet sparades inte. Kontrollera anslutningen och försök igen.":"The workout was not saved. Check your connection and try again.",
+"Bekräfta":"Confirm","Tryck Bekräfta för att ta bort {x}.":"Press Confirm to delete {x}.","Tog bort {x}.":"Deleted {x}.",
+"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Installera appen":"Install the app"
+};
+let lang="sv";
+try{lang=localStorage.getItem("ccage_lang")||((navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en")}catch(e){lang=(navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en"}
+function T(s,v){let r=(lang==="en"&&EN[s]!=null)?EN[s]:s;if(v)r=r.replace(/\{(\w+)\}/g,(_,k)=>v[k]);return r}
+const staticNodes=[],staticAttrs=[];
+(function collect(){
+  const skip=n=>n.parentElement&&n.parentElement.closest("#sndList,#exList,select,script,style");
+  const w=document.createTreeWalker(document.querySelector(".wrap"),NodeFilter.SHOW_TEXT);
+  let n;while((n=w.nextNode())){const t=n.nodeValue.trim();if(t&&!skip(n)&&EN[t]!=null){const m=n.nodeValue.match(/^(\s*)[\s\S]*?(\s*)$/);staticNodes.push([n,t,m[1],m[2]])}}
+  document.querySelectorAll(".wrap [placeholder],.wrap [aria-label]").forEach(el=>{["placeholder","aria-label"].forEach(a=>{const v=el.getAttribute(a);if(v&&EN[v]!=null)staticAttrs.push([el,a,v])})});
+})();
+function applyStatic(){
+  document.documentElement.lang=lang;
+  staticNodes.forEach(([n,t,a,b])=>{const v=T(t);n.nodeValue=(t==="klocka"&&lang==="en"?" ":a)+v+b});
+  staticAttrs.forEach(([el,a,v])=>el.setAttribute(a,T(v)));
+  document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
+}
+applyStatic();
+let cfg={mode:"auto",st:8,ex:2,sets:2,rd:2,warm:10,instr:20,instrMode:"block",total:60,ratio:70,work:30,setRest:15,exRest:10,stRest:20,rdRest:60,sound:true,names:[],countdown:3,cdRest:false,vol:80,half:true,mix:"ambient",snd:{start:"bell",half:"double",rest:"fall",done:"chime",cd:"pip"}};
+const DEFAULTS=JSON.parse(JSON.stringify(cfg));
+try{const s=JSON.parse(localStorage.getItem("ccage")||"null");if(s)cfg=Object.assign(cfg,s)}catch(e){}
+function fixCfg(){cfg.snd=Object.assign({},DEFAULTS.snd,cfg.snd||{});if(cfg.startStyle){cfg.snd.start=cfg.startStyle;delete cfg.startStyle}if(!Array.isArray(cfg.names))cfg.names=[]}
+fixCfg();
+function save(){try{localStorage.setItem("ccage",JSON.stringify(cfg))}catch(e){}}
+function counts(){const ST=cfg.st,EX=cfg.ex,SETS=cfg.sets,RD=cfg.rd;
+  return{ST,EX,SETS,RD,W:ST*EX*SETS*RD,P:ST*EX*(SETS-1)*RD,E:ST*(EX-1)*RD,S:(ST-1)*RD,R:RD-1}}
+
+const fmt=s=>{s=Math.max(0,Math.round(s));const m=Math.floor(s/60),r=s%60;return m+":"+String(r).padStart(2,"0")};
+const fmtLong=s=>{s=Math.round(s);const m=Math.floor(s/60),r=s%60;return r?m+" min "+r+" s":m+" min"};
+const L="ABCD";
+function exName(st,e){const n=(cfg.names[st]||[])[e];return n&&n.trim()?n.trim():T("Station {s} – övning {l}",{s:st+1,l:L[e]})}
+
+function compute(){
+  const c=counts();let W,P,warn="";
+  const fixed=c.E*cfg.exRest+c.S*cfg.stRest+c.R*cfg.rdRest;
+  const setup=cfg.warm*60+c.ST*c.EX*cfg.instr;
+  if(cfg.mode==="auto"){
+    const rem=cfg.total*60-fixed-setup,f=cfg.ratio/100;
+    const raw=rem/(c.W+c.P*(1-f)/f);
+    W=Math.max(0,Math.round(raw));P=Math.max(0,Math.round(W*(1-f)/f));
+    if(W<5)warn=T("Pauser, uppvärmning och genomgång tar nästan hela tiden. Öka totaltiden eller dra ner på något av dem.");
+  }else{W=cfg.work;P=cfg.setRest}
+  const workTot=c.W*W,restTot=c.P*P+fixed,total=workTot+restTot+setup;
+  if(cfg.mode==="auto"&&!warn){const d=total-cfg.total*60;if(Math.abs(d)>=1)warn=T("Avrundat till hela sekunder: {d} s mot {t} min.",{d:(d>0?"+":"−")+Math.abs(d),t:cfg.total})}
+  return{W,P,workTot,restTot,setup,total,warn};
+}
+
+function buildSeq(W,P){
+  const c=counts(),q=[];
+  if(cfg.warm>0)q.push({type:"warm",d:cfg.warm*60});
+  if(cfg.instr>0&&cfg.instrMode==="block")for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++)q.push({type:"instr",d:cfg.instr,s,e,n:s*c.EX+e});
+  for(let r=0;r<c.RD;r++)for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++){
+    if(r===0&&cfg.instr>0&&cfg.instrMode==="station")q.push({type:"instr",d:cfg.instr,s,e,n:s*c.EX+e,at:true});
+    for(let k=0;k<c.SETS;k++){
+      q.push({type:"work",d:W,r,s,e,k});
+      let t=null,d=0;
+      if(k<c.SETS-1){t="p";d=P}else if(e<c.EX-1){t="e";d=cfg.exRest}else if(s<c.ST-1){t="s";d=cfg.stRest}else if(r<c.RD-1){t="R";d=cfg.rdRest}
+      if(t&&d>0)q.push({type:t,d,r,s,e,k});
+    }
+  }
+  return q;
+}
+
+// --- Plan UI ---
+const fields=["st","ex","sets","rd","warm","instr","total","work","setRest","exRest","stRest","rdRest","countdown"];
+const structural=["st","ex"];
+function setField(f,v){const el=$(f);cfg[f]=Math.max(+el.min,Math.min(+el.max,v));if(structural.includes(f))buildNames();render()}
+fields.forEach(f=>{const el=$(f);el.value=cfg[f];
+  el.addEventListener("input",()=>{const v=parseInt(el.value,10);if(!isNaN(v))setField(f,v)});
+  el.addEventListener("blur",()=>{el.value=cfg[f]})});
+document.querySelectorAll("[data-step]").forEach(b=>b.addEventListener("click",()=>{const[f,st]=b.dataset.step.split(":");setField(f,cfg[f]+ +st);$(f).value=cfg[f]}));
+$("ratio").value=cfg.ratio;
+$("ratio").addEventListener("input",e=>{cfg.ratio=+e.target.value;render()});
+document.querySelectorAll("#ratioChips button").forEach(b=>b.addEventListener("click",()=>{cfg.ratio=+b.dataset.r;$("ratio").value=cfg.ratio;render()}));
+function setMode(m){
+  if(m==="manual"&&cfg.mode==="auto"){const c=compute();cfg.work=c.W;cfg.setRest=c.P;$("work").value=c.W;$("setRest").value=c.P}
+  if(m==="auto"&&cfg.mode==="manual"){cfg.total=Math.max(10,Math.round(compute().total/60));$("total").value=cfg.total}
+  cfg.mode=m;render();
+}
+$("modeAuto").onclick=()=>setMode("auto");$("modeManual").onclick=()=>setMode("manual");
+$("cdWorkOnly").onclick=()=>{cfg.cdRest=false;render()};$("cdAll").onclick=()=>{cfg.cdRest=true;render()};
+$("instrBlock").onclick=()=>{cfg.instrMode="block";render()};$("instrStation").onclick=()=>{cfg.instrMode="station";render()};
+
+function buildNames(){
+  const box=$("exList");box.innerHTML="";
+  for(let s=0;s<cfg.st;s++){
+    const row=document.createElement("div");row.className="ex";row.style.setProperty("--n",cfg.ex);
+    row.innerHTML='<b>'+(s+1)+'</b>';
+    for(let e=0;e<cfg.ex;e++){
+      const i=document.createElement("input");i.id="ex"+s+"_"+e;i.placeholder=T("Övning {l}",{l:L[e]});
+      i.value=(cfg.names[s]||[])[e]||"";
+      i.addEventListener("input",()=>{cfg.names[s]=cfg.names[s]||[];cfg.names[s][e]=i.value;save()});
+      row.appendChild(i);
+    }
+    box.appendChild(row);
+  }
+}
+buildNames();
+
+let plan;
+function render(){
+  const k=counts();
+  $("sub").textContent=T("{st} stationer · {ex} övn · {sets} set · {rd} varv",{st:k.ST,ex:k.EX,sets:k.SETS,rd:k.RD});
+  $("modeAuto").setAttribute("aria-pressed",cfg.mode==="auto");$("modeManual").setAttribute("aria-pressed",cfg.mode==="manual");
+  $("volOut").textContent=cfg.vol+" %";
+  $("mixAmb").setAttribute("aria-pressed",cfg.mix!=="transient");$("mixDuck").setAttribute("aria-pressed",cfg.mix==="transient");
+  $("halfOn").setAttribute("aria-pressed",cfg.half);$("halfOff").setAttribute("aria-pressed",!cfg.half);
+  $("cdWorkOnly").setAttribute("aria-pressed",!cfg.cdRest);$("cdAll").setAttribute("aria-pressed",cfg.cdRest);
+  $("instrBlock").setAttribute("aria-pressed",cfg.instrMode==="block");$("instrStation").setAttribute("aria-pressed",cfg.instrMode==="station");
+  $("autoBlock").hidden=cfg.mode!=="auto";$("manualBlock").hidden=cfg.mode!=="manual";
+  $("instrSum").textContent=T("{n} övningar = {t}",{n:k.ST*k.EX,t:fmt(k.ST*k.EX*cfg.instr)});
+  $("stRestSub").textContent=T("{n} per varv",{n:k.ST-1});
+  $("rdRest").closest(".row").hidden=k.RD<2;
+  $("exRest").closest(".row").hidden=k.EX<2;
+  $("setRest").closest(".row").style.opacity=k.SETS<2?.4:1;
+  $("ratioOut").textContent=T("{p} % arbete",{p:cfg.ratio});
+  document.querySelectorAll("#ratioChips button").forEach(b=>b.classList.toggle("on",+b.dataset.r===cfg.ratio));
+  const c=compute();plan=c;
+  $("oWork").textContent=c.W+" s";$("oSet").textContent=c.P+" s";
+  const perStation=k.EX*k.SETS*c.W+k.EX*(k.SETS-1)*c.P+(k.EX-1)*cfg.exRest;
+  $("oStation").textContent=fmt(perStation);
+  $("oRound").textContent=fmt(k.ST*perStation+(k.ST-1)*cfg.stRest);
+  $("oTotal").textContent=fmtLong(c.total);$("oWorkTot").textContent=fmt(c.workTot);$("oRestTot").textContent=fmt(c.restTot);$("oSetup").textContent=fmt(c.setup);
+  $("warn").hidden=!c.warn;$("warn").textContent=c.warn;
+  const bar=$("bar");bar.innerHTML="";
+  buildSeq(c.W,c.P).forEach(it=>{const i=document.createElement("i");i.className=it.type==="work"?"w":it.type;i.style.flexGrow=it.d;bar.appendChild(i)});
+  save();
+  if(!started)resetRun();
+}
+
+// --- Tabs ---
+function showTab(t){$("plan").hidden=t!=="plan";$("run").hidden=t!=="run";$("tabPlan").setAttribute("aria-selected",t==="plan");$("tabRun").setAttribute("aria-selected",t==="run")}
+$("tabPlan").onclick=()=>showTab("plan");$("tabRun").onclick=()=>showTab("run");$("goBtn").onclick=()=>showTab("run");
+
+// --- Audio ---
+let ac=null;
+let master=null;
+function setSession(){try{if(navigator.audioSession)navigator.audioSession.type=cfg.mix==="transient"?"transient":"ambient"}catch(e){}}
+function makeCtx(){try{if(ac&&ac.close)ac.close()}catch(e){}ac=null;master=null;
+  try{ac=new (window.AudioContext||window.webkitAudioContext)();
+    const comp=ac.createDynamicsCompressor();comp.threshold.value=-18;comp.knee.value=6;comp.ratio.value=6;comp.attack.value=.002;comp.release.value=.15;
+    master=ac.createGain();master.gain.value=1.6;master.connect(comp);comp.connect(ac.destination);
+    ac.onstatechange=checkAudio;
+    const b=ac.createBuffer(1,1,22050),s=ac.createBufferSource();s.buffer=b;s.connect(ac.destination);s.start(0);
+  }catch(e){ac=null}}
+function ensureAudio(){setSession();if(!ac||ac.state==="closed")makeCtx();
+  else if(ac.state!=="running"){const p=ac.resume&&ac.resume();if(p&&p.then)p.then(checkAudio,()=>{makeCtx();checkAudio()})}
+  checkAudio()}
+function checkAudio(){const w=$("audioWarn");if(w)w.hidden=!(cfg.sound&&ac&&ac.state!=="running"&&running)}
+function out(){return master||ac.destination}
+function wake2(){if(ac&&ac.state!=="running"){try{ac.resume().then(checkAudio,checkAudio)}catch(e){}}}
+$("audioWarn").onclick=()=>{makeCtx();setTimeout(checkAudio,300);play("start")};
+["focus","pageshow"].forEach(ev=>window.addEventListener(ev,wake2));
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)wake2()});
+$("mixAmb").onclick=()=>{cfg.mix="ambient";render();makeCtx();setSession();play("start")};
+$("mixDuck").onclick=()=>{cfg.mix="transient";render();setSession();makeCtx();play("start")};
+let catchUp=false;
+function beep(f,dur,vol,delay,type,opt){if(!cfg.sound||!ac||catchUp)return;try{opt=opt||{};const o=ac.createOscillator(),g=ac.createGain();o.type=type||"square";const t=ac.currentTime+(delay||0);o.frequency.setValueAtTime(f,t);
+  if(opt.to)o.frequency.exponentialRampToValueAtTime(opt.to,t+(opt.toT||dur));
+  if(opt.vib){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=opt.vib[0];lg.gain.value=opt.vib[1];l.connect(lg);lg.connect(o.frequency);l.start(t);l.stop(t+dur+.05)}
+  if(ac.state!=="running")wake2();
+  o.connect(g);g.connect(out());const v=Math.min(.9,(vol||.15)*cfg.vol/60);
+  g.gain.setValueAtTime(0,ac.currentTime);g.gain.setValueAtTime(v,t);
+  if(opt.sustain){g.gain.setValueAtTime(v,t+Math.max(0,dur-.06));g.gain.linearRampToValueAtTime(.0001,t+dur)}else g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.start(t);o.stop(t+dur+.05)}catch(e){}}
+function noise(dur,vol,delay,freq,kind){if(!cfg.sound||!ac||catchUp)return;try{const n=Math.ceil(ac.sampleRate*dur),buf=ac.createBuffer(1,n,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
+  const src=ac.createBufferSource(),fl=ac.createBiquadFilter(),g=ac.createGain();src.buffer=buf;fl.type=kind||"bandpass";fl.frequency.value=freq||2000;src.connect(fl);fl.connect(g);g.connect(out());
+  const t=ac.currentTime+(delay||0),v=Math.min(.9,vol*cfg.vol/60);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);src.start(t);src.stop(t+dur+.02)}catch(e){}}
+function bellHit(d){[[523,1],[1046,.6],[1443,.45],[2093,.25]].forEach(([f,a])=>beep(f,1.1,.35*a,d,"sine"))}
+function drumHit(d,big){beep(big?150:180,.35,.7,d,"sine",{to:45});noise(.09,.35,d,big?900:1800)}
+const SOUNDS={
+  bell:["Ringklocka, tre slag",()=>{bellHit(0);bellHit(.22);bellHit(.44)}],
+  bell1:["Ringklocka, ett slag",()=>bellHit(0)],
+  whistle:["Visselpipa",()=>{beep(2800,.22,.22,0,"sine",{vib:[30,200],sustain:true});beep(2800,.6,.22,.32,"sine",{vib:[30,200],sustain:true})}],
+  horn:["Tuta",()=>{[220,277,330].forEach((f,i)=>beep(f,.9,.2-i*.02,0,"sawtooth",{sustain:true}))}],
+  buzzer:["Summer",()=>{beep(140,.8,.28,0,"sawtooth",{sustain:true});beep(147,.8,.22,0,"square",{sustain:true})}],
+  gong:["Gong",()=>{[[110,1],[185,.6],[264,.4],[380,.25]].forEach(([f,a])=>beep(f,2.6,.4*a,0,"sine"))}],
+  drum:["Trumslag",()=>{drumHit(0);drumHit(.18);drumHit(.36,true)}],
+  rise:["Stigande pip",()=>{beep(784,.16,.3,0);beep(988,.16,.3,.18);beep(1318,.7,.35,.36)}],
+  fall:["Fallande pip",()=>{beep(659,.25,.25,0);beep(440,.5,.25,.28)}],
+  double:["Dubbelpip",()=>{beep(1568,.12,.3,0,"triangle");beep(1568,.12,.3,.18,"triangle");beep(2093,.3,.3,.36,"triangle")}],
+  chime:["Klockspel",()=>{[1047,1319,1568,2093].forEach((f,i)=>beep(f,.9,.28,i*.13,"sine"))}],
+  laser:["Laser",()=>{beep(1800,.35,.25,0,"sawtooth",{to:200})}],
+  none:["Inget ljud",()=>{}]
+};
+const TICKS={
+  pip:["Pip",l=>beep(l?1175:880,.13,.25)],
+  wood:["Träkloss",l=>beep(l?2400:1900,.06,.5,0,"sine")],
+  click:["Klick",l=>noise(.035,l?.8:.55,0,l?4500:3500,"highpass")],
+  drum:["Trumma",l=>drumHit(0,l)],
+  bellt:["Pling",l=>beep(l?1568:1175,.4,.3,0,"sine")],
+  none:["Inget ljud",()=>{}]
+};
+const EVENTS=[["start","Övning startar",SOUNDS],["half","Halvtid",SOUNDS],["cd","Nedräkning",TICKS],["rest","Övning slut",SOUNDS],["done","Passet klart",SOUNDS]];
+function play(ev,arg){const lib=ev==="cd"?TICKS:SOUNDS;const x=lib[cfg.snd[ev]]||lib.none;x[1](arg);if(ev==="start")hit()}
+function startSignal(){play("start")}
+function halfSignal(){play("half")}
+function restSignal(){play("rest")}
+function cdBeep(sec){play("cd",sec===1)}
+function hit(){const f=$("face");f.classList.remove("hit");void f.offsetWidth;f.classList.add("hit")}
+let flashT=0;function flash(txt){const el=$("rFlash");el.textContent=txt;el.hidden=false;clearTimeout(flashT);flashT=setTimeout(()=>{el.hidden=true},2000);hit()}
+function testEv(ev){ensureAudio();if(ev==="cd"){const n=Math.max(1,Math.min(5,cfg.countdown||3));for(let i=n;i>=1;i--)setTimeout(()=>cdBeep(i),(n-i)*1000)}else play(ev)}
+function buildSnd(){const box=$("sndList");box.innerHTML="";EVENTS.forEach(([ev,lab,lib])=>{
+  const row=document.createElement("div");row.className="snd";
+  const l=document.createElement("label");l.htmlFor="snd_"+ev;l.textContent=T(lab);
+  const sel=document.createElement("select");sel.id="snd_"+ev;
+  Object.entries(lib).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=T(v[0]);sel.appendChild(o)});
+  sel.value=cfg.snd[ev];sel.addEventListener("change",()=>{cfg.snd[ev]=sel.value;save();testEv(ev)});
+  const b=document.createElement("button");b.className="btn";b.textContent="▶";b.setAttribute("aria-label",T("Testa {x}",{x:T(lab)}));b.onclick=()=>testEv(ev);
+  row.append(l,sel,b);box.appendChild(row)})}
+buildSnd();
+$("vol").value=cfg.vol;$("vol").addEventListener("input",e=>{cfg.vol=+e.target.value;render()});
+$("halfOn").onclick=()=>{cfg.half=true;render()};$("halfOff").onclick=()=>{cfg.half=false;render()};
+function soundLbl(){$("bSound").textContent=T(cfg.sound?"Ljud: på":"Ljud: av")}
+$("bSound").onclick=()=>{cfg.sound=!cfg.sound;soundLbl();save()};
+soundLbl();
+
+// --- Runner ---
+let halfDone=false;
+let seq=[],idx=0,remain=0,running=false,started=false,lastT=0,raf=0,lastBeepSec=-1,wake=null;
+const PREP=10;
+function seqTotal(){return seq.reduce((a,b)=>a+b.d,0)}
+function resetRun(){seq=buildSeq(plan.W,plan.P);seq.unshift({type:"prep",d:PREP});idx=0;remain=seq[0].d;running=false;started=false;cancelAnimationFrame(raf);$("bMain").textContent=T("Start");draw()}
+function label(it){
+  const k=counts();
+  if(!it)return{phase:T("Klart"),what:T("Bra jobbat!"),where:"",cls:"done"};
+  const where=(k.RD>1?T("Varv {r}/{n}",{r:it.r+1,n:k.RD})+" · ":"")+"Station "+(it.s+1)+"/"+k.ST+(k.EX>1?" · "+L[it.e]:"")+(k.SETS>1?" · Set "+(it.k+1)+"/"+k.SETS:"");
+  switch(it.type){
+    case"prep":{const f=seq[1];return{phase:T("Gör dig redo"),what:f&&f.type==="warm"?T("Uppvärmning"):exName(0,0),where:T("Passet startar"),cls:"rest"}}
+    case"warm":return{phase:T("Uppvärmning"),what:T("Värm upp"),where:"",cls:"setup"};
+    case"instr":return{phase:T("Genomgång"),what:exName(it.s,it.e),where:it.at?T("Station {s} · före första set",{s:it.s+1}):T("Övning {n} av {t}",{n:it.n+1,t:k.ST*k.EX}),cls:"setup"};
+    case"work":return{phase:T("Arbete"),what:exName(it.s,it.e),where,cls:"work"};
+    case"p":return{phase:T("Vila"),what:"Set "+(it.k+2)+" – "+exName(it.s,it.e),where,cls:"rest"};
+    case"e":return{phase:T("Byt övning"),what:"→ "+exName(it.s,it.e+1),where,cls:"rest"};
+    case"s":return{phase:T("Byt station"),what:"→ "+exName(it.s+1,0),where,cls:"rest"};
+    case"R":return{phase:T("Varvvila"),what:T("Varv {n} börjar med {x}",{n:it.r+2,x:exName(0,0)}),where:T("Varv {n} klart",{n:it.r+1}),cls:"round"};
+  }
+}
+function nextLabel(it){if(!it)return T("Passet klart");if(it.type==="work")return exName(it.s,it.e)+(counts().SETS>1?" · set "+(it.k+1):"");if(it.type==="instr")return T("Genomgång: {x}",{x:exName(it.s,it.e)});return label(it).phase}
+function draw(){
+  const it=seq[idx],lb=label(it);
+  $("face").className="face "+lb.cls;
+  $("rPhase").textContent=lb.phase;$("rWhat").textContent=lb.what;$("rWhere").textContent=lb.where;
+  $("rClock").textContent=it?fmt(Math.ceil(remain-1e-6)):"0:00";
+  $("rProg").style.width=it?(100*(1-remain/it.d))+"%":"100%";
+  const nx=seq[idx+1];$("nWhat").textContent=nextLabel(nx);$("nDur").textContent=nx?fmt(nx.d):"";
+  let done=0;for(let i=0;i<idx;i++)done+=seq[i].d;if(it)done+=it.d-remain;
+  $("mEl").textContent=fmt(Math.max(0,done-PREP));$("mLeft").textContent=fmt(seqTotal()-done);
+  $("mIdx").textContent=seq.slice(0,idx+1).filter(x=>x.type==="work").length+"/"+counts().W;
+}
+function advance(){idx++;if(idx>=seq.length){running=false;$("bMain").textContent=T("Start");draw();play("done");releaseWake();return}remain=seq[idx].d;lastBeepSec=-1;halfDone=false;
+  if(seq[idx].type==="work")startSignal();else if(seq[idx-1]&&seq[idx-1].type==="work")restSignal();}
+let audioChk=0;
+function tick(t){
+  if(!running)return;
+  if(t-audioChk>1000){audioChk=t;if(ac&&ac.state!=="running")wake2();checkAudio()}
+  const dt=(t-lastT)/1000;lastT=t;remain-=dt;
+  catchUp=dt>2;
+  const sec=Math.ceil(remain);
+  const cur=seq[idx];
+  if(cur&&cfg.half&&!halfDone&&cur.type==="work"&&cur.d>=10&&remain<=cur.d/2){halfDone=true;halfSignal();flash(T("Byt sida"))}
+  if(cur&&cfg.countdown>0&&sec<=cfg.countdown&&sec>=1&&sec!==lastBeepSec&&sec<cur.d&&(cur.type==="work"||cfg.cdRest||(seq[idx+1]&&seq[idx+1].type==="work"&&cur.type!=="warm"))){lastBeepSec=sec;cdBeep(sec)}
+  while(running&&remain<=0){const over=-remain;advance();if(running)remain-=over}
+  catchUp=false;
+  draw();if(running)raf=requestAnimationFrame(tick);
+}
+let noSleep=null,nsOn=false;
+function wakeMsg(ok){const m=$("wakeMsg");m.hidden=false;m.dataset.ok=ok?"1":"0";m.textContent=T(ok?"☀ Skärmen hålls tänd under passet.":"Telefonen kan släcka skärmen. Stäng av automatiskt lås i telefonens inställningar under passet.");m.style.color=ok?"":"var(--danger)"}
+async function getWake(){
+  let ok=false;
+  try{if(navigator.wakeLock){wake=await navigator.wakeLock.request("screen");ok=true;wake.addEventListener&&wake.addEventListener("release",()=>{wake=null})}}catch(e){}
+  if(!ok){try{if(!noSleep&&window.NoSleep)noSleep=new window.NoSleep();if(noSleep){const p=noSleep.enable();if(p&&p.then)await p;nsOn=true;ok=true}}catch(e){}}
+  wakeMsg(ok);
+}
+function releaseWake(){try{wake&&wake.release();wake=null}catch(e){}try{if(noSleep&&nsOn){noSleep.disable();nsOn=false}}catch(e){}}
+$("bMain").onclick=()=>{
+  ensureAudio();
+  if(idx>=seq.length)resetRun();
+  running=!running;started=true;
+  $("bMain").textContent=T(running?"Paus":"Fortsätt");
+  if(running){lastT=performance.now();getWake();raf=requestAnimationFrame(tick)}else{cancelAnimationFrame(raf);releaseWake()}
+  checkAudio();
+};
+$("bNext").onclick=()=>{if(idx<seq.length){started=true;advance();draw()}};
+$("bPrev").onclick=()=>{if(seq[idx]&&remain<seq[idx].d-2){remain=seq[idx].d}else if(idx>0){idx--;remain=seq[idx].d}lastBeepSec=-1;halfDone=false;draw()};
+$("bReset").onclick=()=>{resetRun();releaseWake()};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&running)getWake()});
+
+// --- Saved passes ---
+const PASS_KEY="ccage_passes";
+let db=null,uid=null,passes=[];
+function passMsg(t,bad){const m=$("passMsg");m.textContent=t;m.style.color=bad?"var(--danger)":""}
+function where(){return T(db?"Sparas i ditt Claude-konto och följer med till andra enheter.":"Sparas i den här webbläsaren.")}
+function passData(){const c=JSON.parse(JSON.stringify(cfg));delete c.sound;return c}
+function coll(){return db.collection("data/users/"+uid)}
+function useLocal(){db=null}
+function withTimeout(p){return Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error("timeout")),10000))])}
+async function loadPasses(){
+  try{
+    if(db){try{const snap=await withTimeout(coll().get());passes=snap.docs.map(d=>Object.assign({id:d.id},d.data())).filter(p=>p.name&&p.cfg)}catch(e){useLocal()}}
+    if(!db){passes=JSON.parse(localStorage.getItem(PASS_KEY)||"[]")}
+  }catch(e){passes=[];passMsg(T("Kunde inte hämta sparade pass. Kontrollera anslutningen och ladda om sidan."),true);renderPasses();return}
+  renderPasses();passMsg(where());
+}
+function renderPasses(keep){
+  passes.sort((a,b)=>a.name.localeCompare(b.name,lang));
+  const sel=$("passSel"),cur=keep||sel.value;sel.innerHTML="";
+  const o0=document.createElement("option");o0.value="";o0.textContent=T(passes.length?"Välj ett sparat pass…":"Inga sparade pass än");sel.appendChild(o0);
+  passes.forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;sel.appendChild(o)});
+  sel.value=passes.some(p=>p.id===cur)?cur:"";
+  $("passLoad").disabled=$("passDel").disabled=!sel.value;resetDel();
+}
+$("passSel").addEventListener("change",()=>{const p=passes.find(x=>x.id===$("passSel").value);$("passLoad").disabled=$("passDel").disabled=!p;resetDel();if(p)$("passName").value=p.name});
+function syncInputs(){fields.forEach(f=>{$(f).value=cfg[f]});$("ratio").value=cfg.ratio;$("vol").value=cfg.vol;buildNames();buildSnd()}
+$("passLoad").onclick=()=>{
+  const p=passes.find(x=>x.id===$("passSel").value);if(!p)return;
+  let c;try{c=typeof p.cfg==="string"?JSON.parse(p.cfg):p.cfg}catch(e){passMsg(T("Passet kunde inte läsas."),true);return}
+  const snd=cfg.sound;cfg=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),c,{sound:snd});fixCfg();
+  if(running)$("bMain").click();started=false;
+  syncInputs();render();$("passName").value=p.name;passMsg(T("Laddade {x}.",{x:p.name}));
+};
+$("passSave").onclick=async()=>{
+  const name=$("passName").value.trim();
+  if(!name){passMsg(T("Skriv ett namn på passet först."),true);$("passName").focus();return}
+  const ex=passes.find(p=>p.name.toLowerCase()===name.toLowerCase());
+  const data={name,cfg:JSON.stringify(passData()),updated:Date.now()};
+  $("passSave").disabled=true;
+  try{
+    let id;
+    if(db){try{const ref=coll().doc(ex?ex.id:"pass_"+Date.now());await withTimeout(ref.set(data));id=ref.id}catch(e){useLocal()}}
+    if(!db){id=ex?ex.id:"p"+Date.now();const list=passes.filter(p=>p.id!==id);list.push(Object.assign({id},data));localStorage.setItem(PASS_KEY,JSON.stringify(list))}
+    await loadPasses();renderPasses(id||(passes.find(p=>p.name===name)||{}).id);
+    passMsg(T(ex?"Uppdaterade {x}.":"Sparade {x}.",{x:name})+" "+where());
+  }catch(e){passMsg(T("Passet sparades inte. Kontrollera anslutningen och försök igen."),true)}
+  $("passSave").disabled=false;
+};
+let delArm=false,delT=0;
+function resetDel(){delArm=false;clearTimeout(delT);const b=$("passDel");b.textContent=T("Ta bort");b.classList.remove("danger")}
+$("passDel").onclick=async()=>{
+  const p=passes.find(x=>x.id===$("passSel").value);if(!p)return;
+  if(!delArm){delArm=true;const b=$("passDel");b.textContent=T("Bekräfta");b.classList.add("danger");passMsg(T("Tryck Bekräfta för att ta bort {x}.",{x:p.name}));delT=setTimeout(()=>{resetDel();passMsg(where())},5000);return}
+  resetDel();
+  try{
+    if(db)await withTimeout(coll().doc(p.id).delete());
+    else localStorage.setItem(PASS_KEY,JSON.stringify(passes.filter(x=>x.id!==p.id)));
+    await loadPasses();passMsg(T("Tog bort {x}.",{x:p.name}));
+  }catch(e){passMsg(T("Kunde inte ta bort passet. Försök igen."),true)}
+};
+renderPasses();
+(async()=>{
+  try{
+    const use=window.claude&&window.claude.use;
+    if(use){const[d,u]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+      if(d&&u){const id=await u.id();if(id){db=d;uid=id}}}
+  }catch(e){}
+  loadPasses();
+})();
+
+function setLang(l){
+  lang=l;try{localStorage.setItem("ccage_lang",l)}catch(e){}
+  applyStatic();buildNames();buildSnd();soundLbl();renderPasses();
+  const pm=$("passMsg");if(!pm.style.color)passMsg(where());
+  const wm=$("wakeMsg");if(!wm.hidden)wakeMsg(wm.dataset.ok==="1");
+  render();draw();
+  $("bMain").textContent=T(running?"Paus":(started&&idx<seq.length?"Fortsätt":"Start"));
+}
+document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setLang(b.dataset.lang)));
+
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBtn").hidden=false});
+$("installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;$("installBtn").hidden=true};
+window.addEventListener("appinstalled",()=>{$("installBtn").hidden=true});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{})})}
+
+render();
+})();
+</script>
+</body>
+</html>
