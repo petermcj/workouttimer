@@ -198,6 +198,13 @@ body.focus .wrap{gap:12px}
         <button id="setsEach" aria-pressed="false">Olika antal set per varv</button>
       </div>
       <div id="setsRounds" style="display:flex;flex-direction:column;gap:10px" hidden></div>
+      <div id="orderBox" style="display:flex;flex-direction:column;gap:6px">
+        <div class="label">Ordning på stationen</div>
+        <div class="mode stack" role="group" aria-label="Ordning på stationen">
+          <button id="orderBlock" aria-pressed="true">Alla set av en övning i taget (A A B B)</button>
+          <button id="orderAlt" aria-pressed="false">Växla övning mellan seten (A B A B)</button>
+        </div>
+      </div>
       <div class="row">
         <label for="rd">Varv</label>
         <div class="num"><button data-step="rd:-1" aria-label="Minska">−</button><input id="rd" type="number" inputmode="numeric" min="1" max="6"><button data-step="rd:1" aria-label="Öka">+</button></div><span class="unit">st</span>
@@ -264,7 +271,7 @@ body.focus .wrap{gap:12px}
         <div class="num"><button data-step="work:-5" aria-label="Minska">−</button><input id="work" type="number" inputmode="numeric" min="5" max="300"><button data-step="work:5" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
       <div class="row">
-        <label for="setRest">Vila mellan set<small>samma övning, set 1 → 2</small></label>
+        <label for="setRest">Vila mellan set<small id="setRestSub">samma övning, set 1 → 2</small></label>
         <div class="num"><button data-step="setRest:-5" aria-label="Minska">−</button><input id="setRest" type="number" inputmode="numeric" min="0" max="300"><button data-step="setRest:5" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
     </div>
@@ -272,7 +279,7 @@ body.focus .wrap{gap:12px}
     <div class="block">
       <div class="label">Pauser vid byten</div>
       <div class="row">
-        <label for="exRest">Byte övning A → B<small>inom stationen</small></label>
+        <label for="exRest">Byte övning A → B<small id="exRestSub">inom stationen</small></label>
         <div class="num"><button data-step="exRest:-5" aria-label="Minska">−</button><input id="exRest" type="number" inputmode="numeric" min="0" max="300"><button data-step="exRest:5" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
       <div class="row">
@@ -478,7 +485,7 @@ const EN={
 "Skriv ett namn på passet först.":"Enter a name for the workout first.","Uppdaterade {x}.":"Updated {x}.","Sparade {x}.":"Saved {x}.",
 "Passet sparades inte. Kontrollera anslutningen och försök igen.":"The workout was not saved. Check your connection and try again.",
 "Bekräfta":"Confirm","Tryck Bekräfta för att ta bort {x}.":"Press Confirm to delete {x}.","Tog bort {x}.":"Deleted {x}.",
-"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Tid per övning":"Time per exercise","En total tid":"One total time","Hur genomgången räknas":"How demo time is set","Genomgång totalt":"Total demo time","≈ {t} per övning":"≈ {t} per exercise","en samlad genomgång":"one combined demo","Alla övningar":"All exercises","{n} övningar":"{n} exercises","Blanda med musiken (tyst i ljudlöst läge)":"Mix with the music (silent in silent mode)","Hörs alltid, även i ljudlöst läge (kan pausa musiken)":"Always audible, even in silent mode (may pause music)","Låsskärm":"Lock screen","Visa klockan på låsskärmen":"Show the timer on the lock screen","Visa inte på låsskärmen":"Do not show on the lock screen","Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.":"With the lock screen on, the phase and time show as a player on the lock screen, and the timer keeps beeping while the screen is locked. It works best in the installed app. On iPhone it may pause Spotify, since only one app at a time can show on the lock screen.","☀ Skärm tänd":"☀ Screen on","Skärm kan släckas":"Screen may turn off","Fokusläge":"Focus mode","Visa allt":"Show all","Set per varv":"Sets per round","Samma antal set alla varv":"Same number of sets every round","Olika antal set per varv":"Different number of sets per round","Set per övning, varv {n}":"Sets per exercise, round {n}","Övningar: namn och egna tider":"Exercises: names and custom times","Tider per övning":"Times per exercise","Samma tider för alla övningar":"Same times for all exercises","Egna tider per övning":"Custom times per exercise","Lämna en ruta tom för att använda passets vanliga tid.":"Leave a box empty to use the workout's normal time.","Övningar med egna tider räknas bort först, och resten av totaltiden fördelas på de andra.":"Exercises with custom times are taken out first, and the rest of the total time is shared by the others.","({n} egna)":"({n} custom)","Tider per varv":"Times per round","Samma tider alla varv":"Same times every round","Olika tider per varv":"Different times per round","Varv {n}":"Round {n}","{w} s arbete / {p} s vila":"{w} s work / {p} s rest","Tid innan första övningen":"Time before the first exercise","efter uppvärmning och genomgång, för att gå till stationen":"after warm-up and demos, to get to the station","Gå till station 1":"Go to station 1","Passet börjar snart":"The workout starts soon","Till stationen":"To the station","Skapa en app på":"Create an app at","och välj Web API.":"and select Web API.","Lägg in den här adressen som Redirect URI:":"Add this address as the Redirect URI:","Kopiera adressen":"Copy address","Kopiera appens Client ID, klistra in här och tryck Anslut.":"Copy the app's Client ID, paste it here and press Connect.","Anslut":"Connect","Ansluten":"Connected","Koppla från":"Disconnect","Spellista vid start":"Playlist at start","Fortsätt med det som spelas":"Continue what is playing","Hämta spellistor och enheter igen":"Reload playlists and devices","Spela på":"Play on","Enheten som spelar just nu":"The device playing right now","Spotify och passet":"Spotify and the workout","Starta musiken när passet startar":"Start the music when the workout starts","Pausa musiken när passet pausas":"Pause the music when the workout pauses","Sänk volymen under vila":"Lower the volume during rest","Volym under arbete":"Volume during work","Volym under vila":"Volume during rest","Föregående låt":"Previous track","Spela eller pausa musiken":"Play or pause the music","Nästa låt":"Next track","Ansluten som {x}":"Connected as {x}","Klistra in ditt Client ID först.":"Paste your Client ID first.","Kopierad":"Copied","Markera adressen och kopiera den.":"Select the address and copy it.","Spotify-inloggningen avbröts. Försök igen.":"The Spotify sign-in was cancelled. Try again.","Inloggningen kunde inte slutföras. Starta anslutningen igen inifrån appen.":"The sign-in could not be completed. Start connecting again from inside the app.","Spotify svarade inte. Kontrollera Client ID och Redirect URI och försök igen.":"Spotify did not respond. Check the Client ID and Redirect URI and try again.","Kunde inte hämta spellistor.":"Could not load playlists.","Ingen Spotify-enhet är aktiv. Öppna Spotify, spela en låt en kort stund och försök igen.":"No Spotify device is active. Open Spotify, play a song briefly and try again.","Spotify Premium krävs, och ditt konto måste vara tillagt under User Management i Spotify-appen på utvecklarsidan.":"Spotify Premium is required, and your account must be added under User Management in your app on the developer site.","Volymen kan inte styras på den här enheten. Spotify på iPhone tillåter oftast inte det.":"The volume cannot be controlled on this device. Spotify on iPhone usually does not allow it.","Spotify: {x}":"Spotify: {x}","Inget spelas":"Nothing playing","Installera appen":"Install the app"
+"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Tid per övning":"Time per exercise","En total tid":"One total time","Hur genomgången räknas":"How demo time is set","Genomgång totalt":"Total demo time","≈ {t} per övning":"≈ {t} per exercise","en samlad genomgång":"one combined demo","Alla övningar":"All exercises","{n} övningar":"{n} exercises","Blanda med musiken (tyst i ljudlöst läge)":"Mix with the music (silent in silent mode)","Hörs alltid, även i ljudlöst läge (kan pausa musiken)":"Always audible, even in silent mode (may pause music)","Låsskärm":"Lock screen","Visa klockan på låsskärmen":"Show the timer on the lock screen","Visa inte på låsskärmen":"Do not show on the lock screen","Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.":"With the lock screen on, the phase and time show as a player on the lock screen, and the timer keeps beeping while the screen is locked. It works best in the installed app. On iPhone it may pause Spotify, since only one app at a time can show on the lock screen.","☀ Skärm tänd":"☀ Screen on","Skärm kan släckas":"Screen may turn off","Fokusläge":"Focus mode","Visa allt":"Show all","Ordning på stationen":"Order at the station","Alla set av en övning i taget (A A B B)":"All sets of one exercise at a time (A A B B)","Växla övning mellan seten (A B A B)":"Switch exercise between sets (A B A B)","efter sista övningen, före nästa set":"after the last exercise, before the next set","mellan övningarna i varje set":"between the exercises in each set","Set per varv":"Sets per round","Samma antal set alla varv":"Same number of sets every round","Olika antal set per varv":"Different number of sets per round","Set per övning, varv {n}":"Sets per exercise, round {n}","Övningar: namn och egna tider":"Exercises: names and custom times","Tider per övning":"Times per exercise","Samma tider för alla övningar":"Same times for all exercises","Egna tider per övning":"Custom times per exercise","Lämna en ruta tom för att använda passets vanliga tid.":"Leave a box empty to use the workout's normal time.","Övningar med egna tider räknas bort först, och resten av totaltiden fördelas på de andra.":"Exercises with custom times are taken out first, and the rest of the total time is shared by the others.","({n} egna)":"({n} custom)","Tider per varv":"Times per round","Samma tider alla varv":"Same times every round","Olika tider per varv":"Different times per round","Varv {n}":"Round {n}","{w} s arbete / {p} s vila":"{w} s work / {p} s rest","Tid innan första övningen":"Time before the first exercise","efter uppvärmning och genomgång, för att gå till stationen":"after warm-up and demos, to get to the station","Gå till station 1":"Go to station 1","Passet börjar snart":"The workout starts soon","Till stationen":"To the station","Skapa en app på":"Create an app at","och välj Web API.":"and select Web API.","Lägg in den här adressen som Redirect URI:":"Add this address as the Redirect URI:","Kopiera adressen":"Copy address","Kopiera appens Client ID, klistra in här och tryck Anslut.":"Copy the app's Client ID, paste it here and press Connect.","Anslut":"Connect","Ansluten":"Connected","Koppla från":"Disconnect","Spellista vid start":"Playlist at start","Fortsätt med det som spelas":"Continue what is playing","Hämta spellistor och enheter igen":"Reload playlists and devices","Spela på":"Play on","Enheten som spelar just nu":"The device playing right now","Spotify och passet":"Spotify and the workout","Starta musiken när passet startar":"Start the music when the workout starts","Pausa musiken när passet pausas":"Pause the music when the workout pauses","Sänk volymen under vila":"Lower the volume during rest","Volym under arbete":"Volume during work","Volym under vila":"Volume during rest","Föregående låt":"Previous track","Spela eller pausa musiken":"Play or pause the music","Nästa låt":"Next track","Ansluten som {x}":"Connected as {x}","Klistra in ditt Client ID först.":"Paste your Client ID first.","Kopierad":"Copied","Markera adressen och kopiera den.":"Select the address and copy it.","Spotify-inloggningen avbröts. Försök igen.":"The Spotify sign-in was cancelled. Try again.","Inloggningen kunde inte slutföras. Starta anslutningen igen inifrån appen.":"The sign-in could not be completed. Start connecting again from inside the app.","Spotify svarade inte. Kontrollera Client ID och Redirect URI och försök igen.":"Spotify did not respond. Check the Client ID and Redirect URI and try again.","Kunde inte hämta spellistor.":"Could not load playlists.","Ingen Spotify-enhet är aktiv. Öppna Spotify, spela en låt en kort stund och försök igen.":"No Spotify device is active. Open Spotify, play a song briefly and try again.","Spotify Premium krävs, och ditt konto måste vara tillagt under User Management i Spotify-appen på utvecklarsidan.":"Spotify Premium is required, and your account must be added under User Management in your app on the developer site.","Volymen kan inte styras på den här enheten. Spotify på iPhone tillåter oftast inte det.":"The volume cannot be controlled on this device. Spotify on iPhone usually does not allow it.","Spotify: {x}":"Spotify: {x}","Inget spelas":"Nothing playing","Installera appen":"Install the app"
 };
 let lang="sv";
 try{lang=localStorage.getItem("ccage_lang")||((navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en")}catch(e){lang=(navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en"}
@@ -497,12 +504,14 @@ function applyStatic(){
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
 }
 applyStatic();
-let cfg={mode:"auto",st:8,ex:2,sets:2,rd:2,warm:10,instr:20,instrMode:"block",total:60,ratio:70,work:30,setRest:15,exRest:10,stRest:20,rdRest:60,sound:true,names:[],countdown:3,cdRest:false,vol:80,half:true,mix:"ambient",instrUnit:"per",instrTot:5,ready:60,perRound:false,rounds:[],exMode:false,exTimes:{},setsEach:false,roundSets:[],lock:false,awake:true,spList:"",spStart:true,spPause:true,spDuck:false,spWorkVol:80,spRestVol:40,snd:{start:"bell",half:"double",rest:"fall",done:"chime",cd:"pip"}};
+let cfg={mode:"auto",st:8,ex:2,sets:2,rd:2,warm:10,instr:20,instrMode:"block",total:60,ratio:70,work:30,setRest:15,exRest:10,stRest:20,rdRest:60,sound:true,names:[],countdown:3,cdRest:false,vol:80,half:true,mix:"ambient",instrUnit:"per",instrTot:5,ready:60,perRound:false,rounds:[],exMode:false,exTimes:{},setsEach:false,roundSets:[],order:"block",lock:false,awake:true,spList:"",spStart:true,spPause:true,spDuck:false,spWorkVol:80,spRestVol:40,snd:{start:"bell",half:"double",rest:"fall",done:"chime",cd:"pip"}};
 const DEFAULTS=JSON.parse(JSON.stringify(cfg));
 try{const s=JSON.parse(localStorage.getItem("ccage")||"null");if(s)cfg=Object.assign(cfg,s)}catch(e){}
 function fixCfg(){cfg.snd=Object.assign({},DEFAULTS.snd,cfg.snd||{});if(cfg.startStyle){cfg.snd.start=cfg.startStyle;delete cfg.startStyle}if(!Array.isArray(cfg.names))cfg.names=[];if(!Array.isArray(cfg.rounds))cfg.rounds=[];if(!cfg.exTimes||typeof cfg.exTimes!=="object")cfg.exTimes={};if(!Array.isArray(cfg.roundSets))cfg.roundSets=[]}
 fixCfg();
 function save(){try{localStorage.setItem("ccage",JSON.stringify(cfg))}catch(e){}}
+function isAlt(){return cfg.order==="alt"&&cfg.ex>1}
+function exCount(){let n=0;for(let r=0;r<cfg.rd;r++)n+=isAlt()?cfg.st*(cfg.ex-1)*setsAt(r):cfg.st*(cfg.ex-1);return n}
 function setsAt(r){return cfg.setsEach&&cfg.rd>1?Math.max(1,Math.min(6,cfg.roundSets[r]||cfg.sets)):cfg.sets}
 function counts(){const ST=cfg.st,EX=cfg.ex,SETS=cfg.sets,RD=cfg.rd;let sw=0,sp=0;for(let r=0;r<RD;r++){sw+=setsAt(r);sp+=setsAt(r)-1}
   return{ST,EX,SETS,RD,W:ST*EX*sw,P:ST*EX*sp,E:ST*(EX-1)*RD,S:(ST-1)*RD,R:RD-1}}
@@ -521,14 +530,15 @@ function compute(){
   const c=counts();let W,P,warn="",Wr=[],Pr=[];
   const pr=perRound();if(pr)syncRounds();
   const nW=c.W/c.RD,nP=c.P/c.RD;
-  const fixed=c.E*cfg.exRest+c.S*cfg.stRest+c.R*cfg.rdRest;
+  const fixed=exCount()*cfg.exRest+c.S*cfg.stRest+c.R*cfg.rdRest;
   const setup=cfg.warm*60+instrTotal()+cfg.ready;
   const fixW=[],fixP=[],freeW=[],freeP=[];
   for(let r=0;r<c.RD;r++){fixW[r]=fixP[r]=freeW[r]=freeP[r]=0;
     for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++){const o=ovAt(r,s,e);
       const S=setsAt(r);
       if(o&&o.w!=null)fixW[r]+=S*o.w;else freeW[r]+=S;
-      if(o&&o.p!=null)fixP[r]+=(S-1)*o.p;else freeP[r]+=S-1}}
+      const nr=isAlt()?(e===c.EX-1?S-1:0):S-1;
+      if(o&&o.p!=null)fixP[r]+=nr*o.p;else freeP[r]+=nr}}
   if(cfg.mode==="auto"){
     let rem=cfg.total*60-fixed-setup,den=0;
     for(let r=0;r<c.RD;r++){rem-=fixW[r]+fixP[r];const f=(pr?cfg.rounds[r].ratio:cfg.ratio)/100;den+=freeW[r]*f+freeP[r]*(1-f)}
@@ -551,15 +561,28 @@ function buildSeq(pl){
   if(cfg.instrMode==="block"){if(cfg.instrUnit==="total"){if(cfg.instrTot>0)q.push({type:"instr",d:cfg.instrTot*60,all:true})}else if(cfg.instr>0)for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++)q.push({type:"instr",d:cfg.instr,s,e,n:s*c.EX+e})}
   if(cfg.ready>0)q.push({type:"go",d:cfg.ready});
   const ie=instrEach();
-  for(let r=0;r<c.RD;r++)for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++){
-    if(r===0&&ie>0&&cfg.instrMode==="station")q.push({type:"instr",d:ie,s,e,n:s*c.EX+e,at:true});
+  for(let r=0;r<c.RD;r++)for(let s=0;s<c.ST;s++){
     const SR=setsAt(r);
+    const wp=e=>{const o=ovAt(r,s,e);return[o&&o.w!=null?o.w:pl.Wr[r],o&&o.p!=null?o.p:pl.Pr[r]]};
+    const add=(t,d,e,k)=>{if(t&&d>0)q.push({type:t,d,r,s,e,k})};
+    const after=(e,k)=>{if(s<c.ST-1)add("s",cfg.stRest,e,k);else if(r<c.RD-1)add("R",cfg.rdRest,e,k)};
+    if(isAlt()){
+      if(r===0&&ie>0&&cfg.instrMode==="station")for(let e=0;e<c.EX;e++)q.push({type:"instr",d:ie,s,e,n:s*c.EX+e,at:true});
+      for(let k=0;k<SR;k++)for(let e=0;e<c.EX;e++){
+        const[W,P]=wp(e);q.push({type:"work",d:W,r,s,e,k});
+        if(e<c.EX-1)add("e",cfg.exRest,e,k);else if(k<SR-1)add("p",P,e,k);else after(e,k);
+      }
+      continue;
+    }
+    for(let e=0;e<c.EX;e++){
+    if(r===0&&ie>0&&cfg.instrMode==="station")q.push({type:"instr",d:ie,s,e,n:s*c.EX+e,at:true});
     for(let k=0;k<SR;k++){
       const o=ovAt(r,s,e),W=o&&o.w!=null?o.w:pl.Wr[r],P=o&&o.p!=null?o.p:pl.Pr[r];
       q.push({type:"work",d:W,r,s,e,k});
       let t=null,d=0;
       if(k<SR-1){t="p";d=P}else if(e<c.EX-1){t="e";d=cfg.exRest}else if(s<c.ST-1){t="s";d=cfg.stRest}else if(r<c.RD-1){t="R";d=cfg.rdRest}
       if(t&&d>0)q.push({type:t,d,r,s,e,k});
+    }
     }
   }
   return q;
@@ -581,6 +604,7 @@ function setMode(m){
   if(m==="auto"&&cfg.mode==="manual"){const c=compute();cfg.total=Math.max(10,Math.round(c.total/60));$("total").value=cfg.total;syncRounds();c.Wr.forEach((w,r)=>{const t=w+c.Pr[r];if(t>0)cfg.rounds[r].ratio=Math.min(95,Math.max(30,Math.round(100*w/t)))})}
   cfg.mode=m;render();
 }
+$("orderBlock").onclick=()=>{cfg.order="block";render()};$("orderAlt").onclick=()=>{cfg.order="alt";render()};
 $("setsSame").onclick=()=>{cfg.setsEach=false;render()};$("setsEach").onclick=()=>{cfg.setsEach=true;for(let r=0;r<cfg.rd;r++)if(!cfg.roundSets[r])cfg.roundSets[r]=cfg.sets;render()};
 $("exModeOff").onclick=()=>{cfg.exMode=false;render()};$("exModeOn").onclick=()=>{cfg.exMode=true;render()};
 $("prSame").onclick=()=>{cfg.perRound=false;render()};$("prEach").onclick=()=>{cfg.perRound=true;syncRounds();render()};
@@ -655,7 +679,7 @@ function buildNames(){
           inp.setAttribute("aria-label",(k==="w"?T("Arbete"):T("Vila"))+" "+lab.textContent+" "+T("Station")+" "+(s+1));
           const key=r+"-"+s+"-"+e,cur=cfg.exTimes[key];
           if(cur&&cur[k]!=null)inp.value=cur[k];
-          if(k==="p"&&setsAt(r)<2){inp.disabled=true;inp.style.opacity=.35}
+          if(k==="p"&&(setsAt(r)<2||(isAlt()&&e<cfg.ex-1))){inp.disabled=true;inp.style.opacity=.35}
           inp.addEventListener("input",()=>{
             const raw=inp.value.trim(),v=raw===""?null:Math.max(k==="w"?1:0,Math.min(600,parseInt(raw,10)));
             const o=Object.assign({w:null,p:null},cfg.exTimes[key]);o[k]=(v==null||isNaN(v))?null:v;
@@ -698,7 +722,7 @@ function render(){
   document.querySelectorAll("#ratioChips button").forEach(b=>b.classList.toggle("on",+b.dataset.r===cfg.ratio));
   const c=compute();plan=c;
   const pr=c.pr;
-  const nk=[cfg.st,cfg.ex,cfg.rd,cfg.sets,cfg.exMode,lang,cfg.setsEach,(cfg.roundSets||[]).join(",")].join("|");if(nk!==namesKey){namesKey=nk;buildNames()}
+  const nk=[cfg.st,cfg.ex,cfg.rd,cfg.sets,cfg.exMode,lang,cfg.order,cfg.setsEach,(cfg.roundSets||[]).join(",")].join("|");if(nk!==namesKey){namesKey=nk;buildNames()}
   const se=cfg.setsEach&&k.RD>1;
   $("setsPrGroup").hidden=k.RD<2;$("setsSame").setAttribute("aria-pressed",!se);$("setsEach").setAttribute("aria-pressed",se);
   $("setsRow").hidden=se;$("setsRounds").hidden=!se;
@@ -708,6 +732,11 @@ function render(){
       const l=document.createElement("label");l.htmlFor="rs_"+r;l.textContent=T("Set per övning, varv {n}",{n:r+1});
       const u=document.createElement("span");u.className="unit";u.textContent=T("st");
       row.append(l,stepper("rs_"+r,setsAt(r),1,6,1,v=>{cfg.roundSets[r]=v;render()}),u);box.appendChild(row)}}
+  let maxS=0;for(let r=0;r<k.RD;r++)maxS=Math.max(maxS,setsAt(r));
+  $("orderBox").hidden=k.EX<2||maxS<2;
+  $("orderBlock").setAttribute("aria-pressed",!isAlt());$("orderAlt").setAttribute("aria-pressed",isAlt());
+  $("setRestSub").textContent=T(isAlt()?"efter sista övningen, före nästa set":"samma övning, set 1 → 2");
+  $("exRestSub").textContent=T(isAlt()?"mellan övningarna i varje set":"inom stationen");
   $("exModeOff").setAttribute("aria-pressed",!cfg.exMode);$("exModeOn").setAttribute("aria-pressed",!!cfg.exMode);
   $("exHint").hidden=!cfg.exMode;
   $("exHint").textContent=T("Lämna en ruta tom för att använda passets vanliga tid.")+(cfg.mode==="auto"?" "+T("Övningar med egna tider räknas bort först, och resten av totaltiden fördelas på de andra."):"");
@@ -722,7 +751,7 @@ function render(){
   if(pr&&cfg.mode==="auto")c.Wr.forEach((w,r)=>{const v=$("rv_"+r);if(v)v.textContent=T("{w} s arbete / {p} s vila",{w:w,p:c.Pr[r]});document.querySelectorAll("#roundsAuto .chips").forEach((ch,i)=>ch.querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.r===cfg.rounds[i].ratio)))});
   const uniq=a=>a.every(x=>x===a[0]);
   $("oWork").textContent=(uniq(c.Wr)?c.W:c.Wr.join("/"))+" s";$("oSet").textContent=(uniq(c.Pr)?c.P:c.Pr.join("/"))+" s";
-  const stR=c.Wr.map((w,r)=>k.EX*setsAt(r)*w+k.EX*(setsAt(r)-1)*c.Pr[r]+(k.EX-1)*cfg.exRest);
+  const stR=c.Wr.map((w,r)=>{const S=setsAt(r);return isAlt()?k.EX*S*w+(S-1)*c.Pr[r]+S*(k.EX-1)*cfg.exRest:k.EX*S*w+k.EX*(S-1)*c.Pr[r]+(k.EX-1)*cfg.exRest});
   const perStation=stR[0];
   $("oStation").textContent=uniq(stR)?fmt(perStation):stR.map(fmt).join(" / ");
   const rdR=stR.map(x=>k.ST*x+(k.ST-1)*cfg.stRest);$("oRound").textContent=uniq(rdR)?fmt(rdR[0]):rdR.map(fmt).join(" / ");
@@ -839,7 +868,7 @@ function label(it){
     case"warm":return{phase:T("Uppvärmning"),what:T("Värm upp"),where:"",cls:"setup"};
     case"instr":if(it.all)return{phase:T("Genomgång"),what:T("Alla övningar"),where:T("{n} övningar",{n:k.ST*k.EX}),cls:"setup"};return{phase:T("Genomgång"),what:exName(it.s,it.e),where:it.at?T("Station {s} · före första set",{s:it.s+1}):T("Övning {n} av {t}",{n:it.n+1,t:k.ST*k.EX}),cls:"setup"};
     case"work":return{phase:T("Arbete"),what:exName(it.s,it.e),where,cls:"work"};
-    case"p":return{phase:T("Vila"),what:"Set "+(it.k+2)+" – "+exName(it.s,it.e),where,cls:"rest"};
+    case"p":return{phase:T("Vila"),what:"Set "+(it.k+2)+" – "+exName(it.s,isAlt()?0:it.e),where,cls:"rest"};
     case"e":return{phase:T("Byt övning"),what:"→ "+exName(it.s,it.e+1),where,cls:"rest"};
     case"s":return{phase:T("Byt station"),what:"→ "+exName(it.s+1,0),where,cls:"rest"};
     case"R":return{phase:T("Varvvila"),what:T("Varv {n} börjar med {x}",{n:it.r+2,x:exName(0,0)}),where:T("Varv {n} klart",{n:it.r+1}),cls:"round"};

@@ -9,6 +9,7 @@ Intervallklocka för CrossCage-pass, byggd som en webbapp (PWA) som installeras 
 - Räknar ut arbete och vila utifrån total tid, eller så sätter du arbetstiden själv
 - Samma tider alla varv eller olika arbete/vila per varv
 - Olika antal set per varv
+- Ordning på stationen: alla set av en övning i taget (A A B B) eller växla mellan övningarna (A B A B)
 - Egna tider för arbete och vila per övning och varv
 - Pauser för byte av övning, byte av station och mellan varv
 - Ljud: startsignal, halvtidssignal (byt sida), nedräkning, slutsignal, volym och flera ljud att välja mellan
