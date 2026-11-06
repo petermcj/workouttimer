@@ -79,7 +79,7 @@ input[type=range]{width:100%;accent-color:var(--work)}
 .strip{display:flex;flex-direction:column;gap:6px}
 .bar{display:flex;height:22px;border-radius:5px;overflow:hidden;gap:1px;background:var(--bg)}
 .bar i{display:block;min-width:1px}
-.bar .w{background:var(--work)} .bar .p{background:var(--rest);opacity:.55} .bar .e{background:var(--rest);opacity:.8} .bar .s{background:var(--rest)} .bar .R{background:var(--round)} .bar .warm{background:var(--setup)} .bar .instr{background:var(--setup);opacity:.5}
+.bar .w{background:var(--work)} .bar .p{background:var(--rest);opacity:.55} .bar .e{background:var(--rest);opacity:.8} .bar .s{background:var(--rest)} .bar .R{background:var(--round)} .bar .warm{background:var(--setup)} .bar .instr{background:var(--setup);opacity:.5} .bar .go{background:var(--setup);opacity:.25}
 .legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted)}
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c);opacity:var(--o,1)}
 details{border-top:1px solid var(--line);padding-top:12px}
@@ -128,12 +128,22 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 .tiny button{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit}
 .tiny{flex-wrap:wrap;gap:8px 16px}
 .mode.stack{grid-template-columns:1fr}
+.music{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:6px;align-items:center;background:var(--panel);border-radius:10px;padding:6px}
+.music button{background:none;border:0;color:var(--fg);font-size:20px;width:44px;height:44px;border-radius:8px;cursor:pointer}
+.music button:active{background:var(--line)}
+.np{min-width:0}
+.np .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np .a{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-green{color:#1ed760}
+code.uri{display:block;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px;font-size:12px;overflow-wrap:anywhere;color:var(--fg);user-select:all}
+ol.steps{margin:0;padding-left:20px;color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:4px}
+ol.steps a{color:var(--fg)}
 .runbar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .runbar button{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px 8px;font:inherit;font-size:14px;cursor:pointer}
 .runbar button[aria-pressed="true"]{border-color:var(--work);color:var(--work)}
 body.focus header,body.focus .tabs,body.focus .meta,body.focus .tiny,body.focus #wakeMsg{display:none!important}
-body.focus .next,body.focus .ctrls,body.focus .runbar{opacity:.3;transition:opacity .2s}
-body.focus .next:hover,body.focus .ctrls:hover,body.focus .runbar:hover,body.focus .ctrls:focus-within,body.focus .runbar:focus-within{opacity:1}
+body.focus .music,body.focus .next,body.focus .ctrls,body.focus .runbar{opacity:.3;transition:opacity .2s}
+body.focus .music:hover,body.focus .music:focus-within,body.focus .next:hover,body.focus .ctrls:hover,body.focus .runbar:hover,body.focus .ctrls:focus-within,body.focus .runbar:focus-within{opacity:1}
 body.focus .face{padding-block:28px}
 body.focus .clock{font-size:clamp(120px,42vw,260px)}
 body.focus .wrap{gap:12px}
@@ -204,6 +214,10 @@ body.focus .wrap{gap:12px}
       <div class="mode" role="group" aria-label="När instruktionen ges">
         <button id="instrBlock" aria-pressed="true">Samlad genomgång efter uppvärmning</button>
         <button id="instrStation" aria-pressed="false">Vid varje station i varv 1</button>
+      </div>
+      <div class="row">
+        <label for="ready">Tid innan första övningen<small>efter uppvärmning och genomgång, för att gå till stationen</small></label>
+        <div class="num"><button data-step="ready:-15" aria-label="Minska">−</button><input id="ready" type="number" inputmode="numeric" min="0" max="600"><button data-step="ready:15" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
     </div>
 
@@ -278,6 +292,7 @@ body.focus .wrap{gap:12px}
           <span style="--c:var(--round)">Varvvila</span>
           <span style="--c:var(--setup)">Uppvärmning</span>
           <span style="--c:var(--setup);--o:.5">Genomgång</span>
+          <span style="--c:var(--setup);--o:.25">Till stationen</span>
         </div>
       </div>
     </div>
@@ -320,6 +335,35 @@ body.focus .wrap{gap:12px}
       <div class="sub">Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.</div>
     </div>
 
+    <div class="block" id="spBlock">
+      <div class="label"><span class="sp-green">●</span> Spotify</div>
+      <div id="spSetup" style="display:flex;flex-direction:column;gap:10px">
+        <ol class="steps">
+          <li>Skapa en app på <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">developer.spotify.com/dashboard</a> och välj Web API.</li>
+          <li>Lägg in den här adressen som Redirect URI:</li>
+        </ol>
+        <code class="uri" id="spUri"></code>
+        <div class="chips"><button id="spCopy">Kopiera adressen</button></div>
+        <ol class="steps" start="3"><li>Kopiera appens Client ID, klistra in här och tryck Anslut.</li></ol>
+        <div class="passrow"><input id="spClient" placeholder="Client ID" aria-label="Spotify Client ID" autocomplete="off" spellcheck="false"><button class="btn primary" id="spConnect">Anslut</button></div>
+      </div>
+      <div id="spReady" hidden style="display:flex;flex-direction:column;gap:10px">
+        <div class="row"><span id="spWho">Ansluten</span><button class="btn" id="spDisconnect">Koppla från</button></div>
+        <div class="passrow"><select id="spList" aria-label="Spellista vid start"><option value="">Fortsätt med det som spelas</option></select><button class="btn" id="spReload" aria-label="Hämta spellistor och enheter igen">↻</button></div>
+        <div class="passrow"><select id="spDev" aria-label="Spela på"><option value="">Enheten som spelar just nu</option></select></div>
+        <div class="mode stack" role="group" aria-label="Spotify och passet">
+          <button id="spStart" aria-pressed="true">Starta musiken när passet startar</button>
+          <button id="spPause" aria-pressed="true">Pausa musiken när passet pausas</button>
+          <button id="spDuck" aria-pressed="false">Sänk volymen under vila</button>
+        </div>
+        <div class="row" id="spWorkRow"><label for="spWorkVol">Volym under arbete</label>
+          <div class="num"><button data-step="spWorkVol:-10" aria-label="Minska">−</button><input id="spWorkVol" type="number" inputmode="numeric" min="0" max="100"><button data-step="spWorkVol:10" aria-label="Öka">+</button></div><span class="unit">%</span></div>
+        <div class="row" id="spRestRow"><label for="spRestVol">Volym under vila</label>
+          <div class="num"><button data-step="spRestVol:-10" aria-label="Minska">−</button><input id="spRestVol" type="number" inputmode="numeric" min="0" max="100"><button data-step="spRestVol:10" aria-label="Öka">+</button></div><span class="unit">%</span></div>
+      </div>
+      <div class="sub" id="spMsg"></div>
+    </div>
+
     <details>
       <summary>Namnge övningar (valfritt)</summary>
       <div id="exList"></div>
@@ -348,6 +392,12 @@ body.focus .wrap{gap:12px}
       <button id="bPrev" aria-label="Föregående intervall">◀ Bak</button>
       <button id="bMain" class="main">Start</button>
       <button id="bNext" aria-label="Nästa intervall">Fram ▶</button>
+    </div>
+    <div class="music" id="musicBar" hidden>
+      <button id="mPrev" aria-label="Föregående låt">⏮</button>
+      <div class="np"><div class="t" id="npTitle">Spotify</div><div class="a" id="npArtist"></div></div>
+      <button id="mPlay" aria-label="Spela eller pausa musiken">⏯</button>
+      <button id="mNext" aria-label="Nästa låt">⏭</button>
     </div>
     <div class="runbar">
       <button id="bAwake" aria-pressed="true">☀ Skärm tänd</button>
@@ -406,7 +456,7 @@ const EN={
 "Skriv ett namn på passet först.":"Enter a name for the workout first.","Uppdaterade {x}.":"Updated {x}.","Sparade {x}.":"Saved {x}.",
 "Passet sparades inte. Kontrollera anslutningen och försök igen.":"The workout was not saved. Check your connection and try again.",
 "Bekräfta":"Confirm","Tryck Bekräfta för att ta bort {x}.":"Press Confirm to delete {x}.","Tog bort {x}.":"Deleted {x}.",
-"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Tid per övning":"Time per exercise","En total tid":"One total time","Hur genomgången räknas":"How demo time is set","Genomgång totalt":"Total demo time","≈ {t} per övning":"≈ {t} per exercise","en samlad genomgång":"one combined demo","Alla övningar":"All exercises","{n} övningar":"{n} exercises","Blanda med musiken (tyst i ljudlöst läge)":"Mix with the music (silent in silent mode)","Hörs alltid, även i ljudlöst läge (kan pausa musiken)":"Always audible, even in silent mode (may pause music)","Låsskärm":"Lock screen","Visa klockan på låsskärmen":"Show the timer on the lock screen","Visa inte på låsskärmen":"Do not show on the lock screen","Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.":"With the lock screen on, the phase and time show as a player on the lock screen, and the timer keeps beeping while the screen is locked. It works best in the installed app. On iPhone it may pause Spotify, since only one app at a time can show on the lock screen.","☀ Skärm tänd":"☀ Screen on","Skärm kan släckas":"Screen may turn off","Fokusläge":"Focus mode","Visa allt":"Show all","Installera appen":"Install the app"
+"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Tid per övning":"Time per exercise","En total tid":"One total time","Hur genomgången räknas":"How demo time is set","Genomgång totalt":"Total demo time","≈ {t} per övning":"≈ {t} per exercise","en samlad genomgång":"one combined demo","Alla övningar":"All exercises","{n} övningar":"{n} exercises","Blanda med musiken (tyst i ljudlöst läge)":"Mix with the music (silent in silent mode)","Hörs alltid, även i ljudlöst läge (kan pausa musiken)":"Always audible, even in silent mode (may pause music)","Låsskärm":"Lock screen","Visa klockan på låsskärmen":"Show the timer on the lock screen","Visa inte på låsskärmen":"Do not show on the lock screen","Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.":"With the lock screen on, the phase and time show as a player on the lock screen, and the timer keeps beeping while the screen is locked. It works best in the installed app. On iPhone it may pause Spotify, since only one app at a time can show on the lock screen.","☀ Skärm tänd":"☀ Screen on","Skärm kan släckas":"Screen may turn off","Fokusläge":"Focus mode","Visa allt":"Show all","Tid innan första övningen":"Time before the first exercise","efter uppvärmning och genomgång, för att gå till stationen":"after warm-up and demos, to get to the station","Gå till station 1":"Go to station 1","Passet börjar snart":"The workout starts soon","Till stationen":"To the station","Skapa en app på":"Create an app at","och välj Web API.":"and select Web API.","Lägg in den här adressen som Redirect URI:":"Add this address as the Redirect URI:","Kopiera adressen":"Copy address","Kopiera appens Client ID, klistra in här och tryck Anslut.":"Copy the app's Client ID, paste it here and press Connect.","Anslut":"Connect","Ansluten":"Connected","Koppla från":"Disconnect","Spellista vid start":"Playlist at start","Fortsätt med det som spelas":"Continue what is playing","Hämta spellistor och enheter igen":"Reload playlists and devices","Spela på":"Play on","Enheten som spelar just nu":"The device playing right now","Spotify och passet":"Spotify and the workout","Starta musiken när passet startar":"Start the music when the workout starts","Pausa musiken när passet pausas":"Pause the music when the workout pauses","Sänk volymen under vila":"Lower the volume during rest","Volym under arbete":"Volume during work","Volym under vila":"Volume during rest","Föregående låt":"Previous track","Spela eller pausa musiken":"Play or pause the music","Nästa låt":"Next track","Ansluten som {x}":"Connected as {x}","Klistra in ditt Client ID först.":"Paste your Client ID first.","Kopierad":"Copied","Markera adressen och kopiera den.":"Select the address and copy it.","Spotify-inloggningen avbröts. Försök igen.":"The Spotify sign-in was cancelled. Try again.","Inloggningen kunde inte slutföras. Starta anslutningen igen inifrån appen.":"The sign-in could not be completed. Start connecting again from inside the app.","Spotify svarade inte. Kontrollera Client ID och Redirect URI och försök igen.":"Spotify did not respond. Check the Client ID and Redirect URI and try again.","Kunde inte hämta spellistor.":"Could not load playlists.","Ingen Spotify-enhet är aktiv. Öppna Spotify, spela en låt en kort stund och försök igen.":"No Spotify device is active. Open Spotify, play a song briefly and try again.","Spotify Premium krävs, och ditt konto måste vara tillagt under User Management i Spotify-appen på utvecklarsidan.":"Spotify Premium is required, and your account must be added under User Management in your app on the developer site.","Volymen kan inte styras på den här enheten. Spotify på iPhone tillåter oftast inte det.":"The volume cannot be controlled on this device. Spotify on iPhone usually does not allow it.","Spotify: {x}":"Spotify: {x}","Inget spelas":"Nothing playing","Installera appen":"Install the app"
 };
 let lang="sv";
 try{lang=localStorage.getItem("ccage_lang")||((navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en")}catch(e){lang=(navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en"}
@@ -425,7 +475,7 @@ function applyStatic(){
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
 }
 applyStatic();
-let cfg={mode:"auto",st:8,ex:2,sets:2,rd:2,warm:10,instr:20,instrMode:"block",total:60,ratio:70,work:30,setRest:15,exRest:10,stRest:20,rdRest:60,sound:true,names:[],countdown:3,cdRest:false,vol:80,half:true,mix:"ambient",instrUnit:"per",instrTot:5,lock:false,awake:true,snd:{start:"bell",half:"double",rest:"fall",done:"chime",cd:"pip"}};
+let cfg={mode:"auto",st:8,ex:2,sets:2,rd:2,warm:10,instr:20,instrMode:"block",total:60,ratio:70,work:30,setRest:15,exRest:10,stRest:20,rdRest:60,sound:true,names:[],countdown:3,cdRest:false,vol:80,half:true,mix:"ambient",instrUnit:"per",instrTot:5,ready:60,lock:false,awake:true,spList:"",spStart:true,spPause:true,spDuck:false,spWorkVol:80,spRestVol:40,snd:{start:"bell",half:"double",rest:"fall",done:"chime",cd:"pip"}};
 const DEFAULTS=JSON.parse(JSON.stringify(cfg));
 try{const s=JSON.parse(localStorage.getItem("ccage")||"null");if(s)cfg=Object.assign(cfg,s)}catch(e){}
 function fixCfg(){cfg.snd=Object.assign({},DEFAULTS.snd,cfg.snd||{});if(cfg.startStyle){cfg.snd.start=cfg.startStyle;delete cfg.startStyle}if(!Array.isArray(cfg.names))cfg.names=[]}
@@ -444,7 +494,7 @@ function instrEach(){const c=counts();return cfg.instrUnit==="total"?Math.round(
 function compute(){
   const c=counts();let W,P,warn="";
   const fixed=c.E*cfg.exRest+c.S*cfg.stRest+c.R*cfg.rdRest;
-  const setup=cfg.warm*60+instrTotal();
+  const setup=cfg.warm*60+instrTotal()+cfg.ready;
   if(cfg.mode==="auto"){
     const rem=cfg.total*60-fixed-setup,f=cfg.ratio/100;
     const raw=rem/(c.W+c.P*(1-f)/f);
@@ -460,6 +510,7 @@ function buildSeq(W,P){
   const c=counts(),q=[];
   if(cfg.warm>0)q.push({type:"warm",d:cfg.warm*60});
   if(cfg.instrMode==="block"){if(cfg.instrUnit==="total"){if(cfg.instrTot>0)q.push({type:"instr",d:cfg.instrTot*60,all:true})}else if(cfg.instr>0)for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++)q.push({type:"instr",d:cfg.instr,s,e,n:s*c.EX+e})}
+  if(cfg.ready>0)q.push({type:"go",d:cfg.ready});
   const ie=instrEach();
   for(let r=0;r<c.RD;r++)for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++){
     if(r===0&&ie>0&&cfg.instrMode==="station")q.push({type:"instr",d:ie,s,e,n:s*c.EX+e,at:true});
@@ -474,7 +525,7 @@ function buildSeq(W,P){
 }
 
 // --- Plan UI ---
-const fields=["st","ex","sets","rd","warm","instr","instrTot","total","work","setRest","exRest","stRest","rdRest","countdown"];
+const fields=["st","ex","sets","rd","warm","instr","instrTot","ready","total","work","setRest","exRest","stRest","rdRest","countdown","spWorkVol","spRestVol"];
 const structural=["st","ex"];
 function setField(f,v){const el=$(f);cfg[f]=Math.max(+el.min,Math.min(+el.max,v));if(structural.includes(f))buildNames();render()}
 fields.forEach(f=>{const el=$(f);el.value=cfg[f];
@@ -523,6 +574,7 @@ function render(){
   $("instrPer").setAttribute("aria-pressed",cfg.instrUnit!=="total");$("instrAll").setAttribute("aria-pressed",cfg.instrUnit==="total");
   $("instrPerRow").hidden=cfg.instrUnit==="total";$("instrTotRow").hidden=cfg.instrUnit!=="total";
   $("instrTotSum").textContent=cfg.instrMode==="station"?T("≈ {t} per övning",{t:fmt(instrEach())}):T("en samlad genomgång");
+  if(typeof spRender==="function")spRender();
   $("lockOn").setAttribute("aria-pressed",!!cfg.lock);$("lockOff").setAttribute("aria-pressed",!cfg.lock);
   $("mixPlay").setAttribute("aria-pressed",cfg.mix==="playback");
   $("instrBlock").setAttribute("aria-pressed",cfg.instrMode==="block");$("instrStation").setAttribute("aria-pressed",cfg.instrMode==="station");
@@ -648,6 +700,7 @@ function label(it){
   const where=(k.RD>1?T("Varv {r}/{n}",{r:it.r+1,n:k.RD})+" · ":"")+"Station "+(it.s+1)+"/"+k.ST+(k.EX>1?" · "+L[it.e]:"")+(k.SETS>1?" · Set "+(it.k+1)+"/"+k.SETS:"");
   switch(it.type){
     case"prep":{const f=seq[1];return{phase:T("Gör dig redo"),what:f&&f.type==="warm"?T("Uppvärmning"):exName(0,0),where:T("Passet startar"),cls:"rest"}}
+    case"go":return{phase:T("Gör dig redo"),what:T("Gå till station 1")+": "+exName(0,0),where:T("Passet börjar snart"),cls:"rest"};
     case"warm":return{phase:T("Uppvärmning"),what:T("Värm upp"),where:"",cls:"setup"};
     case"instr":if(it.all)return{phase:T("Genomgång"),what:T("Alla övningar"),where:T("{n} övningar",{n:k.ST*k.EX}),cls:"setup"};return{phase:T("Genomgång"),what:exName(it.s,it.e),where:it.at?T("Station {s} · före första set",{s:it.s+1}):T("Övning {n} av {t}",{n:it.n+1,t:k.ST*k.EX}),cls:"setup"};
     case"work":return{phase:T("Arbete"),what:exName(it.s,it.e),where,cls:"work"};
@@ -670,8 +723,8 @@ function draw(){
   $("mEl").textContent=fmt(Math.max(0,done-PREP));$("mLeft").textContent=fmt(seqTotal()-done);
   $("mIdx").textContent=seq.slice(0,idx+1).filter(x=>x.type==="work").length+"/"+counts().W;
 }
-function advance(){idx++;if(idx>=seq.length){running=false;clearInterval(raf);$("bMain").textContent=T("Start");draw();play("done");stopLock();if(!cfg.awake)releaseWake();return}remain=seq[idx].d;lastBeepSec=-1;halfDone=false;
-  if(seq[idx].type==="work")startSignal();else if(seq[idx-1]&&seq[idx-1].type==="work")restSignal();}
+function advance(){idx++;if(idx>=seq.length){running=false;clearInterval(raf);$("bMain").textContent=T("Start");draw();play("done");spEnd();stopLock();if(!cfg.awake)releaseWake();return}remain=seq[idx].d;lastBeepSec=-1;halfDone=false;
+  if(seq[idx].type==="work")startSignal();else if(seq[idx-1]&&seq[idx-1].type==="work")restSignal();spPhase();}
 let audioChk=0;
 function tick(t){
   if(!running)return;
@@ -698,7 +751,9 @@ function releaseWake(){try{wake&&wake.release();wake=null}catch(e){}try{if(noSle
 $("bMain").onclick=()=>{
   ensureAudio();
   if(idx>=seq.length)resetRun();
+  const firstStart=!started;
   running=!running;started=true;
+  spOnToggle(running,firstStart);
   $("bMain").textContent=T(running?"Paus":"Fortsätt");
   if(running){lastT=performance.now();if(cfg.awake)getWake();clearInterval(raf);raf=setInterval(()=>tick(performance.now()),200);startLock()}else{clearInterval(raf);if(!cfg.awake)releaseWake();updateLock(true)}
   setSession();checkAudio();
@@ -819,13 +874,163 @@ renderPasses();
 
 function setLang(l){
   lang=l;try{localStorage.setItem("ccage_lang",l)}catch(e){}
-  applyStatic();buildNames();buildSnd();soundLbl();awakeLbl();$("bFocus").textContent=T(document.body.classList.contains("focus")?"Visa allt":"Fokusläge");renderPasses();
+  applyStatic();buildNames();buildSnd();soundLbl();awakeLbl();if(spOn())spFill();$("bFocus").textContent=T(document.body.classList.contains("focus")?"Visa allt":"Fokusläge");renderPasses();
   const pm=$("passMsg");if(!pm.style.color)passMsg(where());
   const wm=$("wakeMsg");if(!wm.hidden)wakeMsg(wm.dataset.ok==="1");
   render();draw();
   $("bMain").textContent=T(running?"Paus":(started&&idx<seq.length?"Fortsätt":"Start"));
 }
 document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setLang(b.dataset.lang)));
+
+// --- Spotify ---
+const SP_KEY="ccage_sp",SP_API="https://api.spotify.com/v1";
+const SP_REDIRECT=location.origin+location.pathname.replace(/index\.html$/,"");
+const SP_SCOPES="user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative user-read-private";
+let sp={};try{sp=JSON.parse(localStorage.getItem(SP_KEY)||"{}")||{}}catch(e){sp={}}
+let spLists=[],spDevs=[],spVolWarned=false,spNpT=0;
+function spSave(){try{localStorage.setItem(SP_KEY,JSON.stringify(sp))}catch(e){}}
+function spMsg(t,bad){const m=$("spMsg");m.textContent=t||"";m.style.color=bad?"var(--danger)":""}
+function spOn(){return !!(sp.access&&sp.clientId)}
+function b64url(buf){let b="";new Uint8Array(buf).forEach(x=>b+=String.fromCharCode(x));return btoa(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+async function spConnect(){
+  const id=$("spClient").value.trim();
+  if(!id){spMsg(T("Klistra in ditt Client ID först."),true);$("spClient").focus();return}
+  const verifier=b64url(crypto.getRandomValues(new Uint8Array(64)));
+  const challenge=b64url(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(verifier)));
+  const state=b64url(crypto.getRandomValues(new Uint8Array(16)));
+  sp.clientId=id;sp.verifier=verifier;sp.state=state;spSave();
+  location.href="https://accounts.spotify.com/authorize?"+new URLSearchParams({response_type:"code",client_id:id,scope:SP_SCOPES,redirect_uri:SP_REDIRECT,code_challenge_method:"S256",code_challenge:challenge,state});
+}
+async function spToken(params){
+  const r=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(params)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){const e=new Error(j.error_description||j.error||("HTTP "+r.status));e.status=r.status;throw e}
+  sp.access=j.access_token;if(j.refresh_token)sp.refresh=j.refresh_token;sp.exp=Date.now()+((j.expires_in||3600)-60)*1000;spSave();
+}
+let spRefreshing=null;
+async function spAccess(){
+  if(!sp.access)throw Object.assign(new Error("not connected"),{status:401});
+  if(Date.now()>sp.exp){
+    if(!spRefreshing)spRefreshing=spToken({grant_type:"refresh_token",refresh_token:sp.refresh,client_id:sp.clientId}).finally(()=>{spRefreshing=null});
+    try{await spRefreshing}catch(e){if(e.status===400||e.status===401){spLogout(true)}throw e}
+  }
+  return sp.access;
+}
+async function spApi(method,path,body,retry){
+  const tok=await spAccess();
+  const h={Authorization:"Bearer "+tok};if(body)h["Content-Type"]="application/json";
+  const r=await fetch(SP_API+path,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  if(r.status===401&&!retry){sp.exp=0;return spApi(method,path,body,true)}
+  if(r.status===204||r.status===202)return null;
+  const txt=await r.text();let j=null;try{j=txt?JSON.parse(txt):null}catch(e){}
+  if(!r.ok){const e=new Error((j&&j.error&&j.error.message)||("HTTP "+r.status));e.status=r.status;e.reason=j&&j.error&&j.error.reason;throw e}
+  return j;
+}
+function spDevQ(sep){return sp.device?(sep||"?")+"device_id="+encodeURIComponent(sp.device):""}
+function spErr(e){
+  if(e&&e.status===404)spMsg(T("Ingen Spotify-enhet är aktiv. Öppna Spotify, spela en låt en kort stund och försök igen."),true);
+  else if(e&&e.status===403)spMsg(T("Spotify Premium krävs, och ditt konto måste vara tillagt under User Management i Spotify-appen på utvecklarsidan."),true);
+  else spMsg(T("Spotify: {x}",{x:(e&&e.message)||"?"}),true);
+}
+async function spWithDevice(fn){
+  try{return await fn()}catch(e){
+    if(e.status===404&&!sp.device){
+      try{const d=await spApi("GET","/me/player/devices");const dev=(d&&d.devices||[])[0];if(dev){await spApi("PUT","/me/player",{device_ids:[dev.id],play:false});return await fn()}}catch(e2){}
+    }
+    throw e;
+  }
+}
+async function spPlay(first){
+  const body=first&&cfg.spList?{context_uri:cfg.spList}:undefined;
+  await spWithDevice(()=>spApi("PUT","/me/player/play"+spDevQ(),body));
+  spNowSoon();
+}
+async function spPauseMusic(){await spApi("PUT","/me/player/pause"+spDevQ())}
+async function spVolume(v){
+  try{await spApi("PUT","/me/player/volume?volume_percent="+Math.round(v)+spDevQ("&"))}
+  catch(e){if(!spVolWarned&&(e.status===403||e.status===400)){spVolWarned=true;spMsg(T("Volymen kan inte styras på den här enheten. Spotify på iPhone tillåter oftast inte det."),true)}}
+}
+function spOnToggle(nowRunning,first){
+  if(!spOn())return;
+  if(nowRunning){
+    if(cfg.spStart)spPlay(first).then(()=>{if(cfg.spDuck)spPhase()}).catch(spErr);
+    else if(cfg.spDuck)spPhase();
+  }else if(cfg.spPause){spPauseMusic().catch(()=>{})}
+}
+let spLastVol=null;
+function spPhase(){
+  if(!spOn()||!cfg.spDuck||!running)return;
+  const it=seq[idx];if(!it)return;
+  const v=it.type==="work"?cfg.spWorkVol:cfg.spRestVol;
+  if(v!==spLastVol){spLastVol=v;spVolume(v)}
+}
+function spEnd(){if(spOn()&&cfg.spDuck){spLastVol=null;spVolume(cfg.spWorkVol)}}
+async function spLoadLists(){
+  try{
+    const me=await spApi("GET","/me");$("spWho").textContent=T("Ansluten som {x}",{x:(me&&(me.display_name||me.id))||"Spotify"});
+    let url="/me/playlists?limit=50",all=[];
+    for(let i=0;i<4&&url;i++){const j=await spApi("GET",url);all=all.concat((j&&j.items)||[]);url=j&&j.next?j.next.replace(SP_API,""):null}
+    spLists=all.filter(Boolean);
+  }catch(e){spMsg(T("Kunde inte hämta spellistor."),true)}
+  try{const d=await spApi("GET","/me/player/devices");spDevs=(d&&d.devices)||[]}catch(e){spDevs=[]}
+  spFill();
+}
+function spFill(){
+  const ls=$("spList");ls.innerHTML="";
+  const o0=document.createElement("option");o0.value="";o0.textContent=T("Fortsätt med det som spelas");ls.appendChild(o0);
+  spLists.forEach(p=>{const o=document.createElement("option");o.value=p.uri;o.textContent=p.name;ls.appendChild(o)});
+  if(cfg.spList&&!spLists.some(p=>p.uri===cfg.spList)){const o=document.createElement("option");o.value=cfg.spList;o.textContent=cfg.spListName||cfg.spList;ls.appendChild(o)}
+  ls.value=cfg.spList||"";
+  const ds=$("spDev");ds.innerHTML="";
+  const d0=document.createElement("option");d0.value="";d0.textContent=T("Enheten som spelar just nu");ds.appendChild(d0);
+  spDevs.forEach(d=>{const o=document.createElement("option");o.value=d.id;o.textContent=d.name+" ("+d.type+")";ds.appendChild(o)});
+  if(sp.device&&!spDevs.some(d=>d.id===sp.device)){const o=document.createElement("option");o.value=sp.device;o.textContent=sp.deviceName||sp.device;ds.appendChild(o)}
+  ds.value=sp.device||"";
+}
+function spRender(){
+  const on=spOn();
+  $("spSetup").hidden=on;$("spReady").hidden=!on;$("musicBar").hidden=!on;
+  $("spUri").textContent=SP_REDIRECT;
+  if(!$("spClient").value&&sp.clientId)$("spClient").value=sp.clientId;
+  ["spStart","spPause","spDuck"].forEach(k=>$(k).setAttribute("aria-pressed",!!cfg[k]));
+  $("spWorkRow").hidden=$("spRestRow").hidden=!cfg.spDuck;
+  const ls=$("spList");if(ls.options.length>1&&ls.value!==(cfg.spList||""))ls.value=cfg.spList||"";
+}
+function spLogout(expired){sp={clientId:sp.clientId};spSave();spLists=[];spDevs=[];spRender();if(!expired)spMsg("")}
+async function spNow(){
+  if(!spOn())return;
+  try{
+    const j=await spApi("GET","/me/player/currently-playing");
+    const it=j&&j.item;
+    $("npTitle").textContent=it?it.name:T("Inget spelas");
+    $("npArtist").textContent=it?((it.artists||[]).map(a=>a.name).join(", ")||(it.show&&it.show.name)||""):"";
+    $("mPlay").textContent=j&&j.is_playing?"⏸":"▶";
+  }catch(e){}
+}
+function spNowSoon(){clearTimeout(spNpT);spNpT=setTimeout(spNow,800)}
+setInterval(()=>{if(spOn()&&!document.hidden&&!$("run").hidden)spNow()},10000);
+$("spConnect").onclick=()=>{spConnect().catch(()=>spMsg(T("Spotify svarade inte. Kontrollera Client ID och Redirect URI och försök igen."),true))};
+$("spCopy").onclick=()=>{try{navigator.clipboard.writeText(SP_REDIRECT).then(()=>spMsg(T("Kopierad")),()=>spMsg(T("Markera adressen och kopiera den.")))}catch(e){spMsg(T("Markera adressen och kopiera den."))}};
+$("spDisconnect").onclick=()=>spLogout(false);
+$("spReload").onclick=()=>{spMsg("");spLoadLists()};
+$("spList").addEventListener("change",e=>{cfg.spList=e.target.value;const o=e.target.selectedOptions[0];cfg.spListName=o&&e.target.value?o.textContent:"";save()});
+$("spDev").addEventListener("change",e=>{sp.device=e.target.value;const o=e.target.selectedOptions[0];sp.deviceName=o&&e.target.value?o.textContent:"";spSave()});
+["spStart","spPause","spDuck"].forEach(k=>$(k).onclick=()=>{cfg[k]=!cfg[k];render()});
+$("mPlay").onclick=async()=>{try{const j=await spApi("GET","/me/player");if(j&&j.is_playing)await spPauseMusic();else await spPlay(false)}catch(e){spErr(e)}spNowSoon()};
+$("mNext").onclick=()=>{spWithDevice(()=>spApi("POST","/me/player/next"+spDevQ())).then(spNowSoon,spErr)};
+$("mPrev").onclick=()=>{spWithDevice(()=>spApi("POST","/me/player/previous"+spDevQ())).then(spNowSoon,spErr)};
+(async()=>{
+  const q=new URLSearchParams(location.search);
+  if(q.get("error")&&sp.state){spMsg(T("Spotify-inloggningen avbröts. Försök igen."),true);history.replaceState(null,"",SP_REDIRECT)}
+  else if(q.get("code")){
+    const ok=sp.verifier&&q.get("state")===sp.state;
+    history.replaceState(null,"",SP_REDIRECT);
+    if(!ok)spMsg(T("Inloggningen kunde inte slutföras. Starta anslutningen igen inifrån appen."),true);
+    else{try{await spToken({grant_type:"authorization_code",code:q.get("code"),redirect_uri:SP_REDIRECT,client_id:sp.clientId,code_verifier:sp.verifier});delete sp.verifier;delete sp.state;spSave()}catch(e){spMsg(T("Spotify svarade inte. Kontrollera Client ID och Redirect URI och försök igen."),true)}}
+  }
+  spRender();
+  if(spOn()){spLoadLists();spNow()}
+})();
 
 let deferredPrompt=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBtn").hidden=false});

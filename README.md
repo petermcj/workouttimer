@@ -10,6 +10,8 @@ Intervallklocka för CrossCage-pass, byggd som en webbapp (PWA) som installeras 
 - Pauser för byte av övning, byte av station och mellan varv
 - Ljud: startsignal, halvtidssignal (byt sida), nedräkning, slutsignal, volym och flera ljud att välja mellan
 - Spara pass med namn (sparas i telefonen)
+- Styr Spotify: spellista vid start, spela/pausa med passet, nästa låt och lägre volym under vila (kräver Premium, se [SPOTIFY.md](SPOTIFY.md))
+- Valfri tid efter uppvärmning och genomgång för att gå till stationerna
 - Knapp för att hålla skärmen tänd och fokusläge som döljer allt utom klockan
 - Visning på låsskärmen (valfritt), så att klockan syns och piper även när skärmen är låst
 - Svenska och engelska
