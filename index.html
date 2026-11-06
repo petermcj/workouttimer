@@ -128,6 +128,8 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 .tiny button{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit}
 .tiny{flex-wrap:wrap;gap:8px 16px}
 .mode.stack{grid-template-columns:1fr}
+.rlabel{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.04em}
+.rval{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
 .music{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:6px;align-items:center;background:var(--panel);border-radius:10px;padding:6px}
 .music button{background:none;border:0;color:var(--fg);font-size:20px;width:44px;height:44px;border-radius:8px;cursor:pointer}
 .music button:active{background:var(--line)}
@@ -226,13 +228,18 @@ body.focus .wrap{gap:12px}
       <button id="modeAuto" aria-pressed="true">Räkna från totaltid</button>
       <button id="modeManual" aria-pressed="false">Sätt arbetstid själv</button>
     </div>
+    <div class="mode" role="group" aria-label="Tider per varv" id="prGroup">
+      <button id="prSame" aria-pressed="true">Samma tider alla varv</button>
+      <button id="prEach" aria-pressed="false">Olika tider per varv</button>
+    </div>
 
     <div class="block" id="autoBlock">
       <div class="row">
         <label for="total">Total tid för passet<small>inkl. alla pauser</small></label>
         <div class="num"><button data-step="total:-1" aria-label="Minska">−</button><input id="total" type="number" inputmode="numeric" min="10" max="180"><button data-step="total:1" aria-label="Öka">+</button></div><span class="unit">min</span>
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px">
+      <div id="roundsAuto" style="display:flex;flex-direction:column;gap:14px" hidden></div>
+      <div style="display:flex;flex-direction:column;gap:8px" id="ratioSingle">
         <div class="row"><label for="ratio">Arbete vs setvila<small>andel arbete i varje set</small></label><strong id="ratioOut" style="font-family:var(--display);font-size:20px"></strong></div>
         <input id="ratio" type="range" min="30" max="95" step="1">
         <div class="chips" id="ratioChips">
@@ -242,7 +249,8 @@ body.focus .wrap{gap:12px}
     </div>
 
     <div class="block" id="manualBlock" hidden>
-      <div class="row">
+      <div id="roundsManual" style="display:flex;flex-direction:column;gap:12px" hidden></div>
+      <div class="row" id="workRow">
         <label for="work">Arbete per set</label>
         <div class="num"><button data-step="work:-5" aria-label="Minska">−</button><input id="work" type="number" inputmode="numeric" min="5" max="300"><button data-step="work:5" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
@@ -456,7 +464,7 @@ const EN={
 "Skriv ett namn på passet först.":"Enter a name for the workout first.","Uppdaterade {x}.":"Updated {x}.","Sparade {x}.":"Saved {x}.",
 "Passet sparades inte. Kontrollera anslutningen och försök igen.":"The workout was not saved. Check your connection and try again.",
 "Bekräfta":"Confirm","Tryck Bekräfta för att ta bort {x}.":"Press Confirm to delete {x}.","Tog bort {x}.":"Deleted {x}.",
-"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Tid per övning":"Time per exercise","En total tid":"One total time","Hur genomgången räknas":"How demo time is set","Genomgång totalt":"Total demo time","≈ {t} per övning":"≈ {t} per exercise","en samlad genomgång":"one combined demo","Alla övningar":"All exercises","{n} övningar":"{n} exercises","Blanda med musiken (tyst i ljudlöst läge)":"Mix with the music (silent in silent mode)","Hörs alltid, även i ljudlöst läge (kan pausa musiken)":"Always audible, even in silent mode (may pause music)","Låsskärm":"Lock screen","Visa klockan på låsskärmen":"Show the timer on the lock screen","Visa inte på låsskärmen":"Do not show on the lock screen","Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.":"With the lock screen on, the phase and time show as a player on the lock screen, and the timer keeps beeping while the screen is locked. It works best in the installed app. On iPhone it may pause Spotify, since only one app at a time can show on the lock screen.","☀ Skärm tänd":"☀ Screen on","Skärm kan släckas":"Screen may turn off","Fokusläge":"Focus mode","Visa allt":"Show all","Tid innan första övningen":"Time before the first exercise","efter uppvärmning och genomgång, för att gå till stationen":"after warm-up and demos, to get to the station","Gå till station 1":"Go to station 1","Passet börjar snart":"The workout starts soon","Till stationen":"To the station","Skapa en app på":"Create an app at","och välj Web API.":"and select Web API.","Lägg in den här adressen som Redirect URI:":"Add this address as the Redirect URI:","Kopiera adressen":"Copy address","Kopiera appens Client ID, klistra in här och tryck Anslut.":"Copy the app's Client ID, paste it here and press Connect.","Anslut":"Connect","Ansluten":"Connected","Koppla från":"Disconnect","Spellista vid start":"Playlist at start","Fortsätt med det som spelas":"Continue what is playing","Hämta spellistor och enheter igen":"Reload playlists and devices","Spela på":"Play on","Enheten som spelar just nu":"The device playing right now","Spotify och passet":"Spotify and the workout","Starta musiken när passet startar":"Start the music when the workout starts","Pausa musiken när passet pausas":"Pause the music when the workout pauses","Sänk volymen under vila":"Lower the volume during rest","Volym under arbete":"Volume during work","Volym under vila":"Volume during rest","Föregående låt":"Previous track","Spela eller pausa musiken":"Play or pause the music","Nästa låt":"Next track","Ansluten som {x}":"Connected as {x}","Klistra in ditt Client ID först.":"Paste your Client ID first.","Kopierad":"Copied","Markera adressen och kopiera den.":"Select the address and copy it.","Spotify-inloggningen avbröts. Försök igen.":"The Spotify sign-in was cancelled. Try again.","Inloggningen kunde inte slutföras. Starta anslutningen igen inifrån appen.":"The sign-in could not be completed. Start connecting again from inside the app.","Spotify svarade inte. Kontrollera Client ID och Redirect URI och försök igen.":"Spotify did not respond. Check the Client ID and Redirect URI and try again.","Kunde inte hämta spellistor.":"Could not load playlists.","Ingen Spotify-enhet är aktiv. Öppna Spotify, spela en låt en kort stund och försök igen.":"No Spotify device is active. Open Spotify, play a song briefly and try again.","Spotify Premium krävs, och ditt konto måste vara tillagt under User Management i Spotify-appen på utvecklarsidan.":"Spotify Premium is required, and your account must be added under User Management in your app on the developer site.","Volymen kan inte styras på den här enheten. Spotify på iPhone tillåter oftast inte det.":"The volume cannot be controlled on this device. Spotify on iPhone usually does not allow it.","Spotify: {x}":"Spotify: {x}","Inget spelas":"Nothing playing","Installera appen":"Install the app"
+"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Tid per övning":"Time per exercise","En total tid":"One total time","Hur genomgången räknas":"How demo time is set","Genomgång totalt":"Total demo time","≈ {t} per övning":"≈ {t} per exercise","en samlad genomgång":"one combined demo","Alla övningar":"All exercises","{n} övningar":"{n} exercises","Blanda med musiken (tyst i ljudlöst läge)":"Mix with the music (silent in silent mode)","Hörs alltid, även i ljudlöst läge (kan pausa musiken)":"Always audible, even in silent mode (may pause music)","Låsskärm":"Lock screen","Visa klockan på låsskärmen":"Show the timer on the lock screen","Visa inte på låsskärmen":"Do not show on the lock screen","Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.":"With the lock screen on, the phase and time show as a player on the lock screen, and the timer keeps beeping while the screen is locked. It works best in the installed app. On iPhone it may pause Spotify, since only one app at a time can show on the lock screen.","☀ Skärm tänd":"☀ Screen on","Skärm kan släckas":"Screen may turn off","Fokusläge":"Focus mode","Visa allt":"Show all","Tider per varv":"Times per round","Samma tider alla varv":"Same times every round","Olika tider per varv":"Different times per round","Varv {n}":"Round {n}","{w} s arbete / {p} s vila":"{w} s work / {p} s rest","Tid innan första övningen":"Time before the first exercise","efter uppvärmning och genomgång, för att gå till stationen":"after warm-up and demos, to get to the station","Gå till station 1":"Go to station 1","Passet börjar snart":"The workout starts soon","Till stationen":"To the station","Skapa en app på":"Create an app at","och välj Web API.":"and select Web API.","Lägg in den här adressen som Redirect URI:":"Add this address as the Redirect URI:","Kopiera adressen":"Copy address","Kopiera appens Client ID, klistra in här och tryck Anslut.":"Copy the app's Client ID, paste it here and press Connect.","Anslut":"Connect","Ansluten":"Connected","Koppla från":"Disconnect","Spellista vid start":"Playlist at start","Fortsätt med det som spelas":"Continue what is playing","Hämta spellistor och enheter igen":"Reload playlists and devices","Spela på":"Play on","Enheten som spelar just nu":"The device playing right now","Spotify och passet":"Spotify and the workout","Starta musiken när passet startar":"Start the music when the workout starts","Pausa musiken när passet pausas":"Pause the music when the workout pauses","Sänk volymen under vila":"Lower the volume during rest","Volym under arbete":"Volume during work","Volym under vila":"Volume during rest","Föregående låt":"Previous track","Spela eller pausa musiken":"Play or pause the music","Nästa låt":"Next track","Ansluten som {x}":"Connected as {x}","Klistra in ditt Client ID först.":"Paste your Client ID first.","Kopierad":"Copied","Markera adressen och kopiera den.":"Select the address and copy it.","Spotify-inloggningen avbröts. Försök igen.":"The Spotify sign-in was cancelled. Try again.","Inloggningen kunde inte slutföras. Starta anslutningen igen inifrån appen.":"The sign-in could not be completed. Start connecting again from inside the app.","Spotify svarade inte. Kontrollera Client ID och Redirect URI och försök igen.":"Spotify did not respond. Check the Client ID and Redirect URI and try again.","Kunde inte hämta spellistor.":"Could not load playlists.","Ingen Spotify-enhet är aktiv. Öppna Spotify, spela en låt en kort stund och försök igen.":"No Spotify device is active. Open Spotify, play a song briefly and try again.","Spotify Premium krävs, och ditt konto måste vara tillagt under User Management i Spotify-appen på utvecklarsidan.":"Spotify Premium is required, and your account must be added under User Management in your app on the developer site.","Volymen kan inte styras på den här enheten. Spotify på iPhone tillåter oftast inte det.":"The volume cannot be controlled on this device. Spotify on iPhone usually does not allow it.","Spotify: {x}":"Spotify: {x}","Inget spelas":"Nothing playing","Installera appen":"Install the app"
 };
 let lang="sv";
 try{lang=localStorage.getItem("ccage_lang")||((navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en")}catch(e){lang=(navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en"}
@@ -475,10 +483,10 @@ function applyStatic(){
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
 }
 applyStatic();
-let cfg={mode:"auto",st:8,ex:2,sets:2,rd:2,warm:10,instr:20,instrMode:"block",total:60,ratio:70,work:30,setRest:15,exRest:10,stRest:20,rdRest:60,sound:true,names:[],countdown:3,cdRest:false,vol:80,half:true,mix:"ambient",instrUnit:"per",instrTot:5,ready:60,lock:false,awake:true,spList:"",spStart:true,spPause:true,spDuck:false,spWorkVol:80,spRestVol:40,snd:{start:"bell",half:"double",rest:"fall",done:"chime",cd:"pip"}};
+let cfg={mode:"auto",st:8,ex:2,sets:2,rd:2,warm:10,instr:20,instrMode:"block",total:60,ratio:70,work:30,setRest:15,exRest:10,stRest:20,rdRest:60,sound:true,names:[],countdown:3,cdRest:false,vol:80,half:true,mix:"ambient",instrUnit:"per",instrTot:5,ready:60,perRound:false,rounds:[],lock:false,awake:true,spList:"",spStart:true,spPause:true,spDuck:false,spWorkVol:80,spRestVol:40,snd:{start:"bell",half:"double",rest:"fall",done:"chime",cd:"pip"}};
 const DEFAULTS=JSON.parse(JSON.stringify(cfg));
 try{const s=JSON.parse(localStorage.getItem("ccage")||"null");if(s)cfg=Object.assign(cfg,s)}catch(e){}
-function fixCfg(){cfg.snd=Object.assign({},DEFAULTS.snd,cfg.snd||{});if(cfg.startStyle){cfg.snd.start=cfg.startStyle;delete cfg.startStyle}if(!Array.isArray(cfg.names))cfg.names=[]}
+function fixCfg(){cfg.snd=Object.assign({},DEFAULTS.snd,cfg.snd||{});if(cfg.startStyle){cfg.snd.start=cfg.startStyle;delete cfg.startStyle}if(!Array.isArray(cfg.names))cfg.names=[];if(!Array.isArray(cfg.rounds))cfg.rounds=[]}
 fixCfg();
 function save(){try{localStorage.setItem("ccage",JSON.stringify(cfg))}catch(e){}}
 function counts(){const ST=cfg.st,EX=cfg.ex,SETS=cfg.sets,RD=cfg.rd;
@@ -491,22 +499,36 @@ function exName(st,e){const n=(cfg.names[st]||[])[e];return n&&n.trim()?n.trim()
 
 function instrTotal(){const c=counts();return cfg.instrUnit==="total"?cfg.instrTot*60:c.ST*c.EX*cfg.instr}
 function instrEach(){const c=counts();return cfg.instrUnit==="total"?Math.round(cfg.instrTot*60/(c.ST*c.EX)):cfg.instr}
+function syncRounds(){if(!Array.isArray(cfg.rounds))cfg.rounds=[];for(let r=0;r<cfg.rd;r++){const x=cfg.rounds[r]||{};cfg.rounds[r]={ratio:x.ratio??cfg.ratio,work:x.work??cfg.work,setRest:x.setRest??cfg.setRest}}}
+function perRound(){return !!cfg.perRound&&cfg.rd>1}
 function compute(){
-  const c=counts();let W,P,warn="";
+  const c=counts();let W,P,warn="",Wr=[],Pr=[];
+  const pr=perRound();if(pr)syncRounds();
+  const nW=c.W/c.RD,nP=c.P/c.RD;
   const fixed=c.E*cfg.exRest+c.S*cfg.stRest+c.R*cfg.rdRest;
   const setup=cfg.warm*60+instrTotal()+cfg.ready;
-  if(cfg.mode==="auto"){
+  if(cfg.mode==="auto"&&pr){
+    const rem=cfg.total*60-fixed-setup;
+    let den=0;for(let r=0;r<c.RD;r++){const f=cfg.rounds[r].ratio/100;den+=nW*f+nP*(1-f)}
+    const C=rem/den;
+    for(let r=0;r<c.RD;r++){const f=cfg.rounds[r].ratio/100;Wr[r]=Math.max(0,Math.round(C*f));Pr[r]=Math.max(0,Math.round(C*(1-f)))}
+    W=Wr[0];P=Pr[0];
+    if(Math.min(...Wr)<5)warn=T("Pauser, uppvärmning och genomgång tar nästan hela tiden. Öka totaltiden eller dra ner på något av dem.");
+  }else if(cfg.mode==="auto"){
     const rem=cfg.total*60-fixed-setup,f=cfg.ratio/100;
     const raw=rem/(c.W+c.P*(1-f)/f);
     W=Math.max(0,Math.round(raw));P=Math.max(0,Math.round(W*(1-f)/f));
     if(W<5)warn=T("Pauser, uppvärmning och genomgång tar nästan hela tiden. Öka totaltiden eller dra ner på något av dem.");
-  }else{W=cfg.work;P=cfg.setRest}
-  const workTot=c.W*W,restTot=c.P*P+fixed,total=workTot+restTot+setup;
+  }else if(pr){for(let r=0;r<c.RD;r++){Wr[r]=cfg.rounds[r].work;Pr[r]=cfg.rounds[r].setRest}W=Wr[0];P=Pr[0]}
+  else{W=cfg.work;P=cfg.setRest}
+  if(!pr)for(let r=0;r<c.RD;r++){Wr[r]=W;Pr[r]=P}
+  let workTot=0,restTot=fixed;for(let r=0;r<c.RD;r++){workTot+=nW*Wr[r];restTot+=nP*Pr[r]}
+  const total=workTot+restTot+setup;
   if(cfg.mode==="auto"&&!warn){const d=total-cfg.total*60;if(Math.abs(d)>=1)warn=T("Avrundat till hela sekunder: {d} s mot {t} min.",{d:(d>0?"+":"−")+Math.abs(d),t:cfg.total})}
-  return{W,P,workTot,restTot,setup,total,warn};
+  return{W,P,Wr,Pr,pr,workTot,restTot,setup,total,warn};
 }
 
-function buildSeq(W,P){
+function buildSeq(pl){
   const c=counts(),q=[];
   if(cfg.warm>0)q.push({type:"warm",d:cfg.warm*60});
   if(cfg.instrMode==="block"){if(cfg.instrUnit==="total"){if(cfg.instrTot>0)q.push({type:"instr",d:cfg.instrTot*60,all:true})}else if(cfg.instr>0)for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++)q.push({type:"instr",d:cfg.instr,s,e,n:s*c.EX+e})}
@@ -515,6 +537,7 @@ function buildSeq(W,P){
   for(let r=0;r<c.RD;r++)for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++){
     if(r===0&&ie>0&&cfg.instrMode==="station")q.push({type:"instr",d:ie,s,e,n:s*c.EX+e,at:true});
     for(let k=0;k<c.SETS;k++){
+      const W=pl.Wr[r],P=pl.Pr[r];
       q.push({type:"work",d:W,r,s,e,k});
       let t=null,d=0;
       if(k<c.SETS-1){t="p";d=P}else if(e<c.EX-1){t="e";d=cfg.exRest}else if(s<c.ST-1){t="s";d=cfg.stRest}else if(r<c.RD-1){t="R";d=cfg.rdRest}
@@ -536,9 +559,50 @@ $("ratio").value=cfg.ratio;
 $("ratio").addEventListener("input",e=>{cfg.ratio=+e.target.value;render()});
 document.querySelectorAll("#ratioChips button").forEach(b=>b.addEventListener("click",()=>{cfg.ratio=+b.dataset.r;$("ratio").value=cfg.ratio;render()}));
 function setMode(m){
-  if(m==="manual"&&cfg.mode==="auto"){const c=compute();cfg.work=c.W;cfg.setRest=c.P;$("work").value=c.W;$("setRest").value=c.P}
-  if(m==="auto"&&cfg.mode==="manual"){cfg.total=Math.max(10,Math.round(compute().total/60));$("total").value=cfg.total}
+  if(m==="manual"&&cfg.mode==="auto"){const c=compute();cfg.work=c.W;cfg.setRest=c.P;$("work").value=c.W;$("setRest").value=c.P;syncRounds();c.Wr.forEach((w,r)=>{cfg.rounds[r].work=w;cfg.rounds[r].setRest=c.Pr[r]})}
+  if(m==="auto"&&cfg.mode==="manual"){const c=compute();cfg.total=Math.max(10,Math.round(c.total/60));$("total").value=cfg.total;syncRounds();c.Wr.forEach((w,r)=>{const t=w+c.Pr[r];if(t>0)cfg.rounds[r].ratio=Math.min(95,Math.max(30,Math.round(100*w/t)))})}
   cfg.mode=m;render();
+}
+$("prSame").onclick=()=>{cfg.perRound=false;render()};$("prEach").onclick=()=>{cfg.perRound=true;syncRounds();render()};
+let roundsKey="";
+function stepper(id,val,min,max,step,onv){
+  const wrap=document.createElement("div");wrap.className="num";
+  const minus=document.createElement("button");minus.textContent="−";minus.setAttribute("aria-label",T("Minska"));
+  const inp=document.createElement("input");inp.type="number";inp.inputMode="numeric";inp.id=id;inp.min=min;inp.max=max;inp.value=val;
+  const plus=document.createElement("button");plus.textContent="+";plus.setAttribute("aria-label",T("Öka"));
+  const clamp=v=>Math.max(min,Math.min(max,v));
+  minus.onclick=()=>{const v=clamp((parseInt(inp.value,10)||0)-step);inp.value=v;onv(v)};
+  plus.onclick=()=>{const v=clamp((parseInt(inp.value,10)||0)+step);inp.value=v;onv(v)};
+  inp.addEventListener("input",()=>{const v=parseInt(inp.value,10);if(!isNaN(v))onv(clamp(v))});
+  inp.addEventListener("blur",()=>{inp.value=clamp(parseInt(inp.value,10)||0)});
+  wrap.append(minus,inp,plus);return wrap;
+}
+function buildRounds(){
+  const key=[cfg.rd,cfg.mode,perRound(),lang].join("|");if(key===roundsKey)return;roundsKey=key;
+  const A=$("roundsAuto"),M=$("roundsManual");A.innerHTML="";M.innerHTML="";
+  if(!perRound())return;syncRounds();
+  for(let r=0;r<cfg.rd;r++){
+    if(cfg.mode==="auto"){
+      const box=document.createElement("div");box.style.cssText="display:flex;flex-direction:column;gap:6px";
+      const head=document.createElement("div");head.className="row";
+      const lab=document.createElement("label");lab.className="rlabel";lab.htmlFor="rr_"+r;lab.textContent=T("Varv {n}",{n:r+1});
+      const val=document.createElement("span");val.className="rval";val.id="rv_"+r;
+      head.append(lab,val);
+      const rng=document.createElement("input");rng.type="range";rng.min=30;rng.max=95;rng.step=1;rng.id="rr_"+r;rng.value=cfg.rounds[r].ratio;
+      rng.addEventListener("input",()=>{cfg.rounds[r].ratio=+rng.value;render()});
+      const chips=document.createElement("div");chips.className="chips";
+      [[50,"30/30"],[67,"40/20"],[75,"45/15"],[83,"50/10"]].forEach(([v,t])=>{const b=document.createElement("button");b.textContent=t;b.dataset.r=v;b.onclick=()=>{cfg.rounds[r].ratio=v;rng.value=v;render()};chips.appendChild(b)});
+      box.append(head,rng,chips);A.appendChild(box);
+    }else{
+      const lab=document.createElement("div");lab.className="rlabel";lab.textContent=T("Varv {n}",{n:r+1});M.appendChild(lab);
+      [["work",T("Arbete per set"),5,300],["setRest",T("Vila mellan set"),0,300]].forEach(([k,t,mn,mx])=>{
+        const row=document.createElement("div");row.className="row";
+        const l=document.createElement("label");l.htmlFor="rm_"+k+"_"+r;l.textContent=t;
+        const u=document.createElement("span");u.className="unit";u.textContent="s";
+        row.append(l,stepper("rm_"+k+"_"+r,cfg.rounds[r][k],mn,mx,5,v=>{cfg.rounds[r][k]=v;render()}),u);M.appendChild(row);
+      });
+    }
+  }
 }
 $("modeAuto").onclick=()=>setMode("auto");$("modeManual").onclick=()=>setMode("manual");
 $("cdWorkOnly").onclick=()=>{cfg.cdRest=false;render()};$("cdAll").onclick=()=>{cfg.cdRest=true;render()};
@@ -587,14 +651,23 @@ function render(){
   $("ratioOut").textContent=T("{p} % arbete",{p:cfg.ratio});
   document.querySelectorAll("#ratioChips button").forEach(b=>b.classList.toggle("on",+b.dataset.r===cfg.ratio));
   const c=compute();plan=c;
-  $("oWork").textContent=c.W+" s";$("oSet").textContent=c.P+" s";
-  const perStation=k.EX*k.SETS*c.W+k.EX*(k.SETS-1)*c.P+(k.EX-1)*cfg.exRest;
-  $("oStation").textContent=fmt(perStation);
-  $("oRound").textContent=fmt(k.ST*perStation+(k.ST-1)*cfg.stRest);
+  const pr=c.pr;
+  $("prGroup").hidden=k.RD<2;
+  $("prSame").setAttribute("aria-pressed",!pr);$("prEach").setAttribute("aria-pressed",pr);
+  buildRounds();
+  $("roundsAuto").hidden=!(pr&&cfg.mode==="auto");$("ratioSingle").hidden=pr&&cfg.mode==="auto";
+  $("roundsManual").hidden=!(pr&&cfg.mode==="manual");$("workRow").hidden=$("setRest").closest(".row").hidden=pr&&cfg.mode==="manual";
+  if(pr&&cfg.mode==="auto")c.Wr.forEach((w,r)=>{const v=$("rv_"+r);if(v)v.textContent=T("{w} s arbete / {p} s vila",{w:w,p:c.Pr[r]});document.querySelectorAll("#roundsAuto .chips").forEach((ch,i)=>ch.querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.r===cfg.rounds[i].ratio)))});
+  const uniq=a=>a.every(x=>x===a[0]);
+  $("oWork").textContent=(uniq(c.Wr)?c.W:c.Wr.join("/"))+" s";$("oSet").textContent=(uniq(c.Pr)?c.P:c.Pr.join("/"))+" s";
+  const stR=c.Wr.map((w,r)=>k.EX*k.SETS*w+k.EX*(k.SETS-1)*c.Pr[r]+(k.EX-1)*cfg.exRest);
+  const perStation=stR[0];
+  $("oStation").textContent=uniq(stR)?fmt(perStation):stR.map(fmt).join(" / ");
+  const rdR=stR.map(x=>k.ST*x+(k.ST-1)*cfg.stRest);$("oRound").textContent=uniq(rdR)?fmt(rdR[0]):rdR.map(fmt).join(" / ");
   $("oTotal").textContent=fmtLong(c.total);$("oWorkTot").textContent=fmt(c.workTot);$("oRestTot").textContent=fmt(c.restTot);$("oSetup").textContent=fmt(c.setup);
   $("warn").hidden=!c.warn;$("warn").textContent=c.warn;
   const bar=$("bar");bar.innerHTML="";
-  buildSeq(c.W,c.P).forEach(it=>{const i=document.createElement("i");i.className=it.type==="work"?"w":it.type;i.style.flexGrow=it.d;bar.appendChild(i)});
+  buildSeq(c).forEach(it=>{const i=document.createElement("i");i.className=it.type==="work"?"w":it.type;i.style.flexGrow=it.d;bar.appendChild(i)});
   save();
   if(!started)resetRun();
 }
@@ -693,7 +766,7 @@ let halfDone=false;
 let seq=[],idx=0,remain=0,running=false,started=false,lastT=0,raf=0,lastBeepSec=-1,wake=null;
 const PREP=10;
 function seqTotal(){return seq.reduce((a,b)=>a+b.d,0)}
-function resetRun(){seq=buildSeq(plan.W,plan.P);seq.unshift({type:"prep",d:PREP});idx=0;remain=seq[0].d;running=false;started=false;clearInterval(raf);stopLock();$("bMain").textContent=T("Start");draw()}
+function resetRun(){seq=buildSeq(plan);seq.unshift({type:"prep",d:PREP});idx=0;remain=seq[0].d;running=false;started=false;clearInterval(raf);stopLock();$("bMain").textContent=T("Start");draw()}
 function label(it){
   const k=counts();
   if(!it)return{phase:T("Klart"),what:T("Bra jobbat!"),where:"",cls:"done"};
@@ -827,7 +900,7 @@ function renderPasses(keep){
   $("passLoad").disabled=$("passDel").disabled=!sel.value;resetDel();
 }
 $("passSel").addEventListener("change",()=>{const p=passes.find(x=>x.id===$("passSel").value);$("passLoad").disabled=$("passDel").disabled=!p;resetDel();if(p)$("passName").value=p.name});
-function syncInputs(){fields.forEach(f=>{$(f).value=cfg[f]});$("ratio").value=cfg.ratio;$("vol").value=cfg.vol;buildNames();buildSnd()}
+function syncInputs(){roundsKey="";fields.forEach(f=>{$(f).value=cfg[f]});$("ratio").value=cfg.ratio;$("vol").value=cfg.vol;buildNames();buildSnd()}
 $("passLoad").onclick=()=>{
   const p=passes.find(x=>x.id===$("passSel").value);if(!p)return;
   let c;try{c=typeof p.cfg==="string"?JSON.parse(p.cfg):p.cfg}catch(e){passMsg(T("Passet kunde inte läsas."),true);return}
@@ -874,7 +947,7 @@ renderPasses();
 
 function setLang(l){
   lang=l;try{localStorage.setItem("ccage_lang",l)}catch(e){}
-  applyStatic();buildNames();buildSnd();soundLbl();awakeLbl();if(spOn())spFill();$("bFocus").textContent=T(document.body.classList.contains("focus")?"Visa allt":"Fokusläge");renderPasses();
+  roundsKey="";applyStatic();buildNames();buildSnd();soundLbl();awakeLbl();if(spOn())spFill();$("bFocus").textContent=T(document.body.classList.contains("focus")?"Visa allt":"Fokusläge");renderPasses();
   const pm=$("passMsg");if(!pm.style.color)passMsg(where());
   const wm=$("wakeMsg");if(!wm.hidden)wakeMsg(wm.dataset.ok==="1");
   render();draw();

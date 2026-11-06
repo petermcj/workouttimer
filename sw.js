@@ -1,5 +1,5 @@
 // Bump VERSION when files change so phones pick up the new app.
-const VERSION = "crosscage-v3";
+const VERSION = "crosscage-v4";
 const SHELL = [
   "./",
   "./index.html",
