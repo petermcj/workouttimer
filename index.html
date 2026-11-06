@@ -126,6 +126,17 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 .meta strong{color:var(--fg)}
 .tiny{display:flex;gap:16px;justify-content:center;font-size:13px}
 .tiny button{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit}
+.tiny{flex-wrap:wrap;gap:8px 16px}
+.mode.stack{grid-template-columns:1fr}
+.runbar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.runbar button{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px 8px;font:inherit;font-size:14px;cursor:pointer}
+.runbar button[aria-pressed="true"]{border-color:var(--work);color:var(--work)}
+body.focus header,body.focus .tabs,body.focus .meta,body.focus .tiny,body.focus #wakeMsg{display:none!important}
+body.focus .next,body.focus .ctrls,body.focus .runbar{opacity:.3;transition:opacity .2s}
+body.focus .next:hover,body.focus .ctrls:hover,body.focus .runbar:hover,body.focus .ctrls:focus-within,body.focus .runbar:focus-within{opacity:1}
+body.focus .face{padding-block:28px}
+body.focus .clock{font-size:clamp(120px,42vw,260px)}
+body.focus .wrap{gap:12px}
 @media (prefers-reduced-motion:reduce){.face{transition:none}}
 </style>
 
@@ -178,7 +189,15 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
         <label for="warm">Uppvärmning<small>i början av passet</small></label>
         <div class="num"><button data-step="warm:-1" aria-label="Minska">−</button><input id="warm" type="number" inputmode="numeric" min="0" max="60"><button data-step="warm:1" aria-label="Öka">+</button></div><span class="unit">min</span>
       </div>
-      <div class="row">
+      <div class="mode" role="group" aria-label="Hur genomgången räknas">
+        <button id="instrPer" aria-pressed="true">Tid per övning</button>
+        <button id="instrAll" aria-pressed="false">En total tid</button>
+      </div>
+      <div class="row" id="instrTotRow" hidden>
+        <label for="instrTot">Genomgång totalt<small id="instrTotSum"></small></label>
+        <div class="num"><button data-step="instrTot:-1" aria-label="Minska">−</button><input id="instrTot" type="number" inputmode="numeric" min="0" max="45"><button data-step="instrTot:1" aria-label="Öka">+</button></div><span class="unit">min</span>
+      </div>
+      <div class="row" id="instrPerRow">
         <label for="instr">Instruktion per övning<small id="instrSum"></small></label>
         <div class="num"><button data-step="instr:-5" aria-label="Minska">−</button><input id="instr" type="number" inputmode="numeric" min="0" max="300"><button data-step="instr:5" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
@@ -284,11 +303,21 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
         <button id="halfOff" aria-pressed="false">Ingen halvtidssignal</button>
       </div>
       <div class="label">Med musik i bakgrunden</div>
-      <div class="mode" role="group" aria-label="Ljud tillsammans med musik">
-        <button id="mixAmb" aria-pressed="true">Blanda med musiken</button>
+      <div class="mode stack" role="group" aria-label="Ljud tillsammans med musik">
+        <button id="mixAmb" aria-pressed="true">Blanda med musiken (tyst i ljudlöst läge)</button>
         <button id="mixDuck" aria-pressed="false">Sänk musiken vid signal</button>
+        <button id="mixPlay" aria-pressed="false">Hörs alltid, även i ljudlöst läge (kan pausa musiken)</button>
       </div>
       <div class="sub">Starta musiken i Spotify först och tryck sedan Start här. På iPhone: stäng av ljudlös-reglaget på sidan av telefonen, annars hörs inte klockan. Om det ändå är tyst, prova "Sänk musiken vid signal".</div>
+    </div>
+
+    <div class="block">
+      <div class="label">Låsskärm</div>
+      <div class="mode stack" role="group" aria-label="Låsskärm">
+        <button id="lockOn" aria-pressed="false">Visa klockan på låsskärmen</button>
+        <button id="lockOff" aria-pressed="true">Visa inte på låsskärmen</button>
+      </div>
+      <div class="sub">Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.</div>
     </div>
 
     <details>
@@ -319,6 +348,10 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
       <button id="bPrev" aria-label="Föregående intervall">◀ Bak</button>
       <button id="bMain" class="main">Start</button>
       <button id="bNext" aria-label="Nästa intervall">Fram ▶</button>
+    </div>
+    <div class="runbar">
+      <button id="bAwake" aria-pressed="true">☀ Skärm tänd</button>
+      <button id="bFocus" aria-pressed="false">Fokusläge</button>
     </div>
     <div class="meta"><span>Gått <strong id="mEl">0:00</strong></span><span>Intervall <strong id="mIdx">0/0</strong></span><span>Kvar <strong id="mLeft">0:00</strong></span></div>
     <div class="tiny"><button id="bReset">Börja om</button><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
@@ -373,7 +406,7 @@ const EN={
 "Skriv ett namn på passet först.":"Enter a name for the workout first.","Uppdaterade {x}.":"Updated {x}.","Sparade {x}.":"Saved {x}.",
 "Passet sparades inte. Kontrollera anslutningen och försök igen.":"The workout was not saved. Check your connection and try again.",
 "Bekräfta":"Confirm","Tryck Bekräfta för att ta bort {x}.":"Press Confirm to delete {x}.","Tog bort {x}.":"Deleted {x}.",
-"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Installera appen":"Install the app"
+"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Tid per övning":"Time per exercise","En total tid":"One total time","Hur genomgången räknas":"How demo time is set","Genomgång totalt":"Total demo time","≈ {t} per övning":"≈ {t} per exercise","en samlad genomgång":"one combined demo","Alla övningar":"All exercises","{n} övningar":"{n} exercises","Blanda med musiken (tyst i ljudlöst läge)":"Mix with the music (silent in silent mode)","Hörs alltid, även i ljudlöst läge (kan pausa musiken)":"Always audible, even in silent mode (may pause music)","Låsskärm":"Lock screen","Visa klockan på låsskärmen":"Show the timer on the lock screen","Visa inte på låsskärmen":"Do not show on the lock screen","Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.":"With the lock screen on, the phase and time show as a player on the lock screen, and the timer keeps beeping while the screen is locked. It works best in the installed app. On iPhone it may pause Spotify, since only one app at a time can show on the lock screen.","☀ Skärm tänd":"☀ Screen on","Skärm kan släckas":"Screen may turn off","Fokusläge":"Focus mode","Visa allt":"Show all","Installera appen":"Install the app"
 };
 let lang="sv";
 try{lang=localStorage.getItem("ccage_lang")||((navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en")}catch(e){lang=(navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en"}
@@ -392,7 +425,7 @@ function applyStatic(){
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
 }
 applyStatic();
-let cfg={mode:"auto",st:8,ex:2,sets:2,rd:2,warm:10,instr:20,instrMode:"block",total:60,ratio:70,work:30,setRest:15,exRest:10,stRest:20,rdRest:60,sound:true,names:[],countdown:3,cdRest:false,vol:80,half:true,mix:"ambient",snd:{start:"bell",half:"double",rest:"fall",done:"chime",cd:"pip"}};
+let cfg={mode:"auto",st:8,ex:2,sets:2,rd:2,warm:10,instr:20,instrMode:"block",total:60,ratio:70,work:30,setRest:15,exRest:10,stRest:20,rdRest:60,sound:true,names:[],countdown:3,cdRest:false,vol:80,half:true,mix:"ambient",instrUnit:"per",instrTot:5,lock:false,awake:true,snd:{start:"bell",half:"double",rest:"fall",done:"chime",cd:"pip"}};
 const DEFAULTS=JSON.parse(JSON.stringify(cfg));
 try{const s=JSON.parse(localStorage.getItem("ccage")||"null");if(s)cfg=Object.assign(cfg,s)}catch(e){}
 function fixCfg(){cfg.snd=Object.assign({},DEFAULTS.snd,cfg.snd||{});if(cfg.startStyle){cfg.snd.start=cfg.startStyle;delete cfg.startStyle}if(!Array.isArray(cfg.names))cfg.names=[]}
@@ -406,10 +439,12 @@ const fmtLong=s=>{s=Math.round(s);const m=Math.floor(s/60),r=s%60;return r?m+" m
 const L="ABCD";
 function exName(st,e){const n=(cfg.names[st]||[])[e];return n&&n.trim()?n.trim():T("Station {s} – övning {l}",{s:st+1,l:L[e]})}
 
+function instrTotal(){const c=counts();return cfg.instrUnit==="total"?cfg.instrTot*60:c.ST*c.EX*cfg.instr}
+function instrEach(){const c=counts();return cfg.instrUnit==="total"?Math.round(cfg.instrTot*60/(c.ST*c.EX)):cfg.instr}
 function compute(){
   const c=counts();let W,P,warn="";
   const fixed=c.E*cfg.exRest+c.S*cfg.stRest+c.R*cfg.rdRest;
-  const setup=cfg.warm*60+c.ST*c.EX*cfg.instr;
+  const setup=cfg.warm*60+instrTotal();
   if(cfg.mode==="auto"){
     const rem=cfg.total*60-fixed-setup,f=cfg.ratio/100;
     const raw=rem/(c.W+c.P*(1-f)/f);
@@ -424,9 +459,10 @@ function compute(){
 function buildSeq(W,P){
   const c=counts(),q=[];
   if(cfg.warm>0)q.push({type:"warm",d:cfg.warm*60});
-  if(cfg.instr>0&&cfg.instrMode==="block")for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++)q.push({type:"instr",d:cfg.instr,s,e,n:s*c.EX+e});
+  if(cfg.instrMode==="block"){if(cfg.instrUnit==="total"){if(cfg.instrTot>0)q.push({type:"instr",d:cfg.instrTot*60,all:true})}else if(cfg.instr>0)for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++)q.push({type:"instr",d:cfg.instr,s,e,n:s*c.EX+e})}
+  const ie=instrEach();
   for(let r=0;r<c.RD;r++)for(let s=0;s<c.ST;s++)for(let e=0;e<c.EX;e++){
-    if(r===0&&cfg.instr>0&&cfg.instrMode==="station")q.push({type:"instr",d:cfg.instr,s,e,n:s*c.EX+e,at:true});
+    if(r===0&&ie>0&&cfg.instrMode==="station")q.push({type:"instr",d:ie,s,e,n:s*c.EX+e,at:true});
     for(let k=0;k<c.SETS;k++){
       q.push({type:"work",d:W,r,s,e,k});
       let t=null,d=0;
@@ -438,7 +474,7 @@ function buildSeq(W,P){
 }
 
 // --- Plan UI ---
-const fields=["st","ex","sets","rd","warm","instr","total","work","setRest","exRest","stRest","rdRest","countdown"];
+const fields=["st","ex","sets","rd","warm","instr","instrTot","total","work","setRest","exRest","stRest","rdRest","countdown"];
 const structural=["st","ex"];
 function setField(f,v){const el=$(f);cfg[f]=Math.max(+el.min,Math.min(+el.max,v));if(structural.includes(f))buildNames();render()}
 fields.forEach(f=>{const el=$(f);el.value=cfg[f];
@@ -455,6 +491,8 @@ function setMode(m){
 }
 $("modeAuto").onclick=()=>setMode("auto");$("modeManual").onclick=()=>setMode("manual");
 $("cdWorkOnly").onclick=()=>{cfg.cdRest=false;render()};$("cdAll").onclick=()=>{cfg.cdRest=true;render()};
+$("instrPer").onclick=()=>{cfg.instrUnit="per";render()};$("instrAll").onclick=()=>{cfg.instrUnit="total";render()};
+$("lockOn").onclick=()=>{cfg.lock=true;render()};$("lockOff").onclick=()=>{cfg.lock=false;stopLock();render()};
 $("instrBlock").onclick=()=>{cfg.instrMode="block";render()};$("instrStation").onclick=()=>{cfg.instrMode="station";render()};
 
 function buildNames(){
@@ -479,9 +517,14 @@ function render(){
   $("sub").textContent=T("{st} stationer · {ex} övn · {sets} set · {rd} varv",{st:k.ST,ex:k.EX,sets:k.SETS,rd:k.RD});
   $("modeAuto").setAttribute("aria-pressed",cfg.mode==="auto");$("modeManual").setAttribute("aria-pressed",cfg.mode==="manual");
   $("volOut").textContent=cfg.vol+" %";
-  $("mixAmb").setAttribute("aria-pressed",cfg.mix!=="transient");$("mixDuck").setAttribute("aria-pressed",cfg.mix==="transient");
+  $("mixAmb").setAttribute("aria-pressed",cfg.mix==="ambient");$("mixDuck").setAttribute("aria-pressed",cfg.mix==="transient");
   $("halfOn").setAttribute("aria-pressed",cfg.half);$("halfOff").setAttribute("aria-pressed",!cfg.half);
   $("cdWorkOnly").setAttribute("aria-pressed",!cfg.cdRest);$("cdAll").setAttribute("aria-pressed",cfg.cdRest);
+  $("instrPer").setAttribute("aria-pressed",cfg.instrUnit!=="total");$("instrAll").setAttribute("aria-pressed",cfg.instrUnit==="total");
+  $("instrPerRow").hidden=cfg.instrUnit==="total";$("instrTotRow").hidden=cfg.instrUnit!=="total";
+  $("instrTotSum").textContent=cfg.instrMode==="station"?T("≈ {t} per övning",{t:fmt(instrEach())}):T("en samlad genomgång");
+  $("lockOn").setAttribute("aria-pressed",!!cfg.lock);$("lockOff").setAttribute("aria-pressed",!cfg.lock);
+  $("mixPlay").setAttribute("aria-pressed",cfg.mix==="playback");
   $("instrBlock").setAttribute("aria-pressed",cfg.instrMode==="block");$("instrStation").setAttribute("aria-pressed",cfg.instrMode==="station");
   $("autoBlock").hidden=cfg.mode!=="auto";$("manualBlock").hidden=cfg.mode!=="manual";
   $("instrSum").textContent=T("{n} övningar = {t}",{n:k.ST*k.EX,t:fmt(k.ST*k.EX*cfg.instr)});
@@ -511,13 +554,14 @@ $("tabPlan").onclick=()=>showTab("plan");$("tabRun").onclick=()=>showTab("run");
 // --- Audio ---
 let ac=null;
 let master=null;
-function setSession(){try{if(navigator.audioSession)navigator.audioSession.type=cfg.mix==="transient"?"transient":"ambient"}catch(e){}}
+function setSession(){try{if(navigator.audioSession)navigator.audioSession.type=(cfg.lock&&running)?"playback":(cfg.mix||"ambient")}catch(e){}}
 function makeCtx(){try{if(ac&&ac.close)ac.close()}catch(e){}ac=null;master=null;
   try{ac=new (window.AudioContext||window.webkitAudioContext)();
     const comp=ac.createDynamicsCompressor();comp.threshold.value=-18;comp.knee.value=6;comp.ratio.value=6;comp.attack.value=.002;comp.release.value=.15;
     master=ac.createGain();master.gain.value=1.6;master.connect(comp);comp.connect(ac.destination);
     ac.onstatechange=checkAudio;
     const b=ac.createBuffer(1,1,22050),s=ac.createBufferSource();s.buffer=b;s.connect(ac.destination);s.start(0);
+    if(ac.state!=="running"&&ac.resume){const p=ac.resume();if(p&&p.then)p.then(checkAudio,checkAudio)}
   }catch(e){ac=null}}
 function ensureAudio(){setSession();if(!ac||ac.state==="closed")makeCtx();
   else if(ac.state!=="running"){const p=ac.resume&&ac.resume();if(p&&p.then)p.then(checkAudio,()=>{makeCtx();checkAudio()})}
@@ -528,8 +572,9 @@ function wake2(){if(ac&&ac.state!=="running"){try{ac.resume().then(checkAudio,ch
 $("audioWarn").onclick=()=>{makeCtx();setTimeout(checkAudio,300);play("start")};
 ["focus","pageshow"].forEach(ev=>window.addEventListener(ev,wake2));
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)wake2()});
-$("mixAmb").onclick=()=>{cfg.mix="ambient";render();makeCtx();setSession();play("start")};
-$("mixDuck").onclick=()=>{cfg.mix="transient";render();setSession();makeCtx();play("start")};
+function setMix(m){cfg.mix=m;render();setSession();makeCtx();play("start")}
+$("mixAmb").onclick=()=>setMix("ambient");$("mixDuck").onclick=()=>setMix("transient");$("mixPlay").onclick=()=>setMix("playback");
+["pointerdown","touchend","click","keydown"].forEach(ev=>document.addEventListener(ev,()=>{if(!ac||ac.state!=="running")ensureAudio()},{capture:true,passive:true}));
 let catchUp=false;
 function beep(f,dur,vol,delay,type,opt){if(!cfg.sound||!ac||catchUp)return;try{opt=opt||{};const o=ac.createOscillator(),g=ac.createGain();o.type=type||"square";const t=ac.currentTime+(delay||0);o.frequency.setValueAtTime(f,t);
   if(opt.to)o.frequency.exponentialRampToValueAtTime(opt.to,t+(opt.toT||dur));
@@ -596,7 +641,7 @@ let halfDone=false;
 let seq=[],idx=0,remain=0,running=false,started=false,lastT=0,raf=0,lastBeepSec=-1,wake=null;
 const PREP=10;
 function seqTotal(){return seq.reduce((a,b)=>a+b.d,0)}
-function resetRun(){seq=buildSeq(plan.W,plan.P);seq.unshift({type:"prep",d:PREP});idx=0;remain=seq[0].d;running=false;started=false;cancelAnimationFrame(raf);$("bMain").textContent=T("Start");draw()}
+function resetRun(){seq=buildSeq(plan.W,plan.P);seq.unshift({type:"prep",d:PREP});idx=0;remain=seq[0].d;running=false;started=false;clearInterval(raf);stopLock();$("bMain").textContent=T("Start");draw()}
 function label(it){
   const k=counts();
   if(!it)return{phase:T("Klart"),what:T("Bra jobbat!"),where:"",cls:"done"};
@@ -604,7 +649,7 @@ function label(it){
   switch(it.type){
     case"prep":{const f=seq[1];return{phase:T("Gör dig redo"),what:f&&f.type==="warm"?T("Uppvärmning"):exName(0,0),where:T("Passet startar"),cls:"rest"}}
     case"warm":return{phase:T("Uppvärmning"),what:T("Värm upp"),where:"",cls:"setup"};
-    case"instr":return{phase:T("Genomgång"),what:exName(it.s,it.e),where:it.at?T("Station {s} · före första set",{s:it.s+1}):T("Övning {n} av {t}",{n:it.n+1,t:k.ST*k.EX}),cls:"setup"};
+    case"instr":if(it.all)return{phase:T("Genomgång"),what:T("Alla övningar"),where:T("{n} övningar",{n:k.ST*k.EX}),cls:"setup"};return{phase:T("Genomgång"),what:exName(it.s,it.e),where:it.at?T("Station {s} · före första set",{s:it.s+1}):T("Övning {n} av {t}",{n:it.n+1,t:k.ST*k.EX}),cls:"setup"};
     case"work":return{phase:T("Arbete"),what:exName(it.s,it.e),where,cls:"work"};
     case"p":return{phase:T("Vila"),what:"Set "+(it.k+2)+" – "+exName(it.s,it.e),where,cls:"rest"};
     case"e":return{phase:T("Byt övning"),what:"→ "+exName(it.s,it.e+1),where,cls:"rest"};
@@ -612,8 +657,9 @@ function label(it){
     case"R":return{phase:T("Varvvila"),what:T("Varv {n} börjar med {x}",{n:it.r+2,x:exName(0,0)}),where:T("Varv {n} klart",{n:it.r+1}),cls:"round"};
   }
 }
-function nextLabel(it){if(!it)return T("Passet klart");if(it.type==="work")return exName(it.s,it.e)+(counts().SETS>1?" · set "+(it.k+1):"");if(it.type==="instr")return T("Genomgång: {x}",{x:exName(it.s,it.e)});return label(it).phase}
+function nextLabel(it){if(!it)return T("Passet klart");if(it.type==="work")return exName(it.s,it.e)+(counts().SETS>1?" · set "+(it.k+1):"");if(it.type==="instr")return it.all?T("Genomgång"):T("Genomgång: {x}",{x:exName(it.s,it.e)});return label(it).phase}
 function draw(){
+  if(typeof updateLock==="function")updateLock(false);
   const it=seq[idx],lb=label(it);
   $("face").className="face "+lb.cls;
   $("rPhase").textContent=lb.phase;$("rWhat").textContent=lb.what;$("rWhere").textContent=lb.where;
@@ -624,7 +670,7 @@ function draw(){
   $("mEl").textContent=fmt(Math.max(0,done-PREP));$("mLeft").textContent=fmt(seqTotal()-done);
   $("mIdx").textContent=seq.slice(0,idx+1).filter(x=>x.type==="work").length+"/"+counts().W;
 }
-function advance(){idx++;if(idx>=seq.length){running=false;$("bMain").textContent=T("Start");draw();play("done");releaseWake();return}remain=seq[idx].d;lastBeepSec=-1;halfDone=false;
+function advance(){idx++;if(idx>=seq.length){running=false;clearInterval(raf);$("bMain").textContent=T("Start");draw();play("done");stopLock();if(!cfg.awake)releaseWake();return}remain=seq[idx].d;lastBeepSec=-1;halfDone=false;
   if(seq[idx].type==="work")startSignal();else if(seq[idx-1]&&seq[idx-1].type==="work")restSignal();}
 let audioChk=0;
 function tick(t){
@@ -638,7 +684,7 @@ function tick(t){
   if(cur&&cfg.countdown>0&&sec<=cfg.countdown&&sec>=1&&sec!==lastBeepSec&&sec<cur.d&&(cur.type==="work"||cfg.cdRest||(seq[idx+1]&&seq[idx+1].type==="work"&&cur.type!=="warm"))){lastBeepSec=sec;cdBeep(sec)}
   while(running&&remain<=0){const over=-remain;advance();if(running)remain-=over}
   catchUp=false;
-  draw();if(running)raf=requestAnimationFrame(tick);
+  draw();
 }
 let noSleep=null,nsOn=false;
 function wakeMsg(ok){const m=$("wakeMsg");m.hidden=false;m.dataset.ok=ok?"1":"0";m.textContent=T(ok?"☀ Skärmen hålls tänd under passet.":"Telefonen kan släcka skärmen. Stäng av automatiskt lås i telefonens inställningar under passet.");m.style.color=ok?"":"var(--danger)"}
@@ -654,13 +700,52 @@ $("bMain").onclick=()=>{
   if(idx>=seq.length)resetRun();
   running=!running;started=true;
   $("bMain").textContent=T(running?"Paus":"Fortsätt");
-  if(running){lastT=performance.now();getWake();raf=requestAnimationFrame(tick)}else{cancelAnimationFrame(raf);releaseWake()}
-  checkAudio();
+  if(running){lastT=performance.now();if(cfg.awake)getWake();clearInterval(raf);raf=setInterval(()=>tick(performance.now()),200);startLock()}else{clearInterval(raf);if(!cfg.awake)releaseWake();updateLock(true)}
+  setSession();checkAudio();
 };
 $("bNext").onclick=()=>{if(idx<seq.length){started=true;advance();draw()}};
 $("bPrev").onclick=()=>{if(seq[idx]&&remain<seq[idx].d-2){remain=seq[idx].d}else if(idx>0){idx--;remain=seq[idx].d}lastBeepSec=-1;halfDone=false;draw()};
-$("bReset").onclick=()=>{resetRun();releaseWake()};
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&running)getWake()});
+$("bReset").onclick=()=>{resetRun();if(!cfg.awake)releaseWake()};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(running||cfg.awake)&&!$("run").hidden)getWake()});
+
+// --- Keep screen on + focus mode ---
+function awakeLbl(){$("bAwake").setAttribute("aria-pressed",!!cfg.awake);$("bAwake").textContent=T(cfg.awake?"☀ Skärm tänd":"Skärm kan släckas")}
+$("bAwake").onclick=()=>{cfg.awake=!cfg.awake;save();awakeLbl();if(cfg.awake)getWake();else{releaseWake();$("wakeMsg").hidden=true}};
+$("bFocus").onclick=()=>{const on=!document.body.classList.contains("focus");document.body.classList.toggle("focus",on);$("bFocus").setAttribute("aria-pressed",on);$("bFocus").textContent=T(on?"Visa allt":"Fokusläge")};
+awakeLbl();
+
+// --- Lock screen (Media Session) ---
+let lockAudio=null,lockUrl=null,lockLast="";
+function silentWav(){const sr=8000,n=sr*2,b=new ArrayBuffer(44+n*2),v=new DataView(b);const w=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))};
+  w(0,"RIFF");v.setUint32(4,36+n*2,true);w(8,"WAVE");w(12,"fmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,"data");v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++)v.setInt16(44+i*2,(Math.random()-.5)*4,true);return new Blob([b],{type:"audio/wav"})}
+function startLock(){
+  if(!cfg.lock||!("mediaSession" in navigator))return;
+  try{
+    if(!lockAudio){lockUrl=URL.createObjectURL(silentWav());lockAudio=new Audio(lockUrl);lockAudio.loop=true;lockAudio.setAttribute("playsinline","");lockAudio.volume=1}
+    const p=lockAudio.play();if(p&&p.catch)p.catch(()=>{});
+    const ms=navigator.mediaSession;
+    ms.setActionHandler("play",()=>{if(!running)$("bMain").click()});
+    ms.setActionHandler("pause",()=>{if(running)$("bMain").click()});
+    try{ms.setActionHandler("nexttrack",()=>$("bNext").click())}catch(e){}
+    try{ms.setActionHandler("previoustrack",()=>$("bPrev").click())}catch(e){}
+    lockLast="";updateLock(true);
+  }catch(e){}
+}
+function stopLock(){try{if(lockAudio){lockAudio.pause()}if("mediaSession" in navigator){navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState="none"}}catch(e){}}
+function updateLock(force){
+  if(!cfg.lock||!lockAudio||!("mediaSession" in navigator))return;
+  try{
+    const it=seq[idx],lb=label(it),time=it?fmt(Math.ceil(remain-1e-6)):"0:00";
+    const title=lb.phase+" · "+time;
+    if(!force&&title===lockLast)return;lockLast=title;
+    const ms=navigator.mediaSession;
+    ms.metadata=new MediaMetadata({title,artist:lb.what,album:lb.where||"CrossCage",artwork:[{src:"icons/icon-512.png",sizes:"512x512",type:"image/png"},{src:"icons/icon-192.png",sizes:"192x192",type:"image/png"}]});
+    ms.playbackState=running?"playing":"paused";
+    if(it&&ms.setPositionState)ms.setPositionState({duration:it.d,position:Math.min(it.d,Math.max(0,it.d-remain)),playbackRate:1});
+    if(running&&lockAudio.paused){const p=lockAudio.play();if(p&&p.catch)p.catch(()=>{})}
+  }catch(e){}
+}
 
 // --- Saved passes ---
 const PASS_KEY="ccage_passes";
@@ -734,7 +819,7 @@ renderPasses();
 
 function setLang(l){
   lang=l;try{localStorage.setItem("ccage_lang",l)}catch(e){}
-  applyStatic();buildNames();buildSnd();soundLbl();renderPasses();
+  applyStatic();buildNames();buildSnd();soundLbl();awakeLbl();$("bFocus").textContent=T(document.body.classList.contains("focus")?"Visa allt":"Fokusläge");renderPasses();
   const pm=$("passMsg");if(!pm.style.color)passMsg(where());
   const wm=$("wakeMsg");if(!wm.hidden)wakeMsg(wm.dataset.ok==="1");
   render();draw();

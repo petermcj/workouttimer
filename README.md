@@ -5,12 +5,13 @@ Intervallklocka för CrossCage-pass, byggd som en webbapp (PWA) som installeras 
 ## Funktioner
 
 - Valfritt antal stationer, övningar per station, set och varv
-- Uppvärmning och genomgång av övningar, samlad eller vid varje station
+- Uppvärmning och genomgång av övningar: tid per övning eller en total tid, samlad eller vid varje station
 - Räknar ut arbete och vila utifrån total tid, eller så sätter du arbetstiden själv
 - Pauser för byte av övning, byte av station och mellan varv
 - Ljud: startsignal, halvtidssignal (byt sida), nedräkning, slutsignal, volym och flera ljud att välja mellan
 - Spara pass med namn (sparas i telefonen)
-- Håller skärmen tänd under passet
+- Knapp för att hålla skärmen tänd och fokusläge som döljer allt utom klockan
+- Visning på låsskärmen (valfritt), så att klockan syns och piper även när skärmen är låst
 - Svenska och engelska
 
 ## Installera på telefonen
