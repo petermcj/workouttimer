@@ -28,7 +28,7 @@ button,input,select{touch-action:manipulation}
 :root{
   --bg:#11151b; --panel:#1a2029; --line:#2b3440; --fg:#eef1f4; --muted:#8d98a6;
   --work:#ffb020; --work-ink:#1d1300; --rest:#3fc1c9; --rest-ink:#00191b;
-  --round:#a78bfa; --setup:#e58fb0; --danger:#ff6b5a;
+  --round:#a78bfa; --setup:#e58fb0; --cool:#7bd389; --mid:#ff8a5c; --danger:#ff6b5a;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:dark;
@@ -79,7 +79,9 @@ input[type=range]{width:100%;accent-color:var(--work)}
 .strip{display:flex;flex-direction:column;gap:6px}
 .bar{display:flex;height:22px;border-radius:5px;overflow:hidden;gap:1px;background:var(--bg)}
 .bar i{display:block;min-width:1px}
-.bar .w{background:var(--work)} .bar .p{background:var(--rest);opacity:.55} .bar .e{background:var(--rest);opacity:.8} .bar .s{background:var(--rest)} .bar .R{background:var(--round)} .bar .warm{background:var(--setup)} .bar .instr{background:var(--setup);opacity:.5} .bar .go{background:var(--setup);opacity:.25}
+.bar .w{background:var(--work)} .bar .p{background:var(--rest);opacity:.55} .bar .e{background:var(--rest);opacity:.8} .bar .s{background:var(--rest)} .bar .R{background:var(--round)} .bar .warm{background:var(--setup)} .bar .instr{background:var(--setup);opacity:.5} .bar .go{background:var(--setup);opacity:.25} .bar .mid{background:var(--mid)} .bar .cool{background:var(--cool)}
+.mode.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+textarea{width:100%;min-height:72px;resize:vertical;background:var(--panel);border:1px solid var(--line);border-radius:6px;color:var(--fg);padding:8px;font:inherit;font-size:14px;line-height:1.5}
 .legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted)}
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c);opacity:var(--o,1)}
 details{border-top:1px solid var(--line);padding-top:12px}
@@ -108,6 +110,8 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 .face.rest{background:var(--rest);color:var(--rest-ink)}
 .face.round{background:var(--round);color:#160a33}
 .face.setup{background:var(--setup);color:#2a0716}
+.face.cool{background:var(--cool);color:#062010}
+.face.mid{background:var(--mid);color:#2a0d00}
 .face.done{background:var(--panel)}
 .flash{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.12em;text-transform:uppercase;background:var(--bg);color:var(--fg);border-radius:8px;padding:2px 14px}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
@@ -239,6 +243,42 @@ body.focus .wrap{gap:12px}
       </div>
     </div>
 
+    <div class="block">
+      <div class="label">Stretch i slutet</div>
+      <div class="row">
+        <label for="stretch">Stretch<small id="stretchSub">efter sista varvet</small></label>
+        <div class="num"><button data-step="stretch:-1" aria-label="Minska">−</button><input id="stretch" type="number" inputmode="numeric" min="0" max="20"><button data-step="stretch:1" aria-label="Öka">+</button></div><span class="unit">min</span>
+      </div>
+      <div id="stretchBox" style="display:flex;flex-direction:column;gap:8px">
+        <label class="sub" for="stretchList">Stretchövningar, en per rad. Tiden delas lika mellan dem.</label>
+        <textarea id="stretchList" rows="5" maxlength="1000"></textarea>
+        <div class="chips"><button id="stretchSuggest">Föreslå stretch</button></div>
+        <div class="sub" id="stretchHint"></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="label">Mellanövning</div>
+      <div class="mode three" role="group" aria-label="Mellanövning">
+        <button id="midOff" aria-pressed="true">Ingen</button>
+        <button id="midRound" aria-pressed="false">Mellan varv</button>
+        <button id="midSt" aria-pressed="false">Efter stationer</button>
+      </div>
+      <div id="midBox" style="display:flex;flex-direction:column;gap:8px">
+        <div class="row" id="midEveryRow">
+          <label for="midEvery">Efter var<small id="midEverySub"></small></label>
+          <div class="num"><button data-step="midEvery:-1" aria-label="Minska">−</button><input id="midEvery" type="number" inputmode="numeric" min="1" max="10"><button data-step="midEvery:1" aria-label="Öka">+</button></div><span class="unit">station</span>
+        </div>
+        <div class="row">
+          <label for="midTime">Tid för mellanövningen<small>alla gör samma övning</small></label>
+          <div class="num"><button data-step="midTime:-5" aria-label="Minska">−</button><input id="midTime" type="number" inputmode="numeric" min="10" max="300"><button data-step="midTime:5" aria-label="Öka">+</button></div><span class="unit">s</span>
+        </div>
+        <label class="sub" for="midList">Mellanövningar, en per rad. De tas i tur och ordning.</label>
+        <textarea id="midList" rows="3" maxlength="1000"></textarea>
+        <div class="sub" id="midHint"></div>
+      </div>
+    </div>
+
     <div class="label" style="margin-top:4px">Fördelning arbete och vila</div>
     <div class="mode" role="group" aria-label="Läge">
       <button id="modeAuto" aria-pressed="true">Räkna från totaltid</button>
@@ -259,7 +299,7 @@ body.focus .wrap{gap:12px}
         <button id="mgOver" aria-pressed="false">Får dra över</button>
       </div>
       <div class="row">
-        <label for="margin"><span id="marginLbl">Tid kvar i slutet</span><small id="marginSub">till stretch, städning eller frågor</small></label>
+        <label for="margin"><span id="marginLbl">Tid kvar i slutet</span><small id="marginSub">till städning eller frågor</small></label>
         <div class="num"><button data-step="margin:-1" aria-label="Minska">−</button><input id="margin" type="number" inputmode="numeric" min="0" max="15"><button data-step="margin:1" aria-label="Öka">+</button></div><span class="unit">min</span>
       </div>
       <div class="mode" role="group" aria-label="Avrundning">
@@ -329,7 +369,7 @@ body.focus .wrap{gap:12px}
         <span>Passet: <strong id="oTotal">–</strong></span>
         <span>Arbete <strong id="oWorkTot">–</strong></span>
         <span>Vila <strong id="oRestTot">–</strong></span>
-        <span>Uppv. + genomgång <strong id="oSetup">–</strong></span>
+        <span>Uppv., genomgång, stretch <strong id="oSetup">–</strong></span>
       </div>
       <div class="sub" id="fit" hidden></div>
       <div class="warn" id="warn" hidden></div>
@@ -344,6 +384,8 @@ body.focus .wrap{gap:12px}
           <span style="--c:var(--setup)">Uppvärmning</span>
           <span style="--c:var(--setup);--o:.5">Genomgång</span>
           <span style="--c:var(--setup);--o:.25">Till stationen</span>
+          <span style="--c:var(--mid)">Mellanövning</span>
+          <span style="--c:var(--cool)">Stretch</span>
         </div>
       </div>
     </div>
@@ -417,6 +459,17 @@ body.focus .wrap{gap:12px}
 
     <details>
       <summary>Övningar: namn och egna tider <span id="exCount"></span></summary>
+      <div class="label" style="margin-top:10px">Visa i klockan</div>
+      <div class="mode three" role="group" aria-label="Visa i klockan">
+        <button id="nsName" aria-pressed="true">Övningens namn</button>
+        <button id="nsNum" aria-pressed="false">Övning 1, 2, 3</button>
+        <button id="nsLetter" aria-pressed="false">Övning A, B</button>
+      </div>
+      <div class="sub" id="nsHint"></div>
+      <div class="label" style="margin-top:10px">Namn på övningarna</div>
+      <div class="sub">Skriv eller välj ur övningsbanken. Övningar du skrivit in själv kommer också med i listan.</div>
+      <div class="chips" style="margin-top:6px"><button id="exFill">Fyll tomma med förslag</button><button id="exClear">Töm alla namn</button></div>
+      <datalist id="bankList"></datalist>
       <div class="mode" role="group" aria-label="Tider per övning" style="margin-top:10px">
         <button id="exModeOff" aria-pressed="true">Samma tider för alla övningar</button>
         <button id="exModeOn" aria-pressed="false">Egna tider per övning</button>
@@ -466,6 +519,6 @@ body.focus .wrap{gap:12px}
   </section>
 </div>
 
-<script src="app.js?v=crosscage-v10"></script>
+<script src="app.js?v=crosscage-v11"></script>
 </body>
 </html>

@@ -15,6 +15,10 @@ Intervallklocka för CrossCage-pass, byggd som en webbapp (PWA) som installeras 
 - Ordning på stationen: alla set av en övning i taget (A A B B) eller växla mellan övningarna (A B A B)
 - Egna tider för arbete och vila per övning och varv
 - Pauser för byte av övning, byte av station och mellan varv
+- Mellanövning som alla gör samtidigt, mellan varv eller efter var X:e station
+- Stretch i slutet med förslag som anpassas efter passets övningar
+- Övningsbank att välja övningar från, och knapp som fyller tomma stationer med förslag
+- Välj om klockan visar övningens namn, Övning 1, 2, 3 eller Övning A, B (bra när deltagarna börjar på olika stationer)
 - Ljud: startsignal, halvtidssignal (byt sida), nedräkning, slutsignal, volym och flera ljud att välja mellan
 - Spara pass med namn (sparas i telefonen)
 - Styr Spotify: spellista vid start, spela/pausa med passet, nästa låt och lägre volym under vila (kräver Premium, se [SPOTIFY.md](SPOTIFY.md))
