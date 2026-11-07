@@ -834,8 +834,9 @@ renderPasses();
   loadPasses();
 })();
 
-function setLang(l){setTimeout(buildTpl,0);
+function setLang(l){
   lang=l;try{localStorage.setItem("ccage_lang",l)}catch(e){}
+  buildTpl();
   roundsKey="";setsKey="";applyStatic();buildNames();buildSnd();soundLbl();awakeLbl();if(spOn())spFill();$("bFocus").textContent=T(document.body.classList.contains("focus")?"Visa allt":"Fokusläge");renderPasses();
   const pm=$("passMsg");if(!pm.style.color)passMsg(where());
   const wm=$("wakeMsg");if(!wm.hidden)wakeMsg(wm.dataset.ok==="1");
