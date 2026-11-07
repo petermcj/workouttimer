@@ -559,6 +559,25 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(c.lock === false && c.mix === "ambient", "still set to pause music: " + JSON.stringify({ lock: c.lock, mix: c.mix }));
   });
 
+  await test("installed on iPhone, the menu reaches the bottom edge even when iOS measures the screen without the status bar", async () => {
+    const at = async (height, standalone) => {
+      const dev = Object.assign({}, devices["iPhone 13"], { viewport: { width: 390, height }, screen: { width: 390, height: 844 } });
+      const page = await open({}, { device: dev });
+      if (standalone) { await page.evaluate(() => Object.defineProperty(navigator, "standalone", { value: true })); await page.evaluate(() => window.dispatchEvent(new Event("resize"))); await page.waitForTimeout(150); }
+      return page.evaluate(() => Math.round(document.querySelector(".nav").getBoundingClientRect().bottom));
+    };
+    assert(await at(797, true) === 844, "a gap the size of the status bar was left under the menu");
+    assert(await at(797, false) === 797, "in the browser the menu must stay above the toolbar");
+    assert(await at(500, true) === 500, "with the keyboard open the frame must not be stretched");
+  });
+
+  await test("without an open workout, the heading keeps clear of the status bar", async () => {
+    const page = await open(null);
+    assert(await page.isHidden("#curBar"), "a workout banner showed without an open workout");
+    const pad = await page.evaluate(() => getComputedStyle(document.getElementById("scroller")).paddingTop);
+    assert(pad === "12px", "unexpected top padding without safe areas: " + pad);
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;

@@ -14,7 +14,7 @@
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
-:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);-webkit-text-size-adjust:100%}
+:root{-webkit-text-size-adjust:100%}
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
 img{max-width:100%}
@@ -40,6 +40,8 @@ html,body{height:100%;overflow:hidden}
 /* The app frame is pinned to the screen edges rather than sized from 100vh/100dvh, which iOS measures differently
    in installed web apps and after the keyboard, share sheet or file picker. */
 .wrap{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column}
+/* Without the workout banner, the page itself keeps clear of the status bar. */
+.curbar[hidden]+.scroll{padding-top:calc(12px + env(safe-area-inset-top,0px))}
 .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px))}
 .inner{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 .curbar{flex:none;display:flex;align-items:center;gap:10px;background:var(--panel);border-bottom:1px solid var(--line);padding:calc(8px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
@@ -247,7 +249,7 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   </div>
   <div class="scroll" id="scroller"><div class="inner">
   <header>
-    <h1>Cross<span>Cage</span> klocka</h1>
+    <h1>Workout<span>Timer</span></h1>
     <div class="sub" id="sub"></div>
   </header>
 
