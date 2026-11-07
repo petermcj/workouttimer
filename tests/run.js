@@ -140,6 +140,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
 
   await test("all new text is translated to English", async () => {
     const page = await open({ stretch: 3, mid: "st", voice: true });
+    await page.click("#tabSet");
     await page.click('[data-lang="en"]');
     const text = await page.evaluate(() => ["passes", "plan", "exlib", "settings"].map((id) => {
       const s = document.getElementById(id); s.hidden = false; s.querySelectorAll("details:not(.item)").forEach((d) => (d.open = true)); return s.innerText; }).join("\n"));
@@ -205,6 +206,51 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.click("#tabRun");
     for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Genomgång"; i++) await page.click("#bNext");
     assert(await page.isVisible("#rDesc") && (await page.textContent("#rDesc")) === "Fötterna axelbrett.", "no description in the demo");
+  });
+
+  await test("an imported file cannot push settings outside their range", async () => {
+    const page = await open({ st: 3 });
+    await page.click("#tabPass");
+    const bad = { format: "crosscage-klocka", version: 1, passes: [], exercises: [], plan: { st: 1e7, rd: -5, ex: 99, total: 1e9, rounds: [{ work: 1e6 }], roundSets: [999] }, settings: { vol: 5000 } };
+    await page.setInputFiles("#impFile", { name: "b.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(bad)) });
+    await page.waitForFunction(() => /Klart/.test(document.getElementById("bkMsg").textContent));
+    const c = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")));
+    assert(c.st === 20 && c.rd === 1 && c.ex === 4 && c.total === 180 && c.vol === 100, "values not limited: " + JSON.stringify({ st: c.st, rd: c.rd, ex: c.ex, total: c.total, vol: c.vol }));
+    assert(!page.errors.length, page.errors.join("; "));
+  });
+
+  await test("undo after an import brings back the workouts, exercises and plan from before", async () => {
+    const page = await open({ st: 3 });
+    await page.evaluate(() => {
+      localStorage.setItem("ccage_passes", JSON.stringify([{ id: "p1", name: "Mitt pass", updated: 1, cfg: JSON.stringify({ st: 2 }) }]));
+      localStorage.setItem("ccage_exlib", JSON.stringify([{ id: "u1", name: "Min övning", group: "", desc: "gammal", updated: 1 }]));
+    });
+    await page.reload();
+    await page.click("#tabPass");
+    const file = { format: "crosscage-klocka", version: 1, lang: "en",
+      passes: [{ name: "Mitt pass", updated: 99, cfg: { st: 9 } }, { name: "Nytt pass", updated: 5, cfg: { st: 7 } }],
+      exercises: [{ id: "u1", name: "Min övning", group: "", desc: "ny", updated: 99 }], plan: { st: 12 }, settings: {} };
+    await page.setInputFiles("#impFile", { name: "b.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(file)) });
+    await page.waitForFunction(() => /Done|Klart/.test(document.getElementById("bkMsg").textContent));
+    await page.click("#toastUndo");
+    await page.waitForFunction(() => /ångrades|undone/.test(document.getElementById("bkMsg").textContent));
+    const s = await page.evaluate(() => ({ passes: JSON.parse(localStorage.getItem("ccage_passes")), lib: JSON.parse(localStorage.getItem("ccage_exlib")), st: JSON.parse(localStorage.getItem("ccage")).st, lang: localStorage.getItem("ccage_lang") }));
+    assert(s.passes.length === 1 && JSON.parse(s.passes[0].cfg).st === 2, "workouts not restored: " + JSON.stringify(s.passes));
+    assert(s.lib[0].desc === "gammal", "exercises not restored");
+    assert(s.st === 3 && s.lang === "sv", "plan or language not restored: st " + s.st + ", lang " + s.lang);
+  });
+
+  await test("a deleted own exercise stays deleted when an older copy is imported", async () => {
+    const page = await open();
+    await page.evaluate(() => localStorage.setItem("ccage_exlib", JSON.stringify([{ id: "u1", name: "Gammal övning", group: "", desc: "", deleted: true, updated: 50 }])));
+    await page.reload();
+    await page.click("#tabPass");
+    const file = { format: "crosscage-klocka", version: 1, passes: [], exercises: [{ id: "u1", name: "Gammal övning", group: "", desc: "", updated: 10 }], plan: {}, settings: {} };
+    await page.setInputFiles("#impFile", { name: "b.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(file)) });
+    await page.waitForFunction(() => /Klart/.test(document.getElementById("bkMsg").textContent));
+    await page.click("#tabEx");
+    await page.fill("#exSearch", "Gammal övning");
+    assert((await page.$$("#exItems details")).length === 0, "the deleted exercise came back");
   });
 
   await browser.close();
