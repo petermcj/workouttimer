@@ -584,13 +584,12 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
       <div class="sub">Starta musiken i Spotify först och tryck sedan Start här. På iPhone: stäng av ljudlös-reglaget på sidan av telefonen, annars hörs inte klockan. Om det ändå är tyst, prova "Sänk musiken vid signal".</div>
     </div>
     <div class="block">
-      <div class="label">Låsskärm</div>
-      
-      <div class="mode stack" role="group" aria-label="Låsskärm">
-        <button id="lockOn" aria-pressed="false">Visa klockan på låsskärmen</button>
-        <button id="lockOff" aria-pressed="true">Visa inte på låsskärmen</button>
+      <div class="label">Låsskärm och musik</div>
+      <div class="mode stack" role="group" aria-label="Låsskärm och musik">
+        <button id="lockOff" aria-pressed="true">Musik i en annan app (rekommenderas)</button>
+        <button id="lockOn" aria-pressed="false">Klockan på låsskärmen (pausar annan musik)</button>
       </div>
-      <div class="sub">Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.</div>
+      <div class="sub">På iPhone kan bara en app i taget visas på låsskärmen. Med klockan på låsskärmen syns fas och tid där och klockan piper även när skärmen är låst, men musik i andra appar, till exempel Spotify, pausas när passet startar. Spelar du musik, välj det första alternativet och låt skärmen vara tänd.</div>
     </div>
     <div class="block" id="spBlock">
       <div class="label"><span class="sp-green">●</span> Spotify</div>
@@ -690,6 +689,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=crosscage-v17"></script>
+<script src="app.js?v=crosscage-v18"></script>
 </body>
 </html>
