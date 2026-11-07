@@ -42,9 +42,9 @@ h1{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.02e
 h1 span{color:var(--work)}
 .sub{color:var(--muted);font-size:13px}
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:10;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--panel);border-top:1px solid var(--line);padding:4px max(6px,env(safe-area-inset-left,0px)) calc(4px + env(safe-area-inset-bottom,0px))}
-.nav button{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:var(--muted);padding:6px 2px;border-radius:8px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:var(--muted);padding:6px 2px;border-radius:8px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.02em;text-transform:uppercase}
 .nav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media (max-width:380px){.nav button{letter-spacing:0;font-size:11px}}
+@media (max-width:380px){.nav button{letter-spacing:0;font-size:11px}}@media (max-width:340px){.nav button{font-size:10px}}
 .nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .nav button[aria-selected="true"]{color:var(--work)}
 .list{display:flex;flex-direction:column;gap:8px}
@@ -139,6 +139,13 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 .face.done{background:var(--panel)}
 .toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(520px,calc(100% - 32px));display:flex;align-items:center;gap:12px;background:var(--fg);color:var(--bg);border-radius:10px;padding:10px 10px 10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);z-index:20;font-size:14px}
 .toast span{flex:1}
+.updbar{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(520px,calc(100% - 32px));display:flex;align-items:center;gap:12px;background:var(--work);color:var(--work-ink);border-radius:10px;padding:10px 10px 10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);z-index:21;font-size:14px;font-weight:600}
+.updbar span{flex:1}
+.updbar button{background:var(--work-ink);color:var(--work);border:0;border-radius:8px;padding:8px 12px;font:inherit;font-weight:700;cursor:pointer}
+.savebar{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(520px,calc(100% - 32px));display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--work);border-radius:10px;padding:8px 8px 8px 14px;box-shadow:0 6px 24px rgba(0,0,0,.45);z-index:19;font-size:14px}
+.savebar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.savebar button{background:var(--work);color:var(--work-ink);border:0;border-radius:8px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer}
+body.focus .savebar{display:none!important}
 .toast button{background:none;border:0;color:var(--bg);font:inherit;font-weight:700;text-decoration:underline;padding:6px 8px;cursor:pointer}
 .flash{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.12em;text-transform:uppercase;background:var(--bg);color:var(--fg);border-radius:8px;padding:2px 14px}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
@@ -208,7 +215,7 @@ body.focus .wrap{gap:12px}
   <section id="plan">
     <div class="block" style="border-top:0;padding-top:0">
       <div class="label">Passet</div>
-      <div class="passrow"><input id="passName" maxlength="40" placeholder="Namn, t.ex. Ben 45 min" aria-label="Passets namn"><button class="btn primary" id="passSave">Spara</button></div>
+      <div class="passrow"><input id="passName" maxlength="40" placeholder="Namn, t.ex. Ben 45 min" aria-label="Passets namn"><button class="btn primary" id="passSave">Spara</button><button class="btn" id="passNew">Nytt</button></div>
       <div class="sub" id="passMsg">Laddar sparade pass…</div>
     </div>
 
@@ -454,6 +461,7 @@ body.focus .wrap{gap:12px}
   <!-- PASS -->
   <section id="passes" hidden>
     <div class="block" style="border-top:0;padding-top:0">
+      <div class="passrow"><button class="btn primary" id="passNew2">Nytt pass</button></div>
       <div class="label">Mina pass</div>
       <div class="sub">Ett sparat pass innehåller upplägg, tider och övningar. Använd det som det är, eller som mall för ett nytt pass.</div>
       <div class="list" id="passList"></div>
@@ -487,6 +495,12 @@ body.focus .wrap{gap:12px}
   <!-- SETTINGS -->
   <section id="settings" hidden>
     <div class="block" style="border-top:0;padding-top:0">
+      <div class="label">Standard för nya pass</div>
+      <div class="sub">Nytt pass börjar med de här värdena: upplägg, tider, pauser, mellanövning, stretch och marginal. Ställ in Plan som du vill ha det och tryck Använd Plan som standard. Övningarnas namn ingår inte.</div>
+      <div class="item"><div class="meta2" id="defSum"></div></div>
+      <div class="passrow" style="flex-wrap:wrap"><button class="btn primary" id="defSave">Använd Plan som standard</button><button class="btn" id="defReset">Återställ appens standard</button></div>
+    </div>
+    <div class="block">
       <div class="label">Språk</div>
       <div class="mode" role="group" aria-label="Språk"><button data-lang="sv">Svenska</button><button data-lang="en">English</button></div>
     </div>
@@ -563,6 +577,7 @@ body.focus .wrap{gap:12px}
       <div class="sub" id="spMsg"></div>
     </div>
     <div class="sub">Inställningarna gäller den här telefonen och följer inte med när du laddar ett pass.</div>
+    <div class="sub" id="appVer" style="text-align:center;margin-top:8px"></div>
   </section>
 
   <section id="run" class="run" hidden>
@@ -601,9 +616,11 @@ body.focus .wrap{gap:12px}
     <div class="tiny"><button id="bReset">Börja om</button><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
     <div class="sub" id="wakeMsg" style="text-align:center" hidden></div>
   </section>
+  <div class="updbar" id="updBar" role="status" hidden><span>En ny version av appen finns.</span><button id="updReload">Ladda om</button></div>
+  <div class="savebar" id="saveBar" hidden><span id="saveBarMsg">Ändringarna är inte sparade</span><button id="saveBarBtn">Spara</button></div>
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=crosscage-v14"></script>
+<script src="app.js?v=crosscage-v15"></script>
 </body>
 </html>

@@ -253,6 +253,76 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert((await page.$$("#exItems details")).length === 0, "the deleted exercise came back");
   });
 
+  await test("Settings shows the same version as the service worker, and the backup carries it", async () => {
+    const v = /const VERSION = "crosscage-v(\d+)"/.exec(fs.readFileSync(path.join(ROOT, "sw.js"), "utf8"))[1];
+    const page = await open();
+    await page.click("#tabSet");
+    assert((await page.textContent("#appVer")) === "Version " + v, "shows " + (await page.textContent("#appVer")) + ", expected Version " + v);
+    await page.click("#tabPass");
+    const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#expBtn")]);
+    assert(JSON.parse(fs.readFileSync(await dl.path(), "utf8")).appVersion === v, "the backup has no app version");
+  });
+
+  await test("a save bar appears at the bottom after a change, and saving hides it", async () => {
+    const page = await open(null, devices["iPhone 13"]);
+    assert(await page.isHidden("#saveBar"), "the save bar shows before any change");
+    await page.tap('[data-step="st:1"]');
+    assert(await page.isVisible("#saveBar"), "no save bar after a change");
+    const box = await page.locator("#saveBar").boundingBox();
+    const vh = page.viewportSize().height;
+    assert(box.y + box.height <= vh && box.y > vh / 2, "the save bar is not at the bottom of the screen");
+    await page.tap("#saveBarBtn");
+    assert(await page.evaluate(() => document.activeElement.id) === "passName", "without a name, Save should go to the name field");
+    await page.fill("#passName", "Nytt pass");
+    await page.tap("#saveBarBtn");
+    await page.waitForFunction(() => /Sparade/.test(document.getElementById("passMsg").textContent));
+    assert(await page.isHidden("#saveBar"), "the save bar stays after saving");
+    await page.tap('[data-step="rd:1"]');
+    assert(/Nytt pass/.test(await page.textContent("#saveBarMsg")), "the save bar does not name the workout");
+    await page.tap("#tabRun");
+    assert(await page.isHidden("#saveBar"), "the save bar shows outside Plan");
+  });
+
+  await test("New workout starts from the defaults set in Settings, without exercise names", async () => {
+    const page = await open({ st: 5, rd: 3, warm: 7, stretch: 4, names: [["Knäböj"]], vol: 40 });
+    await page.click("#tabSet");
+    await page.click("#defSave");
+    assert(/Dina standardvärden/.test(await page.textContent("#defSum")), "the summary does not show your defaults");
+    // change the plan, then start a new workout
+    await page.evaluate(() => { const c = JSON.parse(localStorage.getItem("ccage")); c.st = 9; c.rd = 1; localStorage.setItem("ccage", JSON.stringify(c)); });
+    await page.reload();
+    assert(await page.inputValue("#st") === "9", "setup failed");
+    await page.click("#passNew");
+    const c = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")));
+    assert(c.st === 5 && c.rd === 3 && c.warm === 7 && c.stretch === 4, "new workout does not use the defaults: " + JSON.stringify({ st: c.st, rd: c.rd, warm: c.warm, stretch: c.stretch }));
+    assert(!c.names.length && c.vol === 40, "names should be empty and phone settings kept");
+    assert(await page.isHidden("#saveBar"), "a new workout should not count as unsaved changes");
+    // undo brings the previous plan back
+    await page.click("#toastUndo");
+    assert(await page.inputValue("#st") === "9", "undo did not restore the plan");
+    // reset to the app's defaults
+    await page.click("#tabSet");
+    await page.click("#defReset");
+    assert(/Appens standard/.test(await page.textContent("#defSum")), "reset did not take");
+    await page.click("#tabPass");
+    await page.click("#passNew2");
+    assert(await page.inputValue("#st") === "8", "new workout after reset should use the app's 8 stations");
+  });
+
+  await test("the defaults travel with the backup", async () => {
+    const page = await open({ st: 6 });
+    await page.click("#tabSet");
+    await page.click("#defSave");
+    await page.click("#tabPass");
+    const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#expBtn")]);
+    const file = await dl.path();
+    const fresh = await open();
+    await fresh.click("#tabPass");
+    await fresh.setInputFiles("#impFile", file);
+    await fresh.waitForFunction(() => /Klart/.test(document.getElementById("bkMsg").textContent));
+    assert(await fresh.evaluate(() => JSON.parse(localStorage.getItem("ccage_defaults")).st) === 6, "defaults not imported");
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;

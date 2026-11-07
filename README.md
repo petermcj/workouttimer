@@ -19,6 +19,7 @@ Intervallklocka för CrossCage-pass, byggd som en webbapp (PWA) som installeras 
 - Egna pass med övningar, som kan köras direkt eller användas som mall, plus inbyggda mallar och Ångra efter större ändringar
 - Övningsbibliotek med egna övningar och beskrivningar som visas i klockan under genomgång och arbete
 - Säkerhetskopia: exportera pass, övningar, plan och inställningar till en fil och läs in den igen
+- Egna standardvärden för nya pass (Inställningar → Standard för nya pass) och knappen Nytt pass
 - Röst som läser upp övningar, byten och stretch (valfritt)
 - Knappar för −30 s och +30 s under passet
 - Mellanövning som alla gör samtidigt, mellan varv eller efter var X:e station
@@ -48,7 +49,7 @@ Appen måste ligga på en webbadress med https, till exempel GitHub Pages (se ne
 
 ## Uppdatera appen
 
-Ändra filerna och höj `VERSION` i `sw.js` (till exempel `crosscage-v11`). Skriv samma värde i länken till skriptet i `index.html` (`app.js?v=crosscage-v11`), så att sidan aldrig kör ihop med ett gammalt skript. Då hämtar telefonerna den nya versionen nästa gång appen öppnas med internet.
+Ändra filerna och höj `VERSION` i `sw.js` (till exempel `crosscage-v11`). Skriv samma värde i länken till skriptet i `index.html` (`app.js?v=crosscage-v11`), så att sidan aldrig kör ihop med ett gammalt skript. Versionsnumret visas längst ner under Inställningar och sparas i säkerhetskopian. När en telefon har hämtat en ny version visas en rad med **Ladda om**, så att den nya versionen används direkt (dock inte mitt i ett pass som pågår). Då hämtar telefonerna den nya versionen nästa gång appen öppnas med internet.
 
 ## Filer
 
