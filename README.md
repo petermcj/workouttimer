@@ -15,7 +15,10 @@ Intervallklocka för CrossCage-pass, byggd som en webbapp (PWA) som installeras 
 - Ordning på stationen: alla set av en övning i taget (A A B B) eller växla mellan övningarna (A B A B)
 - Egna tider för arbete och vila per övning och varv
 - Pauser för byte av övning, byte av station och mellan varv
-- Mallar för att komma igång snabbt, och Ångra efter större ändringar
+- Meny längst ner: Pass, Plan, Kör, Övningar och Inställningar
+- Egna pass med övningar, som kan köras direkt eller användas som mall, plus inbyggda mallar och Ångra efter större ändringar
+- Övningsbibliotek med egna övningar och beskrivningar som visas i klockan under genomgång och arbete
+- Säkerhetskopia: exportera pass, övningar, plan och inställningar till en fil och läs in den igen
 - Röst som läser upp övningar, byten och stretch (valfritt)
 - Knappar för −30 s och +30 s under passet
 - Mellanövning som alla gör samtidigt, mellan varv eller efter var X:e station
@@ -58,6 +61,10 @@ Appen måste ligga på en webbadress med https, till exempel GitHub Pages (se ne
 | `manifest.webmanifest` | Appens namn, ikoner och färger |
 | `sw.js` | Service worker som gör att appen fungerar offline |
 | `icons/`, `apple-touch-icon.png` | App-ikoner |
+
+## Säkerhetskopia
+
+Under Pass → Säkerhetskopia sparas allt i en JSON-fil. Läs in filen med Importera om appen har krånglat, på en ny telefon eller efter en ny version. Vid inläsning ersätts ett pass eller en övning med samma namn bara om kopian i filen är nyare. Passet i Plan och inställningarna återställs, och det går att ångra direkt efteråt.
 
 ## Säkerhet och beroenden
 
