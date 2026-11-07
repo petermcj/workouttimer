@@ -35,19 +35,56 @@ button,input,select{touch-action:manipulation}
 }
 html,body{background:var(--bg);color:var(--fg)}
 body{font-family:var(--body);font-size:15px;line-height:1.45;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px calc(88px + env(safe-area-inset-bottom,0px))}
-.wrap{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+  padding:0}
+html,body{height:100%;overflow:hidden}
+.wrap{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px))}
+.inner{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.curbar{flex:none;display:flex;align-items:center;gap:10px;background:var(--panel);border-bottom:1px solid var(--line);padding:calc(8px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
+.curbar .ci{flex:1;min-width:0;background:none;border:0;color:var(--fg);text-align:left;padding:0;font:inherit;cursor:pointer}
+.curbar .cn{display:block;font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.curbar .cs{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.curbar .crun{flex:none;background:var(--work);color:var(--work-ink);border:0;border-radius:8px;padding:8px 14px;font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
 header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
 h1{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.02em;margin:0;text-transform:uppercase;line-height:1}
 h1 span{color:var(--work)}
 .sub{color:var(--muted);font-size:13px}
-.nav{position:fixed;left:0;right:0;bottom:0;z-index:10;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--panel);border-top:1px solid var(--line);padding:4px max(6px,env(safe-area-inset-left,0px)) calc(4px + env(safe-area-inset-bottom,0px))}
+.nav{flex:none;z-index:10;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--panel);border-top:1px solid var(--line);padding:4px max(6px,env(safe-area-inset-left,0px)) calc(4px + env(safe-area-inset-bottom,0px))}
 .nav button{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:var(--muted);padding:6px 2px;border-radius:8px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.02em;text-transform:uppercase}
 .nav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:380px){.nav button{letter-spacing:0;font-size:11px}}@media (max-width:340px){.nav button{font-size:10px}}
 .nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .nav button[aria-selected="true"]{color:var(--work)}
 .list{display:flex;flex-direction:column;gap:8px}
+.edhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.edhead .back{background:none;border:0;color:var(--muted);font:inherit;font-size:14px;padding:4px 0;cursor:pointer}
+.edtitle{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;justify-content:flex-end}
+.edtitle #edTitle{font-family:var(--display);font-weight:700;font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status{font-size:12px;color:var(--muted);white-space:nowrap}
+.status.bad{color:var(--danger)}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;background:var(--panel);border-radius:10px;padding:4px}
+.steps button{background:none;border:0;color:var(--muted);border-radius:7px;padding:8px 2px;font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;display:flex;gap:6px;justify-content:center;align-items:center}
+.steps button b{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid currentColor;font-size:11px}
+.steps button[aria-selected="true"]{background:var(--fg);color:var(--bg)}
+.pane{display:flex;flex-direction:column;gap:14px}
+.scard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.scard .hd{display:flex;align-items:center;gap:6px}
+.scard .hd b{flex:1;font-family:var(--display);font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.scard .hd button:disabled{opacity:.3}
+.scard .hd button,.slot button.x{background:none;border:1px solid var(--line);color:var(--fg);border-radius:7px;width:34px;height:30px;font:inherit;cursor:pointer}
+.slot{display:flex;align-items:center;gap:8px}
+.slot .lt{width:20px;font-family:var(--display);font-weight:700;color:var(--work)}
+.slot .nmb{flex:1;min-width:0;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:7px;color:var(--fg);padding:8px 10px;font:inherit;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot .nmb.empty{color:var(--muted);border-style:dashed}
+.scard .addex{align-self:flex-start;background:none;border:0;color:var(--work);font:inherit;font-size:14px;padding:4px 0;cursor:pointer}
+.sheet{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}
+.sheetbox{background:var(--bg);border:1px solid var(--line);border-radius:14px 14px 0 0;width:min(620px,100%);max-height:88vh;overflow:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.sheetbox .top{display:flex;align-items:center;justify-content:space-between}
+.opt{display:flex;flex-direction:column;gap:2px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--fg);padding:10px 12px;font:inherit;cursor:pointer}
+.opt small{color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--work);box-shadow:0 0 0 1px var(--work) inset}
+.pick{display:flex;align-items:center;gap:8px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--fg);padding:10px 12px;font:inherit;cursor:pointer}
+.pick .nm{flex:1}
 .item{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .item .top{display:flex;align-items:center;gap:8px}
 .item .nm{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
@@ -142,10 +179,7 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 .updbar{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(520px,calc(100% - 32px));display:flex;align-items:center;gap:12px;background:var(--work);color:var(--work-ink);border-radius:10px;padding:10px 10px 10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);z-index:21;font-size:14px;font-weight:600}
 .updbar span{flex:1}
 .updbar button{background:var(--work-ink);color:var(--work);border:0;border-radius:8px;padding:8px 12px;font:inherit;font-weight:700;cursor:pointer}
-.savebar{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(520px,calc(100% - 32px));display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--work);border-radius:10px;padding:8px 8px 8px 14px;box-shadow:0 6px 24px rgba(0,0,0,.45);z-index:19;font-size:14px}
-.savebar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.savebar button{background:var(--work);color:var(--work-ink);border:0;border-radius:8px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer}
-body.focus .savebar{display:none!important}
+
 .toast button{background:none;border:0;color:var(--bg);font:inherit;font-weight:700;text-decoration:underline;padding:6px 8px;cursor:pointer}
 .flash{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.12em;text-transform:uppercase;background:var(--bg);color:var(--fg);border-radius:8px;padding:2px 14px}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
@@ -191,44 +225,113 @@ body.focus .music,body.focus .next,body.focus .ctrls,body.focus .runbar,body.foc
 body.focus .music:hover,body.focus .music:focus-within,body.focus .next:hover,body.focus .ctrls:hover,body.focus .runbar:hover,body.focus .ctrls:focus-within,body.focus .runbar:focus-within{opacity:1}
 body.focus .face{padding-block:28px}
 body.focus .clock{font-size:clamp(120px,42vw,260px)}
-body.focus .wrap{gap:12px}
+body.focus .inner{gap:12px}
+body.focus .curbar{display:none!important}
+body.onrun header{display:none}
+body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--line)}
 @media (prefers-reduced-motion:reduce){.face{transition:none}}
 </style>
 
 </head>
 <body>
 <div class="wrap">
+  <div class="curbar" id="curBar" hidden>
+    <button class="ci" id="curOpen" aria-label="Öppna passet"><span class="cn" id="edTitle"></span><span class="cs"><span id="curSum"></span> · <span class="status" id="saveState"></span></span></button>
+    <button class="crun" id="curRun">▶ Kör</button>
+  </div>
+  <div class="scroll" id="scroller"><div class="inner">
   <header>
     <h1>Cross<span>Cage</span> klocka</h1>
     <div class="sub" id="sub"></div>
   </header>
 
-  <nav class="nav" role="tablist" aria-label="Meny">
-    <button id="tabPass" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg><span>Pass</span></button>
-    <button id="tabPlan" role="tab" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>Plan</span></button>
-    <button id="tabRun" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Kör</span></button>
-    <button id="tabEx" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/></svg><span>Övningar</span></button>
-    <button id="tabSet" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span>Inställningar</span></button>
-  </nav>
 
   <!-- PLAN -->
-  <section id="plan">
-    <div class="block" style="border-top:0;padding-top:0">
-      <div class="label">Passet</div>
-      <div class="passrow"><input id="passName" maxlength="40" placeholder="Namn, t.ex. Ben 45 min" aria-label="Passets namn"><button class="btn primary" id="passSave">Spara</button><button class="btn" id="passNew">Nytt</button></div>
-      <div class="sub" id="passMsg">Laddar sparade pass…</div>
+  <section id="plan" hidden>
+    <div class="edhead">
+      <button class="back" id="edBack">‹ Alla pass</button>
+    </div>
+    <div class="steps" role="tablist" aria-label="Steg">
+      <button id="stepPass" role="tab" data-step-to="pass"><b>1</b>Pass</button>
+      <button id="stepEx" role="tab" data-step-to="ex"><b>2</b>Övningar</button>
+      <button id="stepTime" role="tab" data-step-to="time"><b>3</b>Tider</button>
+      <button id="stepRun" role="tab" data-step-to="run"><b>4</b>Kör</button>
     </div>
 
-    <div class="block">
-      <div class="label">Upplägg</div>
-      <div class="row">
-        <label for="st">Stationer</label>
-        <div class="num"><button data-step="st:-1" aria-label="Minska">−</button><input id="st" type="number" inputmode="numeric" min="1" max="20"><button data-step="st:1" aria-label="Öka">+</button></div><span class="unit">st</span>
+    <div class="pane" id="panePass">
+      <div class="block" style="border-top:0;padding-top:0">
+        <label class="field"><span class="label">Namn</span><input id="passName" maxlength="40" placeholder="Namn, t.ex. Ben 45 min" aria-label="Passets namn"></label>
+        <label class="field"><span class="label">Beskrivning</span><textarea id="passDesc" rows="3" maxlength="500" placeholder="T.ex. fokus, utrustning eller vem passet passar"></textarea></label>
+        <div class="sub" id="passMsg">Ändringar sparas automatiskt.</div>
+        <div class="passrow" style="flex-wrap:wrap"><button class="btn" id="passDup">Duplicera</button><button class="btn" id="passDefault">Använd som standard för nya pass</button><button class="btn" id="passDel">Ta bort passet</button></div>
       </div>
-      <div class="row">
-        <label for="ex">Övningar per station</label>
-        <div class="num"><button data-step="ex:-1" aria-label="Minska">−</button><input id="ex" type="number" inputmode="numeric" min="1" max="4"><button data-step="ex:1" aria-label="Öka">+</button></div><span class="unit">st</span>
+    </div>
+
+    <div class="pane" id="paneEx" hidden>
+      <div class="block" style="border-top:0;padding-top:0">
+        <div class="label">Stationer</div>
+        <div class="sub">Lägg till en station genom att välja dess första övning. Flera övningar på samma station blir A, B och så vidare.</div>
+        <div class="list" id="stCards"></div>
+        <button class="btn primary" id="stAdd">+ Lägg till station</button>
+        <div class="chips"><button id="exFill">Fyll tomma med förslag</button><button id="exClear">Töm alla övningar</button></div>
       </div>
+      <div class="block">
+      <div class="label">Visa i klockan</div>
+      <div class="mode three" role="group" aria-label="Visa i klockan">
+        <button id="nsName" aria-pressed="true">Övningens namn</button>
+        <button id="nsNum" aria-pressed="false">Övning 1, 2, 3</button>
+        <button id="nsLetter" aria-pressed="false">Övning A, B</button>
+      </div>
+      <div class="sub" id="nsHint"></div>
+    </div>
+      <details class="block fold" data-fold="mid"><summary><span>Mellanövning</span><span class="fsum" id="sum_mid"></span></summary><div class="foldin">
+      
+      <div class="mode three" role="group" aria-label="Mellanövning">
+        <button id="midOff" aria-pressed="true">Ingen</button>
+        <button id="midRound" aria-pressed="false">Mellan varv</button>
+        <button id="midSt" aria-pressed="false">Efter stationer</button>
+      </div>
+      <div id="midBox" style="display:flex;flex-direction:column;gap:8px">
+        <div class="row" id="midEveryRow">
+          <label for="midEvery">Efter var<small id="midEverySub"></small></label>
+          <div class="num"><button data-step="midEvery:-1" aria-label="Minska">−</button><input id="midEvery" type="number" inputmode="numeric" min="1" max="10"><button data-step="midEvery:1" aria-label="Öka">+</button></div><span class="unit">station</span>
+        </div>
+        <div class="row">
+          <label for="midTime">Tid för mellanövningen<small>alla gör samma övning</small></label>
+          <div class="num"><button data-step="midTime:-5" aria-label="Minska">−</button><input id="midTime" type="number" inputmode="numeric" min="10" max="300"><button data-step="midTime:5" aria-label="Öka">+</button></div><span class="unit">s</span>
+        </div>
+        <label class="sub" for="midList">Mellanövningar, en per rad. De tas i tur och ordning.</label>
+        <textarea id="midList" rows="3" maxlength="1000"></textarea>
+        <div class="sub" id="midHint"></div>
+      </div>
+    </div></details>
+      <details class="block fold" data-fold="stretch"><summary><span>Stretch i slutet</span><span class="fsum" id="sum_stretch"></span></summary><div class="foldin">
+      
+      <div class="row">
+        <label for="stretch">Stretch<small id="stretchSub">efter sista varvet</small></label>
+        <div class="num"><button data-step="stretch:-1" aria-label="Minska">−</button><input id="stretch" type="number" inputmode="numeric" min="0" max="20"><button data-step="stretch:1" aria-label="Öka">+</button></div><span class="unit">min</span>
+      </div>
+      <div id="stretchBox" style="display:flex;flex-direction:column;gap:8px">
+        <label class="sub" for="stretchList">Stretchövningar, en per rad. Tiden delas lika mellan dem.</label>
+        <textarea id="stretchList" rows="5" maxlength="1000"></textarea>
+        <div class="chips"><button id="stretchSuggest">Föreslå stretch</button></div>
+        <div class="sub" id="stretchHint"></div>
+      </div>
+    </div></details>
+      <details class="block fold" data-fold="extimes">
+      <summary>Egna tider per övning <span id="exCount"></span></summary>
+      <div class="mode" role="group" aria-label="Tider per övning" style="margin-top:10px">
+        <button id="exModeOff" aria-pressed="true">Samma tider för alla övningar</button>
+        <button id="exModeOn" aria-pressed="false">Egna tider per övning</button>
+      </div>
+      <div class="sub" id="exHint" style="margin-top:8px" hidden></div>
+      <div id="exList"></div>
+    </details>
+    </div>
+
+    <div class="pane" id="paneTime" hidden>
+      <div class="block">
+      <div class="label">Set och varv</div>
       <div class="row" id="setsRow">
         <label for="sets">Set per övning</label>
         <div class="num"><button data-step="sets:-1" aria-label="Minska">−</button><input id="sets" type="number" inputmode="numeric" min="1" max="6"><button data-step="sets:1" aria-label="Öka">+</button></div><span class="unit">st</span>
@@ -250,8 +353,7 @@ body.focus .wrap{gap:12px}
         <div class="num"><button data-step="rd:-1" aria-label="Minska">−</button><input id="rd" type="number" inputmode="numeric" min="1" max="6"><button data-step="rd:1" aria-label="Öka">+</button></div><span class="unit">st</span>
       </div>
     </div>
-
-    <div class="block">
+      <div class="block">
       <div class="label">Uppvärmning och genomgång</div>
       <div class="row">
         <label for="warm">Uppvärmning<small>i början av passet</small></label>
@@ -278,54 +380,16 @@ body.focus .wrap{gap:12px}
         <div class="num"><button data-step="ready:-15" aria-label="Minska">−</button><input id="ready" type="number" inputmode="numeric" min="0" max="600"><button data-step="ready:15" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
     </div>
-
-    <details class="block fold" data-fold="stretch"><summary><span>Stretch i slutet</span><span class="fsum" id="sum_stretch"></span></summary><div class="foldin">
-      
-      <div class="row">
-        <label for="stretch">Stretch<small id="stretchSub">efter sista varvet</small></label>
-        <div class="num"><button data-step="stretch:-1" aria-label="Minska">−</button><input id="stretch" type="number" inputmode="numeric" min="0" max="20"><button data-step="stretch:1" aria-label="Öka">+</button></div><span class="unit">min</span>
-      </div>
-      <div id="stretchBox" style="display:flex;flex-direction:column;gap:8px">
-        <label class="sub" for="stretchList">Stretchövningar, en per rad. Tiden delas lika mellan dem.</label>
-        <textarea id="stretchList" rows="5" maxlength="1000"></textarea>
-        <div class="chips"><button id="stretchSuggest">Föreslå stretch</button></div>
-        <div class="sub" id="stretchHint"></div>
-      </div>
-    </div></details>
-
-    <details class="block fold" data-fold="mid"><summary><span>Mellanövning</span><span class="fsum" id="sum_mid"></span></summary><div class="foldin">
-      
-      <div class="mode three" role="group" aria-label="Mellanövning">
-        <button id="midOff" aria-pressed="true">Ingen</button>
-        <button id="midRound" aria-pressed="false">Mellan varv</button>
-        <button id="midSt" aria-pressed="false">Efter stationer</button>
-      </div>
-      <div id="midBox" style="display:flex;flex-direction:column;gap:8px">
-        <div class="row" id="midEveryRow">
-          <label for="midEvery">Efter var<small id="midEverySub"></small></label>
-          <div class="num"><button data-step="midEvery:-1" aria-label="Minska">−</button><input id="midEvery" type="number" inputmode="numeric" min="1" max="10"><button data-step="midEvery:1" aria-label="Öka">+</button></div><span class="unit">station</span>
-        </div>
-        <div class="row">
-          <label for="midTime">Tid för mellanövningen<small>alla gör samma övning</small></label>
-          <div class="num"><button data-step="midTime:-5" aria-label="Minska">−</button><input id="midTime" type="number" inputmode="numeric" min="10" max="300"><button data-step="midTime:5" aria-label="Öka">+</button></div><span class="unit">s</span>
-        </div>
-        <label class="sub" for="midList">Mellanövningar, en per rad. De tas i tur och ordning.</label>
-        <textarea id="midList" rows="3" maxlength="1000"></textarea>
-        <div class="sub" id="midHint"></div>
-      </div>
-    </div></details>
-
-    <div class="label" style="margin-top:4px">Fördelning arbete och vila</div>
-    <div class="mode" role="group" aria-label="Läge">
+      <div class="label" style="margin-top:4px">Fördelning arbete och vila</div>
+      <div class="mode" role="group" aria-label="Läge">
       <button id="modeAuto" aria-pressed="true">Räkna från totaltid</button>
       <button id="modeManual" aria-pressed="false">Sätt arbetstid själv</button>
     </div>
-    <div class="mode" role="group" aria-label="Tider per varv" id="prGroup">
+      <div class="mode" role="group" aria-label="Tider per varv" id="prGroup">
       <button id="prSame" aria-pressed="true">Samma tider alla varv</button>
       <button id="prEach" aria-pressed="false">Olika tider per varv</button>
     </div>
-
-    <div class="block" id="autoBlock">
+      <div class="block" id="autoBlock">
       <div class="row">
         <label for="total">Total tid för passet<small>inkl. alla pauser</small></label>
         <div class="num"><button data-step="total:-1" aria-label="Minska">−</button><input id="total" type="number" inputmode="numeric" min="10" max="180"><button data-step="total:1" aria-label="Öka">+</button></div><span class="unit">min</span>
@@ -351,8 +415,7 @@ body.focus .wrap{gap:12px}
         </div>
       </div>
     </div>
-
-    <div class="block" id="manualBlock" hidden>
+      <div class="block" id="manualBlock" hidden>
       <div id="roundsManual" style="display:flex;flex-direction:column;gap:12px" hidden></div>
       <div class="row" id="workRow">
         <label for="work">Arbete per set</label>
@@ -363,17 +426,7 @@ body.focus .wrap{gap:12px}
         <div class="num"><button data-step="setRest:-5" aria-label="Minska">−</button><input id="setRest" type="number" inputmode="numeric" min="0" max="300"><button data-step="setRest:5" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
     </div>
-
-    <details class="block fold" data-fold="hold"><summary><span>Under passet</span><span class="fsum" id="sum_hold"></span></summary><div class="foldin">
-      
-      <div class="mode" role="group" aria-label="Under passet">
-        <button id="holdOn" aria-pressed="true">Håll sluttiden</button>
-        <button id="holdOff" aria-pressed="false">Följ planen</button>
-      </div>
-      <div class="sub" id="holdHint"></div>
-    </div></details>
-
-    <div class="block">
+      <div class="block">
       <div class="label">Pauser vid byten</div>
       <div class="mode" role="group" aria-label="Tid för byten">
         <button id="oneOff" aria-pressed="true">Egna tider för byten</button>
@@ -393,8 +446,15 @@ body.focus .wrap{gap:12px}
         <div class="num"><button data-step="rdRest:-15" aria-label="Minska">−</button><input id="rdRest" type="number" inputmode="numeric" min="0" max="600"><button data-step="rdRest:15" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
     </div>
-
-    <div class="block">
+      <details class="block fold" data-fold="hold"><summary><span>Under passet</span><span class="fsum" id="sum_hold"></span></summary><div class="foldin">
+      
+      <div class="mode" role="group" aria-label="Under passet">
+        <button id="holdOn" aria-pressed="true">Håll sluttiden</button>
+        <button id="holdOff" aria-pressed="false">Följ planen</button>
+      </div>
+      <div class="sub" id="holdHint"></div>
+    </div></details>
+      <div class="block">
       <div class="result">
         <div class="w"><b id="oWork">–</b><span>Arbete/set</span></div>
         <div class="r"><b id="oSet">–</b><span>Setvila</span></div>
@@ -425,35 +485,18 @@ body.focus .wrap{gap:12px}
         </div>
       </div>
     </div>
-
-    
-
-    
-
-    
-
-    <details>
-      <summary>Övningar: namn och egna tider <span id="exCount"></span></summary>
-      <div class="label" style="margin-top:10px">Visa i klockan</div>
-      <div class="mode three" role="group" aria-label="Visa i klockan">
-        <button id="nsName" aria-pressed="true">Övningens namn</button>
-        <button id="nsNum" aria-pressed="false">Övning 1, 2, 3</button>
-        <button id="nsLetter" aria-pressed="false">Övning A, B</button>
+      <div hidden>
+      <div class="row">
+        <label for="st">Stationer</label>
+        <div class="num"><button data-step="st:-1" aria-label="Minska">−</button><input id="st" type="number" inputmode="numeric" min="1" max="20"><button data-step="st:1" aria-label="Öka">+</button></div><span class="unit">st</span>
       </div>
-      <div class="sub" id="nsHint"></div>
-      <div class="label" style="margin-top:10px">Namn på övningarna</div>
-      <div class="sub">Skriv eller välj ur övningsbanken. Övningar du skrivit in själv kommer också med i listan.</div>
-      <div class="chips" style="margin-top:6px"><button id="exFill">Fyll tomma med förslag</button><button id="exClear">Töm alla namn</button></div>
-      <datalist id="bankList"></datalist>
-      <div class="mode" role="group" aria-label="Tider per övning" style="margin-top:10px">
-        <button id="exModeOff" aria-pressed="true">Samma tider för alla övningar</button>
-        <button id="exModeOn" aria-pressed="false">Egna tider per övning</button>
-      </div>
-      <div class="sub" id="exHint" style="margin-top:8px" hidden></div>
-      <div id="exList"></div>
-    </details>
+      <div class="row">
+        <label for="ex">Övningar per station</label>
+        <div class="num"><button data-step="ex:-1" aria-label="Minska">−</button><input id="ex" type="number" inputmode="numeric" min="1" max="4"><button data-step="ex:1" aria-label="Öka">+</button></div><span class="unit">st</span>
+      </div></div>
+    </div>
 
-    <button class="go" id="goBtn">Till klockan →</button>
+    <button class="go" id="goBtn">Nästa →</button>
     <button class="btn" id="installBtn" hidden style="padding:12px">Installera appen</button>
   </section>
 
@@ -461,19 +504,15 @@ body.focus .wrap{gap:12px}
   <!-- PASS -->
   <section id="passes" hidden>
     <div class="block" style="border-top:0;padding-top:0">
-      <div class="passrow"><button class="btn primary" id="passNew2">Nytt pass</button></div>
+      <div class="passrow"><button class="btn primary" id="passNew">+ Nytt pass</button></div>
       <div class="label">Mina pass</div>
-      <div class="sub">Ett sparat pass innehåller upplägg, tider och övningar. Använd det som det är, eller som mall för ett nytt pass.</div>
+      <div class="sub">Allt du ändrar i ett pass sparas automatiskt. Det senast använda passet ligger överst.</div>
       <div class="list" id="passList"></div>
     </div>
-    <div class="block">
-      <div class="label">Inbyggda mallar</div>
-      <div class="chips" id="tplChips"></div>
-      <div class="sub">En inbyggd mall ställer in upplägget. Övningarna i Plan behålls.</div>
-    </div>
+    
     <div class="block">
       <div class="label">Säkerhetskopia</div>
-      <div class="sub">Spara allt i en fil: dina pass, övningar med beskrivningar, passet i Plan och inställningarna. Läs in filen igen om appen har krånglat, på en ny telefon eller efter en ny version.</div>
+      <div class="sub">Spara allt i en fil: dina pass, övningar med beskrivningar, standardvärden och inställningar. Läs in filen igen om appen har krånglat, på en ny telefon eller efter en ny version.</div>
       <div class="passrow"><button class="btn" id="expBtn">Exportera</button><button class="btn" id="impBtn">Importera</button></div>
       <input type="file" id="impFile" accept="application/json,.json" hidden>
       <div class="sub" id="bkMsg"></div>
@@ -496,9 +535,9 @@ body.focus .wrap{gap:12px}
   <section id="settings" hidden>
     <div class="block" style="border-top:0;padding-top:0">
       <div class="label">Standard för nya pass</div>
-      <div class="sub">Nytt pass börjar med de här värdena: upplägg, tider, pauser, mellanövning, stretch och marginal. Ställ in Plan som du vill ha det och tryck Använd Plan som standard. Övningarnas namn ingår inte.</div>
+      <div class="sub">Nya pass kan börja med de här värdena: set, varv, tider, pauser, mellanövning, stretch och marginal. Ställ in ett pass som du vill ha det och tryck Använd öppet pass som standard. Stationer och övningar ingår inte.</div>
       <div class="item"><div class="meta2" id="defSum"></div></div>
-      <div class="passrow" style="flex-wrap:wrap"><button class="btn primary" id="defSave">Använd Plan som standard</button><button class="btn" id="defReset">Återställ appens standard</button></div>
+      <div class="passrow" style="flex-wrap:wrap"><button class="btn primary" id="defSave">Använd öppet pass som standard</button><button class="btn" id="defReset">Återställ appens standard</button></div>
     </div>
     <div class="block">
       <div class="label">Språk</div>
@@ -616,11 +655,35 @@ body.focus .wrap{gap:12px}
     <div class="tiny"><button id="bReset">Börja om</button><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
     <div class="sub" id="wakeMsg" style="text-align:center" hidden></div>
   </section>
+  </div></div>
+  <nav class="nav" role="tablist" aria-label="Meny">
+    <button id="tabPass" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg><span>Pass</span></button>
+    <button id="tabRun" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Klocka</span></button>
+    <button id="tabEx" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/></svg><span>Övningar</span></button>
+    <button id="tabSet" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span>Inställningar</span></button>
+  </nav>
+  <div class="sheet" id="newSheet" hidden role="dialog" aria-modal="true" aria-labelledby="newTitle">
+    <div class="sheetbox">
+      <div class="label" id="newTitle">Nytt pass</div>
+      <label class="field"><span>Namn</span><input id="newName" maxlength="40"></label>
+      <label class="field"><span>Beskrivning (valfritt)</span><textarea id="newDesc" rows="2" maxlength="500" placeholder="T.ex. fokus, utrustning eller vem passet passar"></textarea></label>
+      <div class="label">Börja från</div>
+      <div class="list" id="newFrom"></div>
+      <div class="passrow"><button class="btn" id="newCancel">Avbryt</button><button class="btn primary" id="newCreate">Skapa pass</button></div>
+    </div>
+  </div>
+  <div class="sheet" id="pickSheet" hidden role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+    <div class="sheetbox">
+      <div class="top"><div class="label" id="pickTitle">Välj övning</div><button class="smallbtn" id="pickClose">Stäng</button></div>
+      <input class="search" id="pickSearch" type="search" placeholder="Sök, eller skriv en ny övning" aria-label="Sök övning" autocomplete="off">
+      <div class="chips" id="pickGroups"></div>
+      <div class="list" id="pickList"></div>
+    </div>
+  </div>
   <div class="updbar" id="updBar" role="status" hidden><span>En ny version av appen finns.</span><button id="updReload">Ladda om</button></div>
-  <div class="savebar" id="saveBar" hidden><span id="saveBarMsg">Ändringarna är inte sparade</span><button id="saveBarBtn">Spara</button></div>
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=crosscage-v15"></script>
+<script src="app.js?v=crosscage-v16"></script>
 </body>
 </html>
