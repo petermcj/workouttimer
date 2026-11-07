@@ -84,7 +84,8 @@ h1 span{color:var(--work)}
 .opt small{color:var(--muted)}
 .opt[aria-pressed="true"]{border-color:var(--work);box-shadow:0 0 0 1px var(--work) inset}
 .pick{display:flex;align-items:center;gap:8px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--fg);padding:10px 12px;font:inherit;cursor:pointer}
-.pick .nm{flex:1}
+.pick .nm{flex:1;min-width:0}
+.pick{overflow:hidden}
 .item{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .item .top{display:flex;align-items:center;gap:8px}
 .item .nm{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
@@ -99,6 +100,10 @@ details.item{border-top:1px solid var(--line)}
 .field{display:flex;flex-direction:column;gap:4px}
 .field input,.field select,.search{background:var(--bg);border:1px solid var(--line);border-radius:6px;color:var(--fg);padding:8px;font:inherit;font-size:14px;min-width:0}
 .desc{font-size:14px;line-height:1.35;opacity:.85;max-width:34em;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.desc.long{-webkit-line-clamp:8;text-align:left}
+.info{display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:1.4}
+.info b{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pick .nm small{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--work);outline-offset:2px}
 section{display:flex;flex-direction:column;gap:14px}
 .lang{display:flex;gap:2px;background:var(--panel);border-radius:7px;padding:3px;margin-left:auto}
@@ -523,7 +528,7 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <section id="exlib" hidden>
     <div class="block" style="border-top:0;padding-top:0">
       <div class="label">Övningar</div>
-      <div class="sub">Övningsbanken som Plan föreslår från. Lägg till egna övningar och skriv beskrivningar. Beskrivningen visas i klockan under genomgången och arbetet.</div>
+      <div class="sub">Appens övningar har instruktioner och vad du ska titta extra på. Skriv egna kommentarer på dem, eller lägg till egna övningar. Instruktionerna visas i klockan under genomgången.</div>
       <input class="search" id="exSearch" type="search" placeholder="Sök övning" aria-label="Sök övning" autocomplete="off">
       <div class="chips" id="exGroups"></div>
       <div class="passrow"><button class="btn primary" id="exAdd">Lägg till övning</button></div>
@@ -684,6 +689,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=crosscage-v16"></script>
+<script src="app.js?v=crosscage-v17"></script>
 </body>
 </html>

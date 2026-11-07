@@ -280,7 +280,10 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.reload();
     await page.click("#tabRun");
     for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Genomgång"; i++) await page.click("#bNext");
-    assert(await page.isVisible("#rDesc") && (await page.textContent("#rDesc")) === "Fötterna axelbrett.", "no description in the demo");
+    const d = await page.textContent("#rDesc");
+    assert(await page.isVisible("#rDesc") && d.startsWith("Fötterna axelbrett.") && /Sätt dig bakåt/.test(d) && /Titta på: Knäna följer tårna/.test(d), "the demo should show your comment, how to do it and what to watch: " + d);
+    for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Arbete"; i++) await page.click("#bNext");
+    assert((await page.textContent("#rDesc")) === "Fötterna axelbrett.", "during work your own comment should show");
   });
 
   await test("an imported workout cannot push settings outside their range", async () => {
@@ -461,6 +464,51 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.fill("#pickSearch", "Rodd");
     await page.press("#pickSearch", "Enter");
     assert(await page.textContent(".scard:nth-child(2) .nmb") === "Rodd", "Enter picked a partial match instead of the typed exercise");
+  });
+
+  await test("every built-in exercise and stretch has instructions, in Swedish and English", async () => {
+    const page = await open({});
+    const r = await page.evaluate(() => {
+      const fails = [];
+      for (const lang of ["sv", "en"]) {
+        document.querySelector('[data-lang="' + lang + '"]').click();
+        const all = [...document.querySelectorAll("#exItems details")];
+        if (all.length < 46) fails.push(lang + ": only " + all.length + " exercises listed");
+      }
+      document.querySelector('[data-lang="sv"]').click();
+      return fails;
+    });
+    assert(!r.length, r.join("; "));
+    await page.click("#tabEx");
+    await page.fill("#exSearch", "kettlebell swing");
+    await page.click("#exItems summary");
+    const txt = await page.textContent("#exItems details[open]");
+    assert(/Utförande/.test(txt) && /Titta särskilt på/.test(txt) && /Kraften kommer från höften/.test(txt), "the instructions are not shown: " + txt.slice(0, 200));
+    await page.click("#tabSet"); await page.click('[data-lang="en"]'); await page.click("#tabEx");
+    await page.fill("#exSearch", "kettlebell swing");
+    await page.evaluate(() => (document.querySelector("#exItems details").open = true));
+    assert(/Power comes from the hips/.test(await page.textContent("#exItems details[open]")), "no English instructions");
+  });
+
+  await test("own comments on a built-in exercise and own exercises with instructions are saved", async () => {
+    const page = await open({ st: 1, ex: 1, names: [["Sandsäck"]], instr: 20 });
+    await page.click("#tabEx");
+    await page.fill("#exSearch", "Planka");
+    await page.click("#exItems summary");
+    await page.fill("#exItems details[open] textarea", "Vi kör på knä första veckan.");
+    await page.fill("#exSearch", "Sandsäck");
+    await page.click("#exAdd");
+    const areas = await page.$$("#exItems details[open] textarea");
+    assert(areas.length === 2, "an own exercise should have How and Watch fields");
+    await areas[0].fill("Lyft säcken till axeln.");
+    await areas[1].fill("Rak rygg i lyftet.");
+    const lib = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_exlib")));
+    assert(lib.some((x) => x.id === "b:Planka" && x.desc === "Vi kör på knä första veckan."), "the comment on Planka was not saved");
+    assert(lib.some((x) => x.name === "Sandsäck" && x.desc === "Lyft säcken till axeln." && x.look === "Rak rygg i lyftet."), "the own exercise was not saved");
+    await page.click("#tabRun");
+    for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Genomgång"; i++) await page.click("#bNext");
+    const d = await page.textContent("#rDesc");
+    assert(/Lyft säcken till axeln/.test(d) && /Titta på: Rak rygg i lyftet/.test(d), "the own exercise's instructions are not on the timer: " + d);
   });
 
   await browser.close();
