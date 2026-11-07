@@ -139,6 +139,13 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 .face.done{background:var(--panel)}
 .toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(520px,calc(100% - 32px));display:flex;align-items:center;gap:12px;background:var(--fg);color:var(--bg);border-radius:10px;padding:10px 10px 10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);z-index:20;font-size:14px}
 .toast span{flex:1}
+.updbar{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(520px,calc(100% - 32px));display:flex;align-items:center;gap:12px;background:var(--work);color:var(--work-ink);border-radius:10px;padding:10px 10px 10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);z-index:21;font-size:14px;font-weight:600}
+.updbar span{flex:1}
+.updbar button{background:var(--work-ink);color:var(--work);border:0;border-radius:8px;padding:8px 12px;font:inherit;font-weight:700;cursor:pointer}
+.savebar{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(520px,calc(100% - 32px));display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--work);border-radius:10px;padding:8px 8px 8px 14px;box-shadow:0 6px 24px rgba(0,0,0,.45);z-index:19;font-size:14px}
+.savebar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.savebar button{background:var(--work);color:var(--work-ink);border:0;border-radius:8px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer}
+body.focus .savebar{display:none!important}
 .toast button{background:none;border:0;color:var(--bg);font:inherit;font-weight:700;text-decoration:underline;padding:6px 8px;cursor:pointer}
 .flash{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.12em;text-transform:uppercase;background:var(--bg);color:var(--fg);border-radius:8px;padding:2px 14px}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
@@ -563,6 +570,7 @@ body.focus .wrap{gap:12px}
       <div class="sub" id="spMsg"></div>
     </div>
     <div class="sub">Inställningarna gäller den här telefonen och följer inte med när du laddar ett pass.</div>
+    <div class="sub" id="appVer" style="text-align:center;margin-top:8px"></div>
   </section>
 
   <section id="run" class="run" hidden>
@@ -601,9 +609,11 @@ body.focus .wrap{gap:12px}
     <div class="tiny"><button id="bReset">Börja om</button><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
     <div class="sub" id="wakeMsg" style="text-align:center" hidden></div>
   </section>
+  <div class="updbar" id="updBar" role="status" hidden><span>En ny version av appen finns.</span><button id="updReload">Ladda om</button></div>
+  <div class="savebar" id="saveBar" hidden><span id="saveBarMsg">Ändringarna är inte sparade</span><button id="saveBarBtn">Spara</button></div>
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=crosscage-v14"></script>
+<script src="app.js?v=crosscage-v15"></script>
 </body>
 </html>
