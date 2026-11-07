@@ -90,10 +90,10 @@ Tänk på detta när du ändrar appen:
 Det enda beroendet är Playwright, som bara kör testerna och aldrig följer med appen. Det och GitHub Actions i CI kontrolleras så här:
 
 - `package-lock.json` låser exakta versioner. CI installerar med `npm ci`, så testerna kör det som är granskat.
-- Jobbet **Sårbarheter** i `.github/workflows/test.yml` kör `npm audit` (kända CVE:er) och `npm audit signatures` (att paketen är signerade av registret). Det körs vid varje PR, vid push till `main` och varje måndag, så att nya sårbarheter i gamla versioner också hittas.
+- Arbetsflödet **Sårbarheter** (`.github/workflows/security.yml`) kör `npm audit` (kända CVE:er) och `npm audit signatures` (att paketen är signerade av registret). Det körs när beroendena ändras i en PR, vid push till `main`, varje måndag och manuellt under Actions. En ny CVE stoppar alltså inte PR:er som bara ändrar appen.
 - `.github/dependabot.yml` låter Dependabot föreslå nya versioner av Playwright och av GitHub Actions varje vecka, som PR:er som går igenom testerna.
 - GitHub Actions är låsta till en commit (SHA) i stället för en tagg som kan flyttas. Dependabot uppdaterar dem.
 
-Slå också på **Dependabot alerts** och **Dependabot security updates** under repots Settings → Code security, så att GitHub larmar och föreslår en rättning direkt när en sårbarhet publiceras.
+Det mesta skyddet kommer från en inställning som inte går att lägga i repot. Slå på **Dependabot alerts** och **Dependabot security updates** under repots Settings → Code security. Då larmar GitHub och öppnar en PR med rättningen så fort en sårbarhet publiceras, i stället för att vänta på den veckovisa uppdateringen. Det är också reservplanen: GitHub stänger av schemalagda körningar i ett repo som inte har ändrats på 60 dagar. Får du ett mejl om det, slå på arbetsflödet igen under Actions.
 
 Lägger du till ett beroende, kör `npm install paketet --save-dev` så att låsfilen uppdateras, och kör `npm audit` innan du committar.

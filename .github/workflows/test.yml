@@ -4,28 +4,11 @@ on:
   pull_request:
   push:
     branches: [main]
-  # Once a week, so new vulnerabilities in the versions we already use are found without a change
-  schedule:
-    - cron: "17 5 * * 1"
 
 permissions:
   contents: read
 
 jobs:
-  audit:
-    name: Sårbarheter (npm audit)
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 22
-      # Checks the exact versions in package-lock.json against known CVEs, and that every package's signature is valid
-      - run: npm ci --ignore-scripts --no-fund
-      - run: npm audit --audit-level=moderate
-      - run: npm audit signatures
-
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -34,6 +17,8 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
-      - run: npm ci --no-audit --no-fund
+          cache: npm
+      # No install scripts: the browser is installed explicitly in the next step
+      - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       - run: npm test
