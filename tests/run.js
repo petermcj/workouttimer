@@ -390,6 +390,79 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(await page.isVisible("#run"), "Run in the banner should open the timer");
   });
 
+  await test("starting the app does not overwrite the open workout's name, description or last run", async () => {
+    const c = { st: 2 };
+    const page = await open(null, { raw: { ccage: c, ccage_cur: '"p1"', ccage_migrated: "true",
+      ccage_passes: [{ id: "p1", name: "Ben", desc: "Kettlebells", updated: 5, lastRun: 7, cfg: JSON.stringify(c) }] } });
+    await page.waitForTimeout(1500);
+    const p = (await passesIn(page))[0];
+    assert(p.name === "Ben" && p.desc === "Kettlebells" && p.lastRun === 7 && p.updated === 5, "the workout was rewritten: " + JSON.stringify(p));
+  });
+
+  await test("the stored workout wins over an old copy on this phone, unless this phone has unsaved edits", async () => {
+    const stale = await open(null, { raw: { ccage: { st: 3 }, ccage_cur: '"p1"', ccage_migrated: "true",
+      ccage_passes: [{ id: "p1", name: "Ben", updated: 9, cfg: JSON.stringify({ st: 5 }) }] } });
+    await stale.waitForTimeout(1300);
+    assert(await stale.inputValue("#st") === "5" && JSON.parse((await passesIn(stale))[0].cfg).st === 5, "an old local copy replaced the stored workout");
+    const dirty = await open(null, { raw: { ccage: { st: 3 }, ccage_cur: '"p1"', ccage_migrated: "true", ccage_dirty: '"p1"',
+      ccage_passes: [{ id: "p1", name: "Ben", updated: 9, cfg: JSON.stringify({ st: 5 }) }] } });
+    await dirty.waitForFunction(() => document.getElementById("saveState").textContent === "Sparat");
+    assert(await dirty.inputValue("#st") === "3" && JSON.parse((await passesIn(dirty))[0].cfg).st === 3, "unsaved edits on this phone were lost");
+  });
+
+  await test("switching workouts right after an edit saves the edit to the right workout", async () => {
+    const page = await open(null, { raw: { ccage: { total: 45 }, ccage_cur: '"x"', ccage_migrated: "true",
+      ccage_passes: [{ id: "x", name: "X", updated: 2, cfg: JSON.stringify({ total: 45 }) }, { id: "y", name: "Y", updated: 1, cfg: JSON.stringify({ total: 30 }) }] } });
+    await page.click("#stepTime");
+    await page.click('[data-step="total:1"]');
+    await page.click("#tabPass");
+    const items = await page.$$("#passList .item");
+    for (const it of items) if ((await it.innerText()).startsWith("Y")) { await (await it.$("button:nth-child(2)")).click(); break; }
+    await page.waitForTimeout(1300);
+    const ps = await passesIn(page), X = ps.find((p) => p.id === "x"), Y = ps.find((p) => p.id === "y");
+    assert(JSON.parse(X.cfg).total === 46 && X.name === "X", "the edit did not reach X: " + X.cfg.slice(0, 80));
+    assert(JSON.parse(Y.cfg).total === 30 && Y.name === "Y", "Y was changed");
+    assert(await page.textContent("#edTitle") === "Y" && await page.inputValue("#total") === "30", "Y is not open");
+    // reopening X shows the edit
+    await page.click("#tabPass");
+    for (const it of await page.$$("#passList .item")) if ((await it.innerText()).startsWith("X")) { await (await it.$("button:nth-child(2)")).click(); break; }
+    assert(await page.inputValue("#total") === "46", "reopening X lost the edit");
+  });
+
+  await test("reloading after deleting the open workout does not create an untitled workout", async () => {
+    const page = await open(null, { raw: { ccage: { st: 4 }, ccage_cur: "null", ccage_migrated: "true",
+      ccage_passes: [{ id: "a", name: "A", updated: 1, cfg: JSON.stringify({ st: 2 }) }] } });
+    await page.reload(); await page.waitForTimeout(400);
+    const ps = await passesIn(page);
+    assert(ps.length === 1, "extra workouts were created: " + ps.map((p) => p.name).join(", "));
+  });
+
+  await test("importing a newer copy of the open workout shows it, and later edits keep it", async () => {
+    const page = await open({ st: 4 });
+    await page.click("#tabPass");
+    const file = { format: "crosscage-klocka", version: 1, passes: [{ name: "Test", updated: 99, cfg: { st: 8, total: 50 } }], exercises: [], settings: {} };
+    await page.setInputFiles("#impFile", { name: "b.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(file)) });
+    await page.waitForFunction(() => /Klart/.test(document.getElementById("bkMsg").textContent));
+    assert(await page.inputValue("#st") === "8", "the open workout still shows the old version");
+    await page.click("#tabPass"); await page.click("#passList .item button:nth-child(2)"); await page.click("#stepTime");
+    await page.click('[data-step="total:1"]');
+    await page.waitForFunction(() => document.getElementById("saveState").textContent === "Sparat");
+    const c = JSON.parse((await passesIn(page))[0].cfg);
+    assert(c.st === 8 && c.total === 51, "the edit saved the old version over the import: " + JSON.stringify({ st: c.st, total: c.total }));
+  });
+
+  await test("choosing an exercise keeps the workout's B slots, and Enter adds a typed exercise", async () => {
+    const page = await open({ st: 2, ex: 2, names: [] });
+    await page.click("#stepEx");
+    await page.click(".scard:nth-child(1) .nmb");
+    await page.fill("#pickSearch", "knäböj"); await page.click("#pickList .pick");
+    assert(await page.inputValue("#ex") === "2", "choosing an exercise dropped the B slots");
+    await page.click(".scard:nth-child(2) .nmb");
+    await page.fill("#pickSearch", "Rodd");
+    await page.press("#pickSearch", "Enter");
+    assert(await page.textContent(".scard:nth-child(2) .nmb") === "Rodd", "Enter picked a partial match instead of the typed exercise");
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;

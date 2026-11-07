@@ -86,6 +86,7 @@ function groupOf(name){const n=(name||"").trim().toLowerCase();if(!n)return null
   const o=(typeof libList==="function"?libList():[]).find(e=>e.id&&e.id[0]==="u"&&!e.deleted&&(e.name||"").toLowerCase()===n);return o&&o.group?o.group:null}
 let cfg={mode:"auto",st:8,ex:2,sets:2,rd:2,warm:10,instr:20,instrMode:"block",total:60,ratio:70,work:30,setRest:15,exRest:10,stRest:20,rdRest:60,sound:true,names:[],countdown:3,cdRest:false,vol:80,half:true,mix:"ambient",instrUnit:"per",instrTot:5,ready:60,perRound:false,rounds:[],exMode:false,exTimes:{},setsEach:false,roundSets:[],order:"block",oneRest:false,stretch:0,stretchList:[],mid:"off",midEvery:2,midTime:30,midList:[],nameStyle:"name",voice:false,stretchSeed:0,stretchAuto:false,marginMode:"buffer",margin:0,even:true,hold:true,lock:false,awake:true,spList:"",spStart:true,spPause:true,spDuck:false,spWorkVol:80,spRestVol:40,snd:{start:"bell",half:"double",rest:"fall",done:"chime",cd:"pip"}};
 const DEFAULTS=JSON.parse(JSON.stringify(cfg));
+try{if(localStorage.getItem("ccage")!=null&&localStorage.getItem("ccage_migrated")==null)localStorage.setItem("ccage_hadplan","true")}catch(e){}
 try{const s=JSON.parse(localStorage.getItem("ccage")||"null");if(s)cfg=Object.assign(cfg,s)}catch(e){}
 // Keep numbers inside the range of their input (and lists inside sane sizes), whatever was saved or imported.
 function clampCfg(){
@@ -307,17 +308,7 @@ $("toastUndo").onclick=async()=>{const fn=undoFn;undoFn=null;clearTimeout(undoT)
   try{await fn();render();$("toast").hidden=true}
   catch(e){$("toastMsg").textContent=T("Det gick inte att ångra. Kontrollera anslutningen.");undoT=setTimeout(()=>{$("toast").hidden=true},6000)}
   $("toastUndo").disabled=false};
-let bankKey="",bankPasses=null;
-function buildBank(){
-  let saved=[];try{saved=passes}catch(e){}
-  const key=lang+"|"+JSON.stringify(cfg.names)+"|"+libList().length;if(key===bankKey&&saved===bankPasses)return;bankKey=key;bankPasses=saved;
-  const seen=new Set(),dl=$("bankList");dl.innerHTML="";
-  const addOpt=v=>{v=(v||"").trim();const k=v.toLowerCase();if(!v||seen.has(k))return;seen.add(k);const o=document.createElement("option");o.value=v;dl.appendChild(o)};
-  cfg.names.forEach(r=>(r||[]).forEach(addOpt));
-  saved.forEach(p=>{try{const c=typeof p.cfg==="string"?JSON.parse(p.cfg):p.cfg;(c.names||[]).forEach(r=>(r||[]).forEach(addOpt))}catch(e){}});
-  libList().forEach(x=>{if(x.id&&x.id[0]==="u"&&!x.deleted)addOpt(x.name)});
-  BANK.forEach(x=>addOpt(bankName(x)));
-}
+
 $("holdOff").onclick=()=>{cfg.hold=false;render()};$("prEach").onclick=()=>{cfg.perRound=true;syncRounds();render()};
 let roundsKey="";
 function stepper(id,val,min,max,step,onv){
@@ -449,7 +440,7 @@ function render(){
   document.querySelectorAll("#ratioChips button").forEach(b=>b.classList.toggle("on",+b.dataset.r===cfg.ratio));
   const c=compute();plan=c;
   const pr=c.pr;
-  buildBank();foldSums();
+  foldSums();
   const nk=[cfg.st,cfg.ex,cfg.rd,cfg.sets,cfg.exMode,lang,cfg.order,cfg.setsEach,(cfg.roundSets||[]).join(",")].join("|");if(nk!==namesKey){namesKey=nk;buildNames()}
   const se=cfg.setsEach&&k.RD>1;
   $("setsPrGroup").hidden=k.RD<2;$("setsSame").setAttribute("aria-pressed",!se);$("setsEach").setAttribute("aria-pressed",se);
@@ -513,7 +504,7 @@ function render(){
   const bar=$("bar");bar.innerHTML="";
   buildSeq(c).forEach(it=>{const i=document.createElement("i");i.className=it.type==="work"?"w":it.type;i.style.flexGrow=it.d;bar.appendChild(i)});
   save();
-  try{renderCards()}catch(e){}
+  try{if(!$("paneEx").hidden&&!$("plan").hidden)renderCards()}catch(e){}
   try{scheduleSave()}catch(e){}
   if(!started)resetRun();
 }
@@ -521,7 +512,7 @@ function render(){
 // --- Tabs ---
 const TABS={passes:"tabPass",plan:"tabPass",run:"tabRun",exlib:"tabEx",settings:"tabSet"};
 function showTab(t){document.body.classList.toggle("onrun",t==="run");Object.keys(TABS).forEach(sec=>{$(sec).hidden=sec!==t});Object.entries(TABS).forEach(([sec,btn])=>{if(sec!=="plan")$(btn).setAttribute("aria-selected",sec===t||(t==="plan"&&sec==="passes"))});
-  if(t==="exlib")renderLib();if(t==="passes")renderPasses();curBar();$("scroller").scrollTo(0,0)}
+  if(t==="exlib")renderLib();if(t==="passes")renderPasses();if(t==="plan"&&!$("paneEx").hidden)renderCards();curBar();$("scroller").scrollTo(0,0)}
 Object.entries(TABS).forEach(([sec,btn])=>{if(sec!=="plan")$(btn).onclick=()=>showTab(sec)});
 
 // --- Audio ---
@@ -824,7 +815,7 @@ async function dropPass(id){
 }
 function cfgOf(p){try{return typeof p.cfg==="string"?JSON.parse(p.cfg):p.cfg}catch(e){return null}}
 function passSummary(c){const parts=[T("{n} stationer",{n:c.st||0}),T("{n} varv",{n:c.rd||1})];if(c.mode==="auto"&&c.total)parts.push(c.total+" min");if(c.stretch)parts.push(T("stretch {n} min",{n:c.stretch}));if(c.mid&&c.mid!=="off")parts.push(T("mellanövning"));return parts.join(" · ")}
-function syncInputs(){roundsKey="";namesKey="";setsKey="";bankKey="";fields.forEach(f=>{$(f).value=cfg[f]});$("ratio").value=cfg.ratio;$("vol").value=cfg.vol;$("stretchList").value=cfg.stretchList.join("\n");$("midList").value=cfg.midList.join("\n");buildNames();buildSnd()}
+function syncInputs(){roundsKey="";namesKey="";setsKey="";fields.forEach(f=>{$(f).value=cfg[f]});$("ratio").value=cfg.ratio;$("vol").value=cfg.vol;$("stretchList").value=cfg.stretchList.join("\n");$("midList").value=cfg.midList.join("\n");buildNames();buildSnd()}
 
 
 // --- Station cards ---
@@ -836,7 +827,7 @@ function reorder(perm){const names=perm.map(o=>(cfg.names[o]||[]).slice()),times
   Object.keys(cfg.exTimes).forEach(k=>{const [r,s,e]=k.split("-").map(Number);const ns=perm.indexOf(s);if(ns>=0)times[r+"-"+ns+"-"+e]=cfg.exTimes[k]});
   cfg.names=names;cfg.exTimes=times}
 function trimSlots(){while(cfg.ex>1&&!Array.from({length:cfg.st},(_,s)=>((cfg.names[s]||[])[cfg.ex-1]||"").trim()).some(Boolean)){cfg.ex--;Object.keys(cfg.exTimes).forEach(k=>{if(+k.split("-")[2]>=cfg.ex)delete cfg.exTimes[k]})}}
-function cardsChanged(){trimSlots();setStructure(cfg.st,cfg.ex);render()}
+function cardsChanged(trim){if(trim)trimSlots();setStructure(cfg.st,cfg.ex);render()}
 function renderCards(){
   const box=$("stCards");if(!box)return;box.innerHTML="";
   for(let s=0;s<cfg.st;s++){
@@ -847,7 +838,7 @@ function renderCards(){
     hb("↓",T("Flytta ned station {n}",{n:s+1}),()=>{const p=[...Array(cfg.st).keys()];[p[s+1],p[s]]=[p[s],p[s+1]];reorder(p);cardsChanged()},s===cfg.st-1);
     hb("✕",T("Ta bort station {n}",{n:s+1}),()=>{const before=JSON.parse(JSON.stringify({st:cfg.st,ex:cfg.ex,names:cfg.names,exTimes:cfg.exTimes}));
       if(cfg.st>1){const p=[...Array(cfg.st).keys()].filter(i=>i!==s);reorder(p);cfg.st--}else cfg.names=[];
-      cardsChanged();undoable(T("Station {n} togs bort.",{n:s+1}),()=>{Object.assign(cfg,before);setStructure(cfg.st,cfg.ex)})});
+      cardsChanged(true);undoable(T("Station {n} togs bort.",{n:s+1}),()=>{Object.assign(cfg,before);setStructure(cfg.st,cfg.ex)})});
     card.appendChild(hd);
     for(let e=0;e<cfg.ex;e++){
       const row=document.createElement("div");row.className="slot";
@@ -858,7 +849,7 @@ function renderCards(){
       btn.onclick=()=>openPicker(T("Station {n}",{n:s+1})+(cfg.ex>1?" · "+L[e]:""),name=>{cfg.names[s]=cfg.names[s]||[];cfg.names[s][e]=name;cardsChanged()});
       row.appendChild(btn);
       if(cfg.ex>1&&nm){const x=document.createElement("button");x.className="x";x.textContent="✕";x.setAttribute("aria-label",T("Ta bort {x} från station {n}",{x:nm,n:s+1}));
-        x.onclick=()=>{cfg.names[s][e]="";cardsChanged()};row.appendChild(x)}
+        x.onclick=()=>{cfg.names[s][e]="";cardsChanged(true)};row.appendChild(x)}
       card.appendChild(row);
     }
     if(cfg.ex<4){const add=document.createElement("button");add.className="addex";add.textContent=T("+ Övning {l}",{l:L[cfg.ex]});
@@ -868,7 +859,7 @@ function renderCards(){
   }
   $("stAdd").disabled=cfg.st>=20;
 }
-$("stAdd").onclick=()=>openPicker(T("Station {n}",{n:cfg.st+1}),name=>{
+$("stAdd").onclick=()=>openPicker(T("Station {n}",{n:cfg.st===1&&!((cfg.names[0]||[]).some(x=>(x||"").trim()))?1:cfg.st+1}),name=>{
   // the first station of a new workout is the empty one it starts with
   const empty=cfg.st===1&&!((cfg.names[0]||[]).some(x=>(x||"").trim()));
   if(!empty)setStructure(cfg.st+1,cfg.ex);const s=empty?0:cfg.st-1;cfg.names[s]=[name];cardsChanged()});
@@ -885,7 +876,7 @@ function renderPick(){
   const items=libAll().filter(x=>(pickGroup==="all"||x.group===pickGroup||(pickGroup==="own"&&!x.builtin))&&(!ql||x.name.toLowerCase().includes(ql)||(x.alt||"").toLowerCase().includes(ql)));
   items.sort((a,b)=>a.name.localeCompare(b.name,lang));
   let newBtn=null;
-  if(q&&!libAll().some(x=>x.name.toLowerCase()===ql)){const b=document.createElement("button");b.className="pick";newBtn=b;const s=document.createElement("span");s.className="nm";s.textContent=T("Ny övning: {x}",{x:q});const tg=document.createElement("span");tg.className="tag";tg.textContent=T("Läggs till i Övningar");b.append(s,tg);
+  if(q&&!libAll().some(x=>x.name.toLowerCase()===ql)){const b=document.createElement("button");b.className="pick";b.dataset.new="1";newBtn=b;const s=document.createElement("span");s.className="nm";s.textContent=T("Ny övning: {x}",{x:q});const tg=document.createElement("span");tg.className="tag";tg.textContent=T("Läggs till i Övningar");b.append(s,tg);
     b.onclick=()=>{lib.push({id:"u"+Date.now(),name:q.slice(0,60),group:pickGroup in GROUP_NAMES?pickGroup:"",desc:"",updated:Date.now()});saveLib();choose(q.slice(0,60))}}
   items.slice(0,200).forEach(x=>{const b=document.createElement("button");b.className="pick";const s=document.createElement("span");s.className="nm";s.textContent=x.name;b.appendChild(s);
     if(x.group){const tg=document.createElement("span");tg.className="tag";tg.textContent=T(GROUP_NAMES[x.group]);b.appendChild(tg)}
@@ -896,7 +887,10 @@ function renderPick(){
   if(!box.children.length){const s=document.createElement("div");s.className="sub";s.textContent=T("Inga övningar matchar.");box.appendChild(s)}
 }
 $("pickSearch").addEventListener("input",renderPick);
-$("pickSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){const f=$("pickList").querySelector(".pick");if(f)f.click()}});
+$("pickSearch").addEventListener("keydown",e=>{if(e.key!=="Enter")return;e.preventDefault();
+  const q=$("pickSearch").value.trim().toLowerCase(),all=[...$("pickList").querySelectorAll(".pick")],named=all.filter(b=>!b.dataset.new);
+  const exact=named.find(b=>b.querySelector(".nm").textContent.toLowerCase()===q),add=all.find(b=>b.dataset.new);
+  const f=exact||(named.length===1?named[0]:null)||add||named[0];if(f)f.click()});
 $("pickClose").onclick=closePicker;
 $("pickSheet").addEventListener("click",e=>{if(e.target===$("pickSheet"))closePicker()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("pickSheet").hidden)closePicker();if(!$("newSheet").hidden)$("newSheet").hidden=true}});
@@ -904,19 +898,27 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("pickSheet").
 // --- The open workout ---
 // You always work in a named workout. Every change in Plan is saved to it automatically about a second later.
 // What happens on the timer (pause, −30 s / +30 s) changes only that run, not the saved workout.
-let curId=readLocal("ccage_cur",null),curMeta={name:"",desc:"",lastRun:0},lastStored="",saveT=0,saving=false;
+let curId=readLocal("ccage_cur",null),curMeta={name:"",desc:"",lastRun:0},lastStored="",saveT=0,saving=false,ready=false;
 function curName(){try{return curId?(curMeta.name||T("Pass utan namn")):""}catch(e){return ""}}
 function curKey(){return JSON.stringify([curMeta.name,curMeta.desc,passData()])}
 function setSaveState(txt,bad){const s=$("saveState");s.textContent=txt;s.classList.toggle("bad",!!bad)}
-function scheduleSave(){if(!curId)return;if(curKey()===lastStored)return;setSaveState(T("Sparar…"));clearTimeout(saveT);saveT=setTimeout(saveNow,900)}
+function scheduleSave(){if(!curId||!ready)return;if(curKey()===lastStored)return;writeLocal("ccage_dirty",curId);setSaveState(T("Sparar…"));clearTimeout(saveT);saveT=setTimeout(saveNow,900)}
+let savePromise=null;
 async function saveNow(){
-  clearTimeout(saveT);if(!curId||saving)return;const k=curKey();if(k===lastStored){setSaveState(T("Sparat"));return}
-  saving=true;const rec={name:curMeta.name||T("Pass utan namn"),desc:curMeta.desc||"",cfg:JSON.stringify(passData()),updated:Date.now(),lastRun:curMeta.lastRun||0};
-  try{await storePass(rec,curId);lastStored=k;setSaveState(T("Sparat"));
-    const p=passes.find(x=>x.id===curId);if(p)Object.assign(p,rec);else passes.push(Object.assign({id:curId},rec));
-    if(!$("passes").hidden)renderPasses();}
-  catch(e){setSaveState(T("Kunde inte spara"),true)}
-  saving=false;if(curKey()!==lastStored)scheduleSave();
+  clearTimeout(saveT);if(!curId||!ready)return;
+  if(saving){await savePromise;if(curKey()===lastStored)return}
+  const k=curKey();if(k===lastStored){setSaveState(T("Sparat"));return}
+  const id=curId,rec={name:curMeta.name||T("Pass utan namn"),desc:curMeta.desc||"",cfg:JSON.stringify(passData()),updated:Date.now(),lastRun:curMeta.lastRun||0};
+  saving=true;
+  savePromise=(async()=>{
+    try{await storePass(rec,id);
+      const p=passes.find(x=>x.id===id);if(p)Object.assign(p,rec);else passes.push(Object.assign({id},rec));
+      if(id===curId){lastStored=k;setSaveState(T("Sparat"));if(curKey()===k)try{localStorage.removeItem("ccage_dirty")}catch(e){}}
+      if(!$("passes").hidden)renderPasses();}
+    catch(e){if(id===curId)setSaveState(T("Kunde inte spara"),true)}
+  })();
+  await savePromise;saving=false;
+  if(id===curId&&curKey()!==lastStored)scheduleSave();
 }
 function edHead(){$("edTitle").textContent=curName();curBar()}
 // The banner at the top shows the open workout on every tab: tap it to edit, or Run to start.
@@ -925,14 +927,15 @@ function curBar(){const on=!!curId;$("curBar").hidden=!on;if(!on)return;
   const onRun=!$("run").hidden;$("curRun").textContent=onRun?T("Redigera"):T("▶ Kör")}
 $("curOpen").onclick=()=>{if(curId){showTab("plan")}};
 $("curRun").onclick=()=>{if(!curId)return;if(!$("run").hidden){showTab("plan")}else{saveNow();showTab("run")}};
-function openPass(p,step){
+async function openPass(p,step){
+  if(curId&&ready)await saveNow();
+  p=passes.find(x=>x.id===p.id)||p;
   const c=cfgOf(p);if(!c){toastMsg(T("Passet kunde inte läsas."));return}
-  if(curId&&curId!==p.id)saveNow();
   if(running)$("bMain").click();started=false;
   cfg=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),c,deviceOf(cfg));fixCfg();
   curId=p.id;writeLocal("ccage_cur",curId);curMeta={name:p.name||"",desc:p.desc||"",lastRun:p.lastRun||0};
   $("passName").value=curMeta.name;$("passDesc").value=curMeta.desc;
-  syncInputs();render();lastStored=curKey();setSaveState(T("Sparat"));edHead();
+  ready=true;syncInputs();lastStored=curKey();render();setSaveState(T("Sparat"));edHead();
   if(step==="run")showTab("run");else{showTab("plan");setStep(step||"ex")}
 }
 function toastMsg(m){undoable(m,null)}
@@ -946,6 +949,7 @@ const STEPS={pass:["panePass","stepPass"],ex:["paneEx","stepEx"],time:["paneTime
 let step="ex";
 function setStep(s,quiet){if(!STEPS[s])s="ex";step=s;writeLocal("ccage_step",s);
   Object.entries(STEPS).forEach(([k,[pane,btn]])=>{$(pane).hidden=k!==s;$(btn).setAttribute("aria-selected",k===s)});
+  if(s==="ex")renderCards();
   $("stepRun").setAttribute("aria-selected","false");
   $("goBtn").textContent=T(s==="pass"?"Nästa: Övningar →":s==="ex"?"Nästa: Tider →":"▶ Kör passet");
   if(!quiet)$("scroller").scrollTo(0,0)}
@@ -1023,17 +1027,22 @@ $("newCreate").onclick=async()=>{
 
 // First start after this update: the plan you had becomes a workout, so nothing is lost.
 async function ensureCurrent(){
-  if(curId&&passes.some(p=>p.id===curId)){const p=passes.find(x=>x.id===curId);curMeta={name:p.name||"",desc:p.desc||"",lastRun:p.lastRun||0};
-    $("passName").value=curMeta.name;$("passDesc").value=curMeta.desc;lastStored=curKey();
-    if(lastStored!==JSON.stringify([curMeta.name,curMeta.desc,cfgOf(p)]))lastStored="";setSaveState(T("Sparat"));edHead();render();return}
-  curId=null;writeLocal("ccage_cur",null);
-  const snap=readLocal("ccage_saved",null),hadPlan=localStorage.getItem("ccage")!=null;
+  const migrated=readLocal("ccage_migrated",false);writeLocal("ccage_migrated",true);
+  if(curId&&passes.some(p=>p.id===curId)){const p=passes.find(x=>x.id===curId);
+    if(readLocal("ccage_dirty",null)===curId){
+      // this phone has edits that were not saved yet (for example offline): keep them and save them now
+      curMeta={name:p.name||"",desc:p.desc||"",lastRun:p.lastRun||0};$("passName").value=curMeta.name;$("passDesc").value=curMeta.desc;
+      ready=true;lastStored="";setSaveState(T("Sparar…"));edHead();render();return}
+    const tab=$("run").hidden?"plan":"run";await openPass(p,step);if(tab==="run")showTab("run");return}
+  curId=null;writeLocal("ccage_cur",null);ready=true;
+  if(migrated)return;
+  const snap=readLocal("ccage_saved",null),hadPlan=!!readLocal("ccage_hadplan",false);
   if(snap&&snap.name){const p=passes.find(x=>x.name===snap.name);if(p&&snap.data===JSON.stringify(passData())){openPass(p,"ex");showTab("passes");return}}
   if(hadPlan&&(snap||passes.length)){
     const rec={name:(snap&&snap.name?T("{x} (ändrad)",{x:snap.name}):T("Pass utan namn")),desc:"",cfg:JSON.stringify(passData()),updated:Date.now(),lastRun:0};
     try{const id=await storePass(rec);await loadPasses();openPass(Object.assign({id},rec),"ex");showTab("passes");toastMsg(T("Din plan sparades som {x}.",{x:rec.name}))}catch(e){}
   }
-  try{localStorage.removeItem("ccage_saved")}catch(e){}
+  try{localStorage.removeItem("ccage_saved");localStorage.removeItem("ccage_hadplan")}catch(e){}
 }
 
 // Defaults for new workouts: what "New workout" starts from. Stored on this phone and in the backup.
@@ -1071,7 +1080,7 @@ function mergeLib(other){let changed=false;
   if(other.length!==lib.length)changed=true;libVer++;return changed}
 async function flushLib(){if(!libDirty||!db)return;clearTimeout(libTimer);libDirty=false;
   try{await withTimeout(coll().doc("exlib").set({lib:JSON.stringify(lib),updated:Date.now()}))}catch(e){libDirty=true}}
-function saveLib(){libVer++;writeLocal(LIB_KEY,lib);bankKey="";libDirty=true;clearTimeout(libTimer);libTimer=setTimeout(flushLib,800)}
+function saveLib(){libVer++;writeLocal(LIB_KEY,lib);libDirty=true;clearTimeout(libTimer);libTimer=setTimeout(flushLib,800)}
 function setLib(id,patch){let x=lib.find(e=>e.id===id);if(!x){x={id};lib.push(x)}Object.assign(x,patch,{updated:Date.now()});saveLib()}
 let exFilter="all",exOpen=null;
 function renderLib(){
@@ -1160,6 +1169,7 @@ $("impFile").addEventListener("change",async()=>{
   Object.assign(cfg,cleanCfg(d.settings));fixCfg();syncInputs();
   if(d.lang==="sv"||d.lang==="en")setLang(d.lang);else render();
   await loadPasses();renderLib();
+  if(curId&&touched.some(x=>x.id===curId)){const p=passes.find(x=>x.id===curId);if(p){lastStored=curKey();await openPass(p,step)}}
   // with no workout open, open the one that was open when the backup was made
   if(!curId){const want=str(d.current,40).trim().toLowerCase();const p=passes.find(x=>want&&x.name.toLowerCase()===want)||passes[0];if(p){openPass(p,"ex");showTab("passes")}}
   bkMsg(T("Klart: {n} pass och {e} övningar lästes in. Inställningarna återställdes.",{n:np,e:ne}));
