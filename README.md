@@ -42,7 +42,23 @@ Appen måste ligga på en webbadress med https, till exempel GitHub Pages (se ne
 
 | Fil | Innehåll |
 | --- | --- |
-| `index.html` | Hela appen (HTML, CSS och JavaScript) |
+| `index.html` | Appens HTML och CSS, och säkerhetspolicyn (CSP) |
+| `app.js` | All JavaScript |
+| `fonts/` | Typsnitten Barlow och Barlow Condensed (SIL Open Font License, se `fonts/OFL.txt`) |
 | `manifest.webmanifest` | Appens namn, ikoner och färger |
 | `sw.js` | Service worker som gör att appen fungerar offline |
 | `icons/`, `apple-touch-icon.png` | App-ikoner |
+
+## Säkerhet och beroenden
+
+Appen använder inga bibliotek och laddar ingen kod från andra servrar. Typsnitten ligger i `fonts/` i stället för att hämtas från Google Fonts. De enda externa anropen går till Spotifys API.
+
+`index.html` har en Content-Security-Policy som bara tillåter skript, typsnitt och stilar från appens egen adress, och anrop till `api.spotify.com` och `accounts.spotify.com`. Den skyddar Spotify-inloggningen som sparas i telefonen om en bugg skulle släppa in främmande kod.
+
+Tänk på detta när du ändrar appen:
+
+- Lägg JavaScript i `app.js`. Skript direkt i `index.html` (`<script>...</script>` eller `onclick="..."`) blockeras av policyn.
+- Skriv text från andra källor, till exempel namn från Spotify, med `textContent` och inte `innerHTML`.
+- Behöver appen anropa en ny tjänst, lägg till adressen i `connect-src` i policyn.
+- Lägg bibliotek och typsnitt i repot i stället för att länka till ett CDN. Om ett CDN ändå behövs, lås versionen och använd `integrity` (SRI).
+- Nya filer ska också läggas till i listan i `sw.js`, annars fungerar de inte offline.
