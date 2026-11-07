@@ -147,7 +147,7 @@ ol.steps a{color:var(--fg)}
 .runbar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .runbar button{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px 8px;font:inherit;font-size:14px;cursor:pointer}
 .runbar button[aria-pressed="true"]{border-color:var(--work);color:var(--work)}
-body.focus header,body.focus .tabs,body.focus .meta,body.focus .tiny,body.focus #wakeMsg{display:none!important}
+body.focus header,body.focus .tabs,body.focus .meta,body.focus #mEnd,body.focus .tiny,body.focus #wakeMsg{display:none!important}
 body.focus .music,body.focus .next,body.focus .ctrls,body.focus .runbar{opacity:.3;transition:opacity .2s}
 body.focus .music:hover,body.focus .music:focus-within,body.focus .next:hover,body.focus .ctrls:hover,body.focus .runbar:hover,body.focus .ctrls:focus-within,body.focus .runbar:focus-within{opacity:1}
 body.focus .face{padding-block:28px}
@@ -254,6 +254,18 @@ body.focus .wrap{gap:12px}
         <label for="total">Total tid för passet<small>inkl. alla pauser</small></label>
         <div class="num"><button data-step="total:-1" aria-label="Minska">−</button><input id="total" type="number" inputmode="numeric" min="10" max="180"><button data-step="total:1" aria-label="Öka">+</button></div><span class="unit">min</span>
       </div>
+      <div class="mode" role="group" aria-label="Marginal">
+        <button id="mgBuffer" aria-pressed="true">Tid kvar i slutet</button>
+        <button id="mgOver" aria-pressed="false">Får dra över</button>
+      </div>
+      <div class="row">
+        <label for="margin"><span id="marginLbl">Tid kvar i slutet</span><small id="marginSub">till stretch, städning eller frågor</small></label>
+        <div class="num"><button data-step="margin:-1" aria-label="Minska">−</button><input id="margin" type="number" inputmode="numeric" min="0" max="15"><button data-step="margin:1" aria-label="Öka">+</button></div><span class="unit">min</span>
+      </div>
+      <div class="mode" role="group" aria-label="Avrundning">
+        <button id="evenOn" aria-pressed="true">Jämna tider (5 s)</button>
+        <button id="evenOff" aria-pressed="false">Exakta sekunder</button>
+      </div>
       <div id="roundsAuto" style="display:flex;flex-direction:column;gap:14px" hidden></div>
       <div style="display:flex;flex-direction:column;gap:8px" id="ratioSingle">
         <div class="row"><label for="ratio">Arbete vs setvila<small>andel arbete i varje set</small></label><strong id="ratioOut" style="font-family:var(--display);font-size:20px"></strong></div>
@@ -274,6 +286,15 @@ body.focus .wrap{gap:12px}
         <label for="setRest">Vila mellan set<small id="setRestSub">samma övning, set 1 → 2</small></label>
         <div class="num"><button data-step="setRest:-5" aria-label="Minska">−</button><input id="setRest" type="number" inputmode="numeric" min="0" max="300"><button data-step="setRest:5" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
+    </div>
+
+    <div class="block">
+      <div class="label">Under passet</div>
+      <div class="mode" role="group" aria-label="Under passet">
+        <button id="holdOn" aria-pressed="true">Håll sluttiden</button>
+        <button id="holdOff" aria-pressed="false">Följ planen</button>
+      </div>
+      <div class="sub" id="holdHint"></div>
     </div>
 
     <div class="block">
@@ -310,6 +331,7 @@ body.focus .wrap{gap:12px}
         <span>Vila <strong id="oRestTot">–</strong></span>
         <span>Uppv. + genomgång <strong id="oSetup">–</strong></span>
       </div>
+      <div class="sub" id="fit" hidden></div>
       <div class="warn" id="warn" hidden></div>
       <div class="strip">
         <div class="bar" id="bar" aria-label="Hela passet som tidslinje"></div>
@@ -438,6 +460,7 @@ body.focus .wrap{gap:12px}
       <button id="bFocus" aria-pressed="false">Fokusläge</button>
     </div>
     <div class="meta"><span>Gått <strong id="mEl">0:00</strong></span><span>Intervall <strong id="mIdx">0/0</strong></span><span>Kvar <strong id="mLeft">0:00</strong></span></div>
+    <div class="sub" id="mEnd" style="text-align:center" hidden></div>
     <div class="tiny"><button id="bReset">Börja om</button><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
     <div class="sub" id="wakeMsg" style="text-align:center" hidden></div>
   </section>
