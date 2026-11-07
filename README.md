@@ -84,3 +84,16 @@ Tänk på detta när du ändrar appen:
 - Behöver appen anropa en ny tjänst, lägg till adressen i `connect-src` i policyn.
 - Lägg bibliotek och typsnitt i repot i stället för att länka till ett CDN. Om ett CDN ändå behövs, lås versionen och använd `integrity` (SRI).
 - Nya filer ska också läggas till i listan i `sw.js`, annars fungerar de inte offline.
+
+### Sårbarheter i beroenden
+
+Det enda beroendet är Playwright, som bara kör testerna och aldrig följer med appen. Det och GitHub Actions i CI kontrolleras så här:
+
+- `package-lock.json` låser exakta versioner. CI installerar med `npm ci`, så testerna kör det som är granskat.
+- Jobbet **Sårbarheter** i `.github/workflows/test.yml` kör `npm audit` (kända CVE:er) och `npm audit signatures` (att paketen är signerade av registret). Det körs vid varje PR, vid push till `main` och varje måndag, så att nya sårbarheter i gamla versioner också hittas.
+- `.github/dependabot.yml` låter Dependabot föreslå nya versioner av Playwright och av GitHub Actions varje vecka, som PR:er som går igenom testerna.
+- GitHub Actions är låsta till en commit (SHA) i stället för en tagg som kan flyttas. Dependabot uppdaterar dem.
+
+Slå också på **Dependabot alerts** och **Dependabot security updates** under repots Settings → Code security, så att GitHub larmar och föreslår en rättning direkt när en sårbarhet publiceras.
+
+Lägger du till ett beroende, kör `npm install paketet --save-dev` så att låsfilen uppdateras, och kör `npm audit` innan du committar.
