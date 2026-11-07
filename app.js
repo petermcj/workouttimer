@@ -46,7 +46,7 @@ const EN={
 "Skriv ett namn på passet först.":"Enter a name for the workout first.","Uppdaterade {x}.":"Updated {x}.","Sparade {x}.":"Saved {x}.",
 "Passet sparades inte. Kontrollera anslutningen och försök igen.":"The workout was not saved. Check your connection and try again.",
 "Tog bort {x}.":"Deleted {x}.",
-"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Tid per övning":"Time per exercise","En total tid":"One total time","Hur genomgången räknas":"How demo time is set","Genomgång totalt":"Total demo time","≈ {t} per övning":"≈ {t} per exercise","en samlad genomgång":"one combined demo","Alla övningar":"All exercises","{n} övningar":"{n} exercises","Blanda med musiken (tyst i ljudlöst läge)":"Mix with the music (silent in silent mode)","Hörs alltid, även i ljudlöst läge (kan pausa musiken)":"Always audible, even in silent mode (may pause music)","Låsskärm":"Lock screen","Visa klockan på låsskärmen":"Show the timer on the lock screen","Visa inte på låsskärmen":"Do not show on the lock screen","Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.":"With the lock screen on, the phase and time show as a player on the lock screen, and the timer keeps beeping while the screen is locked. It works best in the installed app. On iPhone it may pause Spotify, since only one app at a time can show on the lock screen.","☀ Skärm tänd":"☀ Screen on","Skärm kan släckas":"Screen may turn off","Fokusläge":"Focus mode","Visa allt":"Show all","Tid för byten":"Time for switches","Egna tider för byten":"Own times for switches","Byten = vilan mellan set":"Switches = set rest","Vila och byten":"Rest and switches","Byte av övning och station tar lika lång tid som vilan mellan set i varje varv.":"Switching exercise and station takes as long as the set rest in each round.","Tider för byten ställs in per varv ovan.":"Switch times are set per round above.","gäller även byte av övning och station":"also used for switching exercise and station","Ordning på stationen":"Order at the station","Alla set av en övning i taget (A A B B)":"All sets of one exercise at a time (A A B B)","Växla övning mellan seten (A B A B)":"Switch exercise between sets (A B A B)","efter sista övningen, före nästa set":"after the last exercise, before the next set","mellan övningarna i varje set":"between the exercises in each set","Set per varv":"Sets per round","Samma antal set alla varv":"Same number of sets every round","Olika antal set per varv":"Different number of sets per round","Set per övning, varv {n}":"Sets per exercise, round {n}","Övningar: namn och egna tider":"Exercises: names and custom times","Tider per övning":"Times per exercise","Samma tider för alla övningar":"Same times for all exercises","Egna tider per övning":"Custom times per exercise","Lämna en ruta tom för att använda passets vanliga tid.":"Leave a box empty to use the workout's normal time.","Övningar med egna tider räknas bort först, och resten av totaltiden fördelas på de andra.":"Exercises with custom times are taken out first, and the rest of the total time is shared by the others.","({n} egna)":"({n} custom)","Tider per varv":"Times per round","Samma tider alla varv":"Same times every round","Olika tider per varv":"Different times per round","Varv {n}":"Round {n}","{w} s arbete / {p} s vila":"{w} s work / {p} s rest","Tid innan första övningen":"Time before the first exercise","efter uppvärmning och genomgång, för att gå till stationen":"after warm-up and demos, to get to the station","Gå till station 1":"Go to station 1","Passet börjar snart":"The workout starts soon","Till stationen":"To the station","Skapa en app på":"Create an app at","och välj Web API.":"and select Web API.","Lägg in den här adressen som Redirect URI:":"Add this address as the Redirect URI:","Kopiera adressen":"Copy address","Kopiera appens Client ID, klistra in här och tryck Anslut.":"Copy the app's Client ID, paste it here and press Connect.","Anslut":"Connect","Ansluten":"Connected","Koppla från":"Disconnect","Spellista vid start":"Playlist at start","Fortsätt med det som spelas":"Continue what is playing","Hämta spellistor och enheter igen":"Reload playlists and devices","Spela på":"Play on","Enheten som spelar just nu":"The device playing right now","Spotify och passet":"Spotify and the workout","Starta musiken när passet startar":"Start the music when the workout starts","Pausa musiken när passet pausas":"Pause the music when the workout pauses","Sänk volymen under vila":"Lower the volume during rest","Volym under arbete":"Volume during work","Volym under vila":"Volume during rest","Föregående låt":"Previous track","Spela eller pausa musiken":"Play or pause the music","Nästa låt":"Next track","Ansluten som {x}":"Connected as {x}","Klistra in ditt Client ID först.":"Paste your Client ID first.","Kopierad":"Copied","Markera adressen och kopiera den.":"Select the address and copy it.","Spotify-inloggningen avbröts. Försök igen.":"The Spotify sign-in was cancelled. Try again.","Inloggningen kunde inte slutföras. Starta anslutningen igen inifrån appen.":"The sign-in could not be completed. Start connecting again from inside the app.","Spotify svarade inte. Kontrollera Client ID och Redirect URI och försök igen.":"Spotify did not respond. Check the Client ID and Redirect URI and try again.","Kunde inte hämta spellistor.":"Could not load playlists.","Ingen Spotify-enhet är aktiv. Öppna Spotify, spela en låt en kort stund och försök igen.":"No Spotify device is active. Open Spotify, play a song briefly and try again.","Spotify Premium krävs, och ditt konto måste vara tillagt under User Management i Spotify-appen på utvecklarsidan.":"Spotify Premium is required, and your account must be added under User Management in your app on the developer site.","Volymen kan inte styras på den här enheten. Spotify på iPhone tillåter oftast inte det.":"The volume cannot be controlled on this device. Spotify on iPhone usually does not allow it.","Spotify: {x}":"Spotify: {x}","Inget spelas":"Nothing playing","Installera appen":"Install the app","Nytt":"New","Nytt pass":"New workout","Standard för nya pass":"Defaults for new workouts","Nytt pass börjar med de här värdena: upplägg, tider, pauser, mellanövning, stretch och marginal. Ställ in Plan som du vill ha det och tryck Använd Plan som standard. Övningarnas namn ingår inte.":"A new workout starts with these values: structure, times, breaks, interval exercise, stretching and margin. Set up Plan the way you want it and press Use Plan as default. Exercise names are not included.","Använd Plan som standard":"Use Plan as default","Återställ appens standard":"Reset to the app's defaults","Dina standardvärden":"Your defaults","Appens standard":"The app's defaults","{n} övn":"{n} ex","{n} set":"{n} sets","uppvärmning {n} min":"warm-up {n} min","Nytt pass med dina standardvärden.":"New workout with your defaults.","Nytt pass med appens standard.":"New workout with the app's defaults.","Nytt pass.":"New workout.","Plan används som standard för nya pass.":"Plan is now the default for new workouts.","Nya pass börjar med appens standard.":"New workouts start with the app's defaults.","Version {v}":"Version {v}","En ny version av appen finns.":"A new version of the app is available.","Ladda om":"Reload","Ändringarna är inte sparade":"The changes are not saved","Ändringar i {x} är inte sparade":"Changes to {x} are not saved","Skriv ett namn på passet och tryck Spara.":"Type a name for the workout and press Save.","Det gick inte att ångra. Kontrollera anslutningen.":"Could not undo. Check the connection.","Passen kunde inte sparas. Kontrollera anslutningen eller lagringsutrymmet och försök igen.":"The workouts could not be saved. Check the connection or storage space and try again.","Inläsningen ångrades.":"The import was undone.","Meny":"Menu","Pass":"Workouts","Övningar":"Exercises","Inställningar":"Settings","Passet":"Workout","Mina pass":"My workouts","Ett sparat pass innehåller upplägg, tider och övningar. Använd det som det är, eller som mall för ett nytt pass.":"A saved workout holds the structure, times and exercises. Use it as it is, or as a template for a new workout.","Inbyggda mallar":"Built-in templates","En inbyggd mall ställer in upplägget. Övningarna i Plan behålls.":"A built-in template sets up the structure. The exercises in Plan are kept.","Säkerhetskopia":"Backup","Spara allt i en fil: dina pass, övningar med beskrivningar, passet i Plan och inställningarna. Läs in filen igen om appen har krånglat, på en ny telefon eller efter en ny version.":"Save everything in one file: your workouts, exercises with descriptions, the workout in Plan and the settings. Load the file again if the app has had problems, on a new phone or after a new version.","Exportera":"Export","Importera":"Import","Övningsbanken som Plan föreslår från. Lägg till egna övningar och skriv beskrivningar. Beskrivningen visas i klockan under genomgången och arbetet.":"The exercise bank that Plan suggests from. Add your own exercises and write descriptions. The description shows on the timer during demos and work.","Sök övning":"Search exercises","Lägg till övning":"Add exercise","Svenska":"Svenska","English":"English","Inställningarna gäller den här telefonen och följer inte med när du laddar ett pass.":"The settings apply to this phone and do not change when you load a workout.","{n} stationer":"{n} stations","{n} varv":"{n} rounds","stretch {n} min":"stretching {n} min","mellanövning":"interval exercise","Öppna i Plan":"Open in Plan","Inga sparade pass än. Bygg ett pass i Plan och tryck Spara.":"No saved workouts yet. Build a workout in Plan and press Save.","Alla":"All","Ben":"Legs","Drag":"Pull","Press":"Push","Bål":"Core","Kondition":"Cardio","Egna":"Own","Med beskrivning":"With description","Egen":"Own","Har beskrivning":"Has a description","Namn":"Name","Grupp":"Group","Ingen grupp":"No group","Beskrivning och instruktion":"Description and instructions","T.ex. utförande, vad man ska tänka på, lättare och tyngre variant":"E.g. how to do it, what to think about, easier and harder versions","Ta bort övningen":"Delete the exercise","Inga övningar matchar.":"No exercises match.","Ny övning":"New exercise","Säkerhetskopian är klar: {n} pass och {e} egna övningar och beskrivningar.":"The backup is ready: {n} workouts and {e} own exercises and descriptions.","Säkerhetskopian {f} har laddats ned: {n} pass och {e} egna övningar och beskrivningar.":"The backup {f} has been downloaded: {n} workouts and {e} own exercises and descriptions.","Filen är för stor för att vara en säkerhetskopia.":"The file is too large to be a backup.","Filen kunde inte läsas. Välj en säkerhetskopia från appen.":"The file could not be read. Choose a backup from the app.","Det här är inte en säkerhetskopia från appen.":"This is not a backup from the app.","Läser in…":"Loading…","Klart: {n} pass och {e} övningar lästes in. Passet i Plan och inställningarna återställdes.":"Done: {n} workouts and {e} exercises were loaded. The workout in Plan and the settings were restored.","Säkerhetskopian lästes in.":"The backup was loaded.","Mallar":"Templates","En mall ställer in upplägget. Namnen på övningarna behålls.":"A template sets up the structure. The exercise names are kept.","Mallen {x} används.":"Using the template {x}.","{m} min · {n} övningar":"{m} min · {n} stretches","Röst läser upp övningar":"Voice reads out exercises","Ingen röst":"No voice","Röst":"Voice","Rösten är på":"Voice is on","Passet är klart. Bra jobbat!":"The workout is done. Well done!","Gå till första stationen":"Go to the first station","Den här webbläsaren kan inte läsa upp text.":"This browser cannot read text aloud.","Rösten säger övningens namn när arbetet börjar, och vila, byten och stretch. Den använder telefonens talsyntes och hörs inte alltid när skärmen är låst.":"The voice says the exercise name when work starts, plus rest, switches and stretches. It uses the phone's speech and is not always heard while the screen is locked.","Ändra tiden":"Change the time","30 sekunder kortare":"30 seconds shorter","30 sekunder längre":"30 seconds longer","Nytt stretchförslag.":"New stretch suggestion.","Tomma övningar fylldes med förslag.":"Empty exercises were filled with suggestions.","Alla namn togs bort.":"All names were removed.","Ångra":"Undo","Nästa stretch":"Next stretch","De sista {x} får inte plats (minst 5 s per övning).":"The last {x} do not fit (at least 5 s each).","Stretch i slutet":"Stretching at the end","Stretch":"Stretching","efter sista varvet":"after the last round","Stretchövningar, en per rad. Tiden delas lika mellan dem.":"Stretches, one per line. The time is shared evenly between them.","Föreslå stretch":"Suggest stretches","Mellanövning":"Interval exercise","Ingen":"None","Mellan varv":"Between rounds","Efter stationer":"After stations","Efter var":"After every","station":"station","Tid för mellanövningen":"Time for the interval exercise","alla gör samma övning":"everyone does the same exercise","Mellanövningar, en per rad. De tas i tur och ordning.":"Interval exercises, one per line. They are used in turn.","till städning eller frågor":"for tidying up or questions","Uppv., genomgång, stretch":"Warm-up, demos, stretching","Visa i klockan":"Show on the timer","Övningens namn":"Exercise name","Övning 1, 2, 3":"Exercise 1, 2, 3","Övning A, B":"Exercise A, B","Namn på övningarna":"Exercise names","Skriv eller välj ur övningsbanken. Övningar du skrivit in själv kommer också med i listan.":"Type or pick from the exercise bank. Exercises you have typed yourself are in the list too.","Fyll tomma med förslag":"Fill empty with suggestions","Töm alla namn":"Clear all names","Klockan visar namnen nedan.":"The timer shows the names below.","Bra när deltagarna börjar på olika stationer. Klockan visar bara vilken övning på stationen det är, inte namnet.":"Good when participants start at different stations. The timer shows only which exercise at the station it is, not its name.","{n} mellanövningar i hela passet":"{n} interval exercises in the whole workout","Passet har bara ett varv, så det blir ingen mellanövning.":"The workout has only one round, so there is no interval exercise.","Före och efter mellanövningen räknas ett stationsbyte.":"A station switch is counted before and after the interval exercise.","Det blir ingen mellanövning med de här inställningarna.":"These settings give no interval exercise.","{n} övningar, {t} per övning. Klockan säger till när det är dags för nästa.":"{n} stretches, {t} each. The timer signals when it is time for the next one.","Till mellanövningen":"To the interval exercise","alla gör samma":"everyone does the same","Stretcha":"Stretch","{n} av {t}":"{n} of {t}","Tid kvar i slutet":"Time left at the end","Får dra över":"May run over","Får dra över med":"May run over by","om jämna tider inte går jämnt ut":"if even times do not add up exactly","Marginal":"Margin","Avrundning":"Rounding","Jämna tider (5 s)":"Even times (5 s)","Exakta sekunder":"Exact seconds","Under passet":"During the workout","Håll sluttiden":"Keep the end time","Följ planen":"Follow the plan","Om passet pausas eller du backar kortas arbete och setvila resten av passet så att det slutar senast {t} efter start.":"If the workout is paused or you go back, work and set rest are shortened for the rest of the workout so it ends no later than {t} after the start.","Om passet pausas eller du backar kortas arbete och setvila resten av passet så att det slutar på planerad tid.":"If the workout is paused or you go back, work and set rest are shortened for the rest of the workout so it ends at the planned time.","Arbete blir aldrig kortare än 10 s och vila aldrig kortare än 5 s.":"Work never gets shorter than 10 s and rest never shorter than 5 s.","Klockan kör tiderna som de är planerade, även om passet pausas.":"The timer runs the times as planned, even if the workout is paused.","Slutar precis på {t} min.":"Ends exactly at {t} min.","Slutar {x} före {t} min.":"Ends {x} before {t} min.","Drar över {x} (högst {m} min tillåtet).":"Runs over by {x} (at most {m} min allowed).","Jämna tider lämnar {x} oanvänt. Välj exakta sekunder, eller använd tiden till uppvärmning eller vila mellan varv.":"Even times leave {x} unused. Choose exact seconds, or use the time for warm-up or rest between rounds.","Slutar ca {t}":"Ends about {t}","{x} sent, går inte att korta mer":"{x} late, cannot shorten more","{x} efter planen":"{x} behind plan","arbete och vila kortade {x} för att hinna":"work and rest shortened by {x} to finish on time"
+"Kunde inte ta bort passet. Försök igen.":"Could not delete the workout. Try again.","klocka":"timer","Tid per övning":"Time per exercise","En total tid":"One total time","Hur genomgången räknas":"How demo time is set","Genomgång totalt":"Total demo time","≈ {t} per övning":"≈ {t} per exercise","en samlad genomgång":"one combined demo","Alla övningar":"All exercises","{n} övningar":"{n} exercises","Blanda med musiken (tyst i ljudlöst läge)":"Mix with the music (silent in silent mode)","Hörs alltid, även i ljudlöst läge (kan pausa musiken)":"Always audible, even in silent mode (may pause music)","Låsskärm":"Lock screen","Visa klockan på låsskärmen":"Show the timer on the lock screen","Visa inte på låsskärmen":"Do not show on the lock screen","Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.":"With the lock screen on, the phase and time show as a player on the lock screen, and the timer keeps beeping while the screen is locked. It works best in the installed app. On iPhone it may pause Spotify, since only one app at a time can show on the lock screen.","☀ Skärm tänd":"☀ Screen on","Skärm kan släckas":"Screen may turn off","Fokusläge":"Focus mode","Visa allt":"Show all","Tid för byten":"Time for switches","Egna tider för byten":"Own times for switches","Byten = vilan mellan set":"Switches = set rest","Vila och byten":"Rest and switches","Byte av övning och station tar lika lång tid som vilan mellan set i varje varv.":"Switching exercise and station takes as long as the set rest in each round.","Tider för byten ställs in per varv ovan.":"Switch times are set per round above.","gäller även byte av övning och station":"also used for switching exercise and station","Ordning på stationen":"Order at the station","Alla set av en övning i taget (A A B B)":"All sets of one exercise at a time (A A B B)","Växla övning mellan seten (A B A B)":"Switch exercise between sets (A B A B)","efter sista övningen, före nästa set":"after the last exercise, before the next set","mellan övningarna i varje set":"between the exercises in each set","Set per varv":"Sets per round","Samma antal set alla varv":"Same number of sets every round","Olika antal set per varv":"Different number of sets per round","Set per övning, varv {n}":"Sets per exercise, round {n}","Övningar: namn och egna tider":"Exercises: names and custom times","Tider per övning":"Times per exercise","Samma tider för alla övningar":"Same times for all exercises","Egna tider per övning":"Custom times per exercise","Lämna en ruta tom för att använda passets vanliga tid.":"Leave a box empty to use the workout's normal time.","Övningar med egna tider räknas bort först, och resten av totaltiden fördelas på de andra.":"Exercises with custom times are taken out first, and the rest of the total time is shared by the others.","({n} egna)":"({n} custom)","Tider per varv":"Times per round","Samma tider alla varv":"Same times every round","Olika tider per varv":"Different times per round","Varv {n}":"Round {n}","{w} s arbete / {p} s vila":"{w} s work / {p} s rest","Tid innan första övningen":"Time before the first exercise","efter uppvärmning och genomgång, för att gå till stationen":"after warm-up and demos, to get to the station","Gå till station 1":"Go to station 1","Passet börjar snart":"The workout starts soon","Till stationen":"To the station","Skapa en app på":"Create an app at","och välj Web API.":"and select Web API.","Lägg in den här adressen som Redirect URI:":"Add this address as the Redirect URI:","Kopiera adressen":"Copy address","Kopiera appens Client ID, klistra in här och tryck Anslut.":"Copy the app's Client ID, paste it here and press Connect.","Anslut":"Connect","Ansluten":"Connected","Koppla från":"Disconnect","Spellista vid start":"Playlist at start","Fortsätt med det som spelas":"Continue what is playing","Hämta spellistor och enheter igen":"Reload playlists and devices","Spela på":"Play on","Enheten som spelar just nu":"The device playing right now","Spotify och passet":"Spotify and the workout","Starta musiken när passet startar":"Start the music when the workout starts","Pausa musiken när passet pausas":"Pause the music when the workout pauses","Sänk volymen under vila":"Lower the volume during rest","Volym under arbete":"Volume during work","Volym under vila":"Volume during rest","Föregående låt":"Previous track","Spela eller pausa musiken":"Play or pause the music","Nästa låt":"Next track","Ansluten som {x}":"Connected as {x}","Klistra in ditt Client ID först.":"Paste your Client ID first.","Kopierad":"Copied","Markera adressen och kopiera den.":"Select the address and copy it.","Spotify-inloggningen avbröts. Försök igen.":"The Spotify sign-in was cancelled. Try again.","Inloggningen kunde inte slutföras. Starta anslutningen igen inifrån appen.":"The sign-in could not be completed. Start connecting again from inside the app.","Spotify svarade inte. Kontrollera Client ID och Redirect URI och försök igen.":"Spotify did not respond. Check the Client ID and Redirect URI and try again.","Kunde inte hämta spellistor.":"Could not load playlists.","Ingen Spotify-enhet är aktiv. Öppna Spotify, spela en låt en kort stund och försök igen.":"No Spotify device is active. Open Spotify, play a song briefly and try again.","Spotify Premium krävs, och ditt konto måste vara tillagt under User Management i Spotify-appen på utvecklarsidan.":"Spotify Premium is required, and your account must be added under User Management in your app on the developer site.","Volymen kan inte styras på den här enheten. Spotify på iPhone tillåter oftast inte det.":"The volume cannot be controlled on this device. Spotify on iPhone usually does not allow it.","Spotify: {x}":"Spotify: {x}","Inget spelas":"Nothing playing","Installera appen":"Install the app","Passet används som standard för nya pass.":"The workout is now the default for new workouts.","Använd öppet pass som standard":"Use the open workout as default","Nya pass kan börja med de här värdena: set, varv, tider, pauser, mellanövning, stretch och marginal. Ställ in ett pass som du vill ha det och tryck Använd öppet pass som standard. Stationer och övningar ingår inte.":"New workouts can start with these values: sets, rounds, times, breaks, interval exercise, stretching and margin. Set up a workout the way you want it and press Use the open workout as default. Stations and exercises are not included.","Spara allt i en fil: dina pass, övningar med beskrivningar, standardvärden och inställningar. Läs in filen igen om appen har krånglat, på en ny telefon eller efter en ny version.":"Save everything in one file: your workouts, exercises with descriptions, defaults and settings. Load the file again if the app has had problems, on a new phone or after a new version.","Allt du ändrar i ett pass sparas automatiskt. Det senast använda passet ligger överst.":"Everything you change in a workout is saved automatically. The most recently used workout is at the top.","Nästa: Övningar →":"Next: Exercises →","Nästa: Tider →":"Next: Times →","Mina standardvärden":"My defaults","Alla övningar togs bort.":"All exercises were removed.","Station":"Station","Ändringar sparas automatiskt.":"Changes are saved automatically.","Station {n}":"Station {n}","Flytta upp station {n}":"Move station {n} up","Flytta ned station {n}":"Move station {n} down","Ta bort station {n}":"Remove station {n}","Station {n} togs bort.":"Station {n} was removed.","Välj övning":"Choose exercise","station {n}":"station {n}","Ta bort {x} från station {n}":"Remove {x} from station {n}","+ Övning {l}":"+ Exercise {l}","Ny övning: {x}":"New exercise: {x}","Läggs till i Övningar":"Added to Exercises","Pass utan namn":"Untitled workout","Sparar…":"Saving…","Sparat":"Saved","Kunde inte spara":"Could not save","Inga pass än. Tryck Nytt pass för att börja.":"No workouts yet. Press New workout to start.","Öppet":"Open","kört {d}":"run {d}","{x} (kopia)":"{x} (copy)","Kopian {x} är öppen.":"The copy {x} is open.","Passet kunde inte sparas. Kontrollera anslutningen och försök igen.":"The workout could not be saved. Check the connection and try again.","Pass {d}":"Workout {d}","Kopia av {x}":"Copy of {x}","{x} (ändrad)":"{x} (changed)","Din plan sparades som {x}.":"Your plan was saved as {x}.","Klart: {n} pass och {e} övningar lästes in. Inställningarna återställdes.":"Done: {n} workouts and {e} exercises were loaded. The settings were restored.","Klocka":"Timer","‹ Alla pass":"‹ All workouts","Tider":"Times","Beskrivning":"Description","Duplicera":"Duplicate","Använd som standard för nya pass":"Use as default for new workouts","Ta bort passet":"Delete the workout","Lägg till en station genom att välja dess första övning. Flera övningar på samma station blir A, B och så vidare.":"Add a station by choosing its first exercise. Several exercises at the same station become A, B and so on.","+ Lägg till station":"+ Add station","Töm alla övningar":"Clear all exercises","Set och varv":"Sets and rounds","Nästa →":"Next →","+ Nytt pass":"+ New workout","Beskrivning (valfritt)":"Description (optional)","Börja från":"Start from","Avbryt":"Cancel","Skapa pass":"Create workout","Stäng":"Close","Steg":"Steps","T.ex. fokus, utrustning eller vem passet passar":"E.g. focus, equipment or who the workout suits","Sök, eller skriv en ny övning":"Search, or type a new exercise","Redigera":"Edit","Nytt":"New","Nytt pass":"New workout","Standard för nya pass":"Defaults for new workouts","Nytt pass börjar med de här värdena: upplägg, tider, pauser, mellanövning, stretch och marginal. Ställ in Plan som du vill ha det och tryck Använd Plan som standard. Övningarnas namn ingår inte.":"A new workout starts with these values: structure, times, breaks, interval exercise, stretching and margin. Set up Plan the way you want it and press Use Plan as default. Exercise names are not included.","Använd Plan som standard":"Use Plan as default","Återställ appens standard":"Reset to the app's defaults","Dina standardvärden":"Your defaults","Appens standard":"The app's defaults","{n} övn":"{n} ex","{n} set":"{n} sets","uppvärmning {n} min":"warm-up {n} min","Nytt pass med dina standardvärden.":"New workout with your defaults.","Nytt pass med appens standard.":"New workout with the app's defaults.","Nytt pass.":"New workout.","Plan används som standard för nya pass.":"Plan is now the default for new workouts.","Nya pass börjar med appens standard.":"New workouts start with the app's defaults.","Version {v}":"Version {v}","En ny version av appen finns.":"A new version of the app is available.","Ladda om":"Reload","Ändringarna är inte sparade":"The changes are not saved","Ändringar i {x} är inte sparade":"Changes to {x} are not saved","Skriv ett namn på passet och tryck Spara.":"Type a name for the workout and press Save.","Det gick inte att ångra. Kontrollera anslutningen.":"Could not undo. Check the connection.","Passen kunde inte sparas. Kontrollera anslutningen eller lagringsutrymmet och försök igen.":"The workouts could not be saved. Check the connection or storage space and try again.","Inläsningen ångrades.":"The import was undone.","Meny":"Menu","Pass":"Workouts","Övningar":"Exercises","Inställningar":"Settings","Passet":"Workout","Mina pass":"My workouts","Ett sparat pass innehåller upplägg, tider och övningar. Använd det som det är, eller som mall för ett nytt pass.":"A saved workout holds the structure, times and exercises. Use it as it is, or as a template for a new workout.","Inbyggda mallar":"Built-in templates","En inbyggd mall ställer in upplägget. Övningarna i Plan behålls.":"A built-in template sets up the structure. The exercises in Plan are kept.","Säkerhetskopia":"Backup","Spara allt i en fil: dina pass, övningar med beskrivningar, passet i Plan och inställningarna. Läs in filen igen om appen har krånglat, på en ny telefon eller efter en ny version.":"Save everything in one file: your workouts, exercises with descriptions, the workout in Plan and the settings. Load the file again if the app has had problems, on a new phone or after a new version.","Exportera":"Export","Importera":"Import","Övningsbanken som Plan föreslår från. Lägg till egna övningar och skriv beskrivningar. Beskrivningen visas i klockan under genomgången och arbetet.":"The exercise bank that Plan suggests from. Add your own exercises and write descriptions. The description shows on the timer during demos and work.","Sök övning":"Search exercises","Lägg till övning":"Add exercise","Svenska":"Svenska","English":"English","Inställningarna gäller den här telefonen och följer inte med när du laddar ett pass.":"The settings apply to this phone and do not change when you load a workout.","{n} stationer":"{n} stations","{n} varv":"{n} rounds","stretch {n} min":"stretching {n} min","mellanövning":"interval exercise","Öppna i Plan":"Open in Plan","Inga sparade pass än. Bygg ett pass i Plan och tryck Spara.":"No saved workouts yet. Build a workout in Plan and press Save.","Alla":"All","Ben":"Legs","Drag":"Pull","Press":"Push","Bål":"Core","Kondition":"Cardio","Egna":"Own","Med beskrivning":"With description","Egen":"Own","Har beskrivning":"Has a description","Namn":"Name","Grupp":"Group","Ingen grupp":"No group","Beskrivning och instruktion":"Description and instructions","T.ex. utförande, vad man ska tänka på, lättare och tyngre variant":"E.g. how to do it, what to think about, easier and harder versions","Ta bort övningen":"Delete the exercise","Inga övningar matchar.":"No exercises match.","Ny övning":"New exercise","Säkerhetskopian är klar: {n} pass och {e} egna övningar och beskrivningar.":"The backup is ready: {n} workouts and {e} own exercises and descriptions.","Säkerhetskopian {f} har laddats ned: {n} pass och {e} egna övningar och beskrivningar.":"The backup {f} has been downloaded: {n} workouts and {e} own exercises and descriptions.","Filen är för stor för att vara en säkerhetskopia.":"The file is too large to be a backup.","Filen kunde inte läsas. Välj en säkerhetskopia från appen.":"The file could not be read. Choose a backup from the app.","Det här är inte en säkerhetskopia från appen.":"This is not a backup from the app.","Läser in…":"Loading…","Klart: {n} pass och {e} övningar lästes in. Passet i Plan och inställningarna återställdes.":"Done: {n} workouts and {e} exercises were loaded. The workout in Plan and the settings were restored.","Säkerhetskopian lästes in.":"The backup was loaded.","Mallar":"Templates","En mall ställer in upplägget. Namnen på övningarna behålls.":"A template sets up the structure. The exercise names are kept.","Mallen {x} används.":"Using the template {x}.","{m} min · {n} övningar":"{m} min · {n} stretches","Röst läser upp övningar":"Voice reads out exercises","Ingen röst":"No voice","Röst":"Voice","Rösten är på":"Voice is on","Passet är klart. Bra jobbat!":"The workout is done. Well done!","Gå till första stationen":"Go to the first station","Den här webbläsaren kan inte läsa upp text.":"This browser cannot read text aloud.","Rösten säger övningens namn när arbetet börjar, och vila, byten och stretch. Den använder telefonens talsyntes och hörs inte alltid när skärmen är låst.":"The voice says the exercise name when work starts, plus rest, switches and stretches. It uses the phone's speech and is not always heard while the screen is locked.","Ändra tiden":"Change the time","30 sekunder kortare":"30 seconds shorter","30 sekunder längre":"30 seconds longer","Nytt stretchförslag.":"New stretch suggestion.","Tomma övningar fylldes med förslag.":"Empty exercises were filled with suggestions.","Alla namn togs bort.":"All names were removed.","Ångra":"Undo","Nästa stretch":"Next stretch","De sista {x} får inte plats (minst 5 s per övning).":"The last {x} do not fit (at least 5 s each).","Stretch i slutet":"Stretching at the end","Stretch":"Stretching","efter sista varvet":"after the last round","Stretchövningar, en per rad. Tiden delas lika mellan dem.":"Stretches, one per line. The time is shared evenly between them.","Föreslå stretch":"Suggest stretches","Mellanövning":"Interval exercise","Ingen":"None","Mellan varv":"Between rounds","Efter stationer":"After stations","Efter var":"After every","station":"station","Tid för mellanövningen":"Time for the interval exercise","alla gör samma övning":"everyone does the same exercise","Mellanövningar, en per rad. De tas i tur och ordning.":"Interval exercises, one per line. They are used in turn.","till städning eller frågor":"for tidying up or questions","Uppv., genomgång, stretch":"Warm-up, demos, stretching","Visa i klockan":"Show on the timer","Övningens namn":"Exercise name","Övning 1, 2, 3":"Exercise 1, 2, 3","Övning A, B":"Exercise A, B","Namn på övningarna":"Exercise names","Skriv eller välj ur övningsbanken. Övningar du skrivit in själv kommer också med i listan.":"Type or pick from the exercise bank. Exercises you have typed yourself are in the list too.","Fyll tomma med förslag":"Fill empty with suggestions","Töm alla namn":"Clear all names","Klockan visar namnen nedan.":"The timer shows the names below.","Bra när deltagarna börjar på olika stationer. Klockan visar bara vilken övning på stationen det är, inte namnet.":"Good when participants start at different stations. The timer shows only which exercise at the station it is, not its name.","{n} mellanövningar i hela passet":"{n} interval exercises in the whole workout","Passet har bara ett varv, så det blir ingen mellanövning.":"The workout has only one round, so there is no interval exercise.","Före och efter mellanövningen räknas ett stationsbyte.":"A station switch is counted before and after the interval exercise.","Det blir ingen mellanövning med de här inställningarna.":"These settings give no interval exercise.","{n} övningar, {t} per övning. Klockan säger till när det är dags för nästa.":"{n} stretches, {t} each. The timer signals when it is time for the next one.","Till mellanövningen":"To the interval exercise","alla gör samma":"everyone does the same","Stretcha":"Stretch","{n} av {t}":"{n} of {t}","Tid kvar i slutet":"Time left at the end","Får dra över":"May run over","Får dra över med":"May run over by","om jämna tider inte går jämnt ut":"if even times do not add up exactly","Marginal":"Margin","Avrundning":"Rounding","Jämna tider (5 s)":"Even times (5 s)","Exakta sekunder":"Exact seconds","Under passet":"During the workout","Håll sluttiden":"Keep the end time","Följ planen":"Follow the plan","Om passet pausas eller du backar kortas arbete och setvila resten av passet så att det slutar senast {t} efter start.":"If the workout is paused or you go back, work and set rest are shortened for the rest of the workout so it ends no later than {t} after the start.","Om passet pausas eller du backar kortas arbete och setvila resten av passet så att det slutar på planerad tid.":"If the workout is paused or you go back, work and set rest are shortened for the rest of the workout so it ends at the planned time.","Arbete blir aldrig kortare än 10 s och vila aldrig kortare än 5 s.":"Work never gets shorter than 10 s and rest never shorter than 5 s.","Klockan kör tiderna som de är planerade, även om passet pausas.":"The timer runs the times as planned, even if the workout is paused.","Slutar precis på {t} min.":"Ends exactly at {t} min.","Slutar {x} före {t} min.":"Ends {x} before {t} min.","Drar över {x} (högst {m} min tillåtet).":"Runs over by {x} (at most {m} min allowed).","Jämna tider lämnar {x} oanvänt. Välj exakta sekunder, eller använd tiden till uppvärmning eller vila mellan varv.":"Even times leave {x} unused. Choose exact seconds, or use the time for warm-up or rest between rounds.","Slutar ca {t}":"Ends about {t}","{x} sent, går inte att korta mer":"{x} late, cannot shorten more","{x} efter planen":"{x} behind plan","arbete och vila kortade {x} för att hinna":"work and rest shortened by {x} to finish on time"
 };
 let lang="sv";
 try{lang=localStorage.getItem("ccage_lang")||((navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en")}catch(e){lang=(navigator.language||"sv").toLowerCase().startsWith("sv")?"sv":"en"}
@@ -253,10 +253,6 @@ const TEMPLATES=[
   ["Snabbt 30 min","Quick 30 min",{mode:"auto",st:6,ex:1,sets:3,rd:2,warm:5,instr:10,ready:30,total:30,ratio:75,stretch:3,mid:"off",stRest:15}],
   ["Tabata, 4 block","Tabata, 4 blocks",{mode:"manual",st:4,ex:1,sets:8,rd:1,work:20,setRest:10,stRest:60,warm:8,instr:15,ready:30,stretch:4,mid:"off"}]
 ];
-function buildTpl(){const box=$("tplChips");box.innerHTML="";TEMPLATES.forEach(x=>{const b=document.createElement("button");b.textContent=lang==="en"?x[1]:x[0];
-  b.onclick=()=>{const before=JSON.parse(JSON.stringify(cfg));Object.assign(cfg,JSON.parse(JSON.stringify(TPL_BASE)),JSON.parse(JSON.stringify(x[2])));
-    if(running)$("bMain").click();started=false;syncInputs();if(cfg.stretch>0)suggestStretch(true);else render();
-    undoable(T("Mallen {x} används.",{x:b.textContent}),()=>{cfg=before;started=false;syncInputs()})};box.appendChild(b)})}
 // Collapsible sections: the summary line shows the current choice, and the open/closed state is remembered on this phone.
 let folds={};try{folds=JSON.parse(localStorage.getItem("ccage_fold")||"{}")||{}}catch(e){}
 document.querySelectorAll("details.fold").forEach(d=>{const id=d.dataset.fold;if(folds[id])d.open=true;d.addEventListener("toggle",()=>{folds[id]=d.open;try{localStorage.setItem("ccage_fold",JSON.stringify(folds))}catch(e){}})});
@@ -302,7 +298,7 @@ $("exFill").onclick=()=>{
     if(x){cfg.names[s][e]=bankName(x);mark(bankName(x))}}
   namesKey="";render();undoable(T("Tomma övningar fylldes med förslag."),()=>{cfg.names=before;namesKey=""});
 };
-$("exClear").onclick=()=>{const before=JSON.parse(JSON.stringify(cfg.names));cfg.names=[];namesKey="";render();undoable(T("Alla namn togs bort."),()=>{cfg.names=before;namesKey=""})};
+$("exClear").onclick=()=>{const before=JSON.parse(JSON.stringify(cfg.names));cfg.names=[];namesKey="";render();undoable(T("Alla övningar togs bort."),()=>{cfg.names=before;namesKey=""})};
 // A short "Undo" bar instead of asking first: the change happens at once and can be taken back for 8 seconds.
 let undoFn=null,undoT=0;
 function undoable(msg,fn){undoFn=fn;$("toastMsg").textContent=msg;$("toastUndo").hidden=!fn;$("toast").hidden=false;clearTimeout(undoT);undoT=setTimeout(()=>{$("toast").hidden=true;undoFn=null},8000)}
@@ -387,9 +383,7 @@ function buildNames(){
     const row=document.createElement("div");row.className="ex";row.style.setProperty("--n",cfg.ex);
     row.innerHTML='<b>'+(s+1)+'</b>';
     for(let e=0;e<cfg.ex;e++){
-      const i=document.createElement("input");i.id="ex"+s+"_"+e;i.placeholder=T("Övning {l}",{l:L[e]});
-      i.value=(cfg.names[s]||[])[e]||"";i.setAttribute("list","bankList");i.autocomplete="off";
-      i.addEventListener("input",()=>{cfg.names[s]=cfg.names[s]||[];cfg.names[s][e]=i.value;save()});
+      const i=document.createElement("span");i.className="exn";i.textContent=((cfg.names[s]||[])[e]||"").trim()||T("Övning {l}",{l:L[e]});
       row.appendChild(i);
     }
     box.appendChild(row);
@@ -426,7 +420,7 @@ buildNames();
 let plan;
 function render(){
   const k=counts();
-  $("sub").textContent=T("{st} stationer · {ex} övn · {sets} set · {rd} varv",{st:k.ST,ex:k.EX,sets:(cfg.setsEach&&k.RD>1?Array.from({length:k.RD},(_,r)=>setsAt(r)).join("/"):k.SETS),rd:k.RD});
+  $("sub").textContent=(curName()?curName()+" · ":"")+T("{st} stationer · {ex} övn · {sets} set · {rd} varv",{st:k.ST,ex:k.EX,sets:(cfg.setsEach&&k.RD>1?Array.from({length:k.RD},(_,r)=>setsAt(r)).join("/"):k.SETS),rd:k.RD});
   $("modeAuto").setAttribute("aria-pressed",cfg.mode==="auto");$("modeManual").setAttribute("aria-pressed",cfg.mode==="manual");
   $("volOut").textContent=cfg.vol+" %";
   $("mixAmb").setAttribute("aria-pressed",cfg.mix==="ambient");$("mixDuck").setAttribute("aria-pressed",cfg.mix==="transient");
@@ -518,15 +512,16 @@ function render(){
   const bar=$("bar");bar.innerHTML="";
   buildSeq(c).forEach(it=>{const i=document.createElement("i");i.className=it.type==="work"?"w":it.type;i.style.flexGrow=it.d;bar.appendChild(i)});
   save();
-  try{checkDirty()}catch(e){}
+  try{renderCards()}catch(e){}
+  try{scheduleSave()}catch(e){}
   if(!started)resetRun();
 }
 
 // --- Tabs ---
-const TABS={passes:"tabPass",plan:"tabPlan",run:"tabRun",exlib:"tabEx",settings:"tabSet"};
-function showTab(t){Object.entries(TABS).forEach(([sec,btn])=>{$(sec).hidden=sec!==t;$(btn).setAttribute("aria-selected",sec===t)});
-  if(t==="exlib")renderLib();if(t==="passes")renderPasses();checkDirty();window.scrollTo(0,0)}
-Object.entries(TABS).forEach(([sec,btn])=>{$(btn).onclick=()=>showTab(sec)});$("goBtn").onclick=()=>showTab("run");
+const TABS={passes:"tabPass",plan:"tabPass",run:"tabRun",exlib:"tabEx",settings:"tabSet"};
+function showTab(t){Object.keys(TABS).forEach(sec=>{$(sec).hidden=sec!==t});Object.entries(TABS).forEach(([sec,btn])=>{if(sec!=="plan")$(btn).setAttribute("aria-selected",sec===t||(t==="plan"&&sec==="passes"))});
+  if(t==="exlib")renderLib();if(t==="passes")renderPasses();window.scrollTo(0,0)}
+Object.entries(TABS).forEach(([sec,btn])=>{if(sec!=="plan")$(btn).onclick=()=>showTab(sec)});
 
 // --- Audio ---
 let ac=null;
@@ -739,7 +734,7 @@ $("bMain").onclick=()=>{
   ensureAudio();unlockVoice();
   if(idx>=seq.length)resetRun();
   const firstStart=!started;
-  running=!running;started=true;
+  running=!running;started=true;if(firstStart&&running)markRun();
   if(running&&!deadline){let done=0;for(let i=0;i<idx;i++)done+=seq[i].d;if(seq[idx])done+=seq[idx].d-remain;deadline=Date.now()+(runLimit()-(done-PREP))*1000}
   spOnToggle(running,firstStart);
   $("bMain").textContent=T(running?"Paus":"Fortsätt");
@@ -815,7 +810,7 @@ async function loadPasses(){
       if(l&&l.lib){let remote=null;try{remote=JSON.parse(l.lib)}catch(e){}if(Array.isArray(remote)&&mergeLib(remote))saveLib()}}catch(e){useLocal()}}
     if(!db)passes=readLocal(PASS_KEY,[]);
   }catch(e){passes=[];passMsg(T("Kunde inte hämta sparade pass. Kontrollera anslutningen och ladda om sidan."),true);renderPasses();return}
-  renderPasses();renderLib();renderDefs();passMsg(where());
+  renderPasses();renderLib();renderDefs();passMsg(T("Ändringar sparas automatiskt.")+" "+where());
 }
 async function storePass(data,id){
   if(db){const ref=coll().doc(id||"pass_"+Date.now());await withTimeout(ref.set(data));return ref.id}
@@ -828,52 +823,211 @@ async function dropPass(id){
 }
 function cfgOf(p){try{return typeof p.cfg==="string"?JSON.parse(p.cfg):p.cfg}catch(e){return null}}
 function passSummary(c){const parts=[T("{n} stationer",{n:c.st||0}),T("{n} varv",{n:c.rd||1})];if(c.mode==="auto"&&c.total)parts.push(c.total+" min");if(c.stretch)parts.push(T("stretch {n} min",{n:c.stretch}));if(c.mid&&c.mid!=="off")parts.push(T("mellanövning"));return parts.join(" · ")}
-function loadPass(p,go){
-  const c=cfgOf(p);if(!c){passMsg(T("Passet kunde inte läsas."),true);return}
-  const before=JSON.parse(JSON.stringify(cfg)),dev=deviceOf(cfg);
-  cfg=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),c,dev);fixCfg();
-  if(running)$("bMain").click();started=false;
-  syncInputs();render();$("passName").value=p.name;markSaved(p.name);passMsg(T("Laddade {x}.",{x:p.name}));
-  undoable(T("Laddade {x}.",{x:p.name}),()=>{cfg=before;started=false;syncInputs()});
-  showTab(go?"run":"plan");
+function syncInputs(){roundsKey="";namesKey="";setsKey="";bankKey="";fields.forEach(f=>{$(f).value=cfg[f]});$("ratio").value=cfg.ratio;$("vol").value=cfg.vol;$("stretchList").value=cfg.stretchList.join("\n");$("midList").value=cfg.midList.join("\n");buildNames();buildSnd()}
+
+
+// --- Station cards ---
+// Stations follow from the exercises you add: "+ Add station" picks the station's first exercise.
+// All stations have the same number of exercise slots (A, B, …), which the timer needs; an empty slot shows as "Choose exercise".
+function setStructure(st,ex){cfg.st=Math.max(1,Math.min(20,st));cfg.ex=Math.max(1,Math.min(4,ex));$("st").value=cfg.st;$("ex").value=cfg.ex;namesKey="";buildNames()}
+// Station order changed: perm[newIndex] = oldIndex. Names and per-exercise times follow their station.
+function reorder(perm){const names=perm.map(o=>(cfg.names[o]||[]).slice()),times={};
+  Object.keys(cfg.exTimes).forEach(k=>{const [r,s,e]=k.split("-").map(Number);const ns=perm.indexOf(s);if(ns>=0)times[r+"-"+ns+"-"+e]=cfg.exTimes[k]});
+  cfg.names=names;cfg.exTimes=times}
+function trimSlots(){while(cfg.ex>1&&!Array.from({length:cfg.st},(_,s)=>((cfg.names[s]||[])[cfg.ex-1]||"").trim()).some(Boolean)){cfg.ex--;Object.keys(cfg.exTimes).forEach(k=>{if(+k.split("-")[2]>=cfg.ex)delete cfg.exTimes[k]})}}
+function cardsChanged(){trimSlots();setStructure(cfg.st,cfg.ex);render()}
+function renderCards(){
+  const box=$("stCards");if(!box)return;box.innerHTML="";
+  for(let s=0;s<cfg.st;s++){
+    const card=document.createElement("div");card.className="scard";
+    const hd=document.createElement("div");hd.className="hd";const b=document.createElement("b");b.textContent=T("Station {n}",{n:s+1});hd.appendChild(b);
+    const hb=(txt,label,fn,dis)=>{const x=document.createElement("button");x.textContent=txt;x.setAttribute("aria-label",label);x.disabled=!!dis;x.onclick=fn;hd.appendChild(x)};
+    hb("↑",T("Flytta upp station {n}",{n:s+1}),()=>{const p=[...Array(cfg.st).keys()];[p[s-1],p[s]]=[p[s],p[s-1]];reorder(p);cardsChanged()},s===0);
+    hb("↓",T("Flytta ned station {n}",{n:s+1}),()=>{const p=[...Array(cfg.st).keys()];[p[s+1],p[s]]=[p[s],p[s+1]];reorder(p);cardsChanged()},s===cfg.st-1);
+    hb("✕",T("Ta bort station {n}",{n:s+1}),()=>{const before=JSON.parse(JSON.stringify({st:cfg.st,ex:cfg.ex,names:cfg.names,exTimes:cfg.exTimes}));
+      if(cfg.st>1){const p=[...Array(cfg.st).keys()].filter(i=>i!==s);reorder(p);cfg.st--}else cfg.names=[];
+      cardsChanged();undoable(T("Station {n} togs bort.",{n:s+1}),()=>{Object.assign(cfg,before);setStructure(cfg.st,cfg.ex)})});
+    card.appendChild(hd);
+    for(let e=0;e<cfg.ex;e++){
+      const row=document.createElement("div");row.className="slot";
+      if(cfg.ex>1){const lt=document.createElement("span");lt.className="lt";lt.textContent=L[e];row.appendChild(lt)}
+      const nm=((cfg.names[s]||[])[e]||"").trim();
+      const btn=document.createElement("button");btn.className="nmb"+(nm?"":" empty");btn.textContent=nm||T("Välj övning");
+      btn.setAttribute("aria-label",(nm?T("Byt övning"):T("Välj övning"))+": "+T("station {n}",{n:s+1})+(cfg.ex>1?" "+L[e]:""));
+      btn.onclick=()=>openPicker(T("Station {n}",{n:s+1})+(cfg.ex>1?" · "+L[e]:""),name=>{cfg.names[s]=cfg.names[s]||[];cfg.names[s][e]=name;cardsChanged()});
+      row.appendChild(btn);
+      if(cfg.ex>1&&nm){const x=document.createElement("button");x.className="x";x.textContent="✕";x.setAttribute("aria-label",T("Ta bort {x} från station {n}",{x:nm,n:s+1}));
+        x.onclick=()=>{cfg.names[s][e]="";cardsChanged()};row.appendChild(x)}
+      card.appendChild(row);
+    }
+    if(cfg.ex<4){const add=document.createElement("button");add.className="addex";add.textContent=T("+ Övning {l}",{l:L[cfg.ex]});
+      add.onclick=()=>openPicker(T("Station {n}",{n:s+1})+" · "+L[cfg.ex],name=>{const e=cfg.ex;setStructure(cfg.st,cfg.ex+1);cfg.names[s]=cfg.names[s]||[];cfg.names[s][e]=name;cardsChanged()});
+      card.appendChild(add)}
+    box.appendChild(card);
+  }
+  $("stAdd").disabled=cfg.st>=20;
 }
+$("stAdd").onclick=()=>openPicker(T("Station {n}",{n:cfg.st+1}),name=>{
+  // the first station of a new workout is the empty one it starts with
+  const empty=cfg.st===1&&!((cfg.names[0]||[]).some(x=>(x||"").trim()));
+  if(!empty)setStructure(cfg.st+1,cfg.ex);const s=empty?0:cfg.st-1;cfg.names[s]=[name];cardsChanged()});
+
+// --- Exercise picker: search the library, filter by group, or type a new exercise ---
+let pickCb=null,pickGroup="all";
+function openPicker(title,cb){pickCb=cb;$("pickTitle").textContent=title;$("pickSearch").value="";pickGroup="all";renderPick();$("pickSheet").hidden=false;setTimeout(()=>$("pickSearch").focus(),50)}
+function closePicker(){$("pickSheet").hidden=true;pickCb=null}
+function choose(name){const cb=pickCb;closePicker();if(cb)cb(name)}
+function renderPick(){
+  const gs=$("pickGroups");gs.innerHTML="";
+  [["all","Alla"]].concat(Object.entries(GROUP_NAMES)).concat([["own","Egna"]]).forEach(([k,v])=>{const b=document.createElement("button");b.textContent=T(v);b.classList.toggle("on",k===pickGroup);b.onclick=()=>{pickGroup=k;renderPick()};gs.appendChild(b)});
+  const q=$("pickSearch").value.trim(),ql=q.toLowerCase(),box=$("pickList");box.innerHTML="";
+  const items=libAll().filter(x=>(pickGroup==="all"||x.group===pickGroup||(pickGroup==="own"&&!x.builtin))&&(!ql||x.name.toLowerCase().includes(ql)||(x.alt||"").toLowerCase().includes(ql)));
+  items.sort((a,b)=>a.name.localeCompare(b.name,lang));
+  let newBtn=null;
+  if(q&&!libAll().some(x=>x.name.toLowerCase()===ql)){const b=document.createElement("button");b.className="pick";newBtn=b;const s=document.createElement("span");s.className="nm";s.textContent=T("Ny övning: {x}",{x:q});const tg=document.createElement("span");tg.className="tag";tg.textContent=T("Läggs till i Övningar");b.append(s,tg);
+    b.onclick=()=>{lib.push({id:"u"+Date.now(),name:q.slice(0,60),group:pickGroup in GROUP_NAMES?pickGroup:"",desc:"",updated:Date.now()});saveLib();choose(q.slice(0,60))}}
+  items.slice(0,200).forEach(x=>{const b=document.createElement("button");b.className="pick";const s=document.createElement("span");s.className="nm";s.textContent=x.name;b.appendChild(s);
+    if(x.group){const tg=document.createElement("span");tg.className="tag";tg.textContent=T(GROUP_NAMES[x.group]);b.appendChild(tg)}
+    if(x.desc){const i=document.createElement("span");i.className="tag";i.textContent="ⓘ";i.title=x.desc;b.appendChild(i)}
+    b.onclick=()=>choose(x.name);box.appendChild(b)});
+  // a new exercise comes after the matches, or first when nothing matches
+  if(newBtn){if(box.children.length)box.appendChild(newBtn);else box.prepend(newBtn)}
+  if(!box.children.length){const s=document.createElement("div");s.className="sub";s.textContent=T("Inga övningar matchar.");box.appendChild(s)}
+}
+$("pickSearch").addEventListener("input",renderPick);
+$("pickSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){const f=$("pickList").querySelector(".pick");if(f)f.click()}});
+$("pickClose").onclick=closePicker;
+$("pickSheet").addEventListener("click",e=>{if(e.target===$("pickSheet"))closePicker()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("pickSheet").hidden)closePicker();if(!$("newSheet").hidden)$("newSheet").hidden=true}});
+
+// --- The open workout ---
+// You always work in a named workout. Every change in Plan is saved to it automatically about a second later.
+// What happens on the timer (pause, −30 s / +30 s) changes only that run, not the saved workout.
+let curId=readLocal("ccage_cur",null),curMeta={name:"",desc:"",lastRun:0},lastStored="",saveT=0,saving=false;
+function curName(){try{return curId?(curMeta.name||T("Pass utan namn")):""}catch(e){return ""}}
+function curKey(){return JSON.stringify([curMeta.name,curMeta.desc,passData()])}
+function setSaveState(txt,bad){const s=$("saveState");s.textContent=txt;s.classList.toggle("bad",!!bad)}
+function scheduleSave(){if(!curId)return;if(curKey()===lastStored)return;setSaveState(T("Sparar…"));clearTimeout(saveT);saveT=setTimeout(saveNow,900)}
+async function saveNow(){
+  clearTimeout(saveT);if(!curId||saving)return;const k=curKey();if(k===lastStored){setSaveState(T("Sparat"));return}
+  saving=true;const rec={name:curMeta.name||T("Pass utan namn"),desc:curMeta.desc||"",cfg:JSON.stringify(passData()),updated:Date.now(),lastRun:curMeta.lastRun||0};
+  try{await storePass(rec,curId);lastStored=k;setSaveState(T("Sparat"));
+    const p=passes.find(x=>x.id===curId);if(p)Object.assign(p,rec);else passes.push(Object.assign({id:curId},rec));
+    if(!$("passes").hidden)renderPasses();}
+  catch(e){setSaveState(T("Kunde inte spara"),true)}
+  saving=false;if(curKey()!==lastStored)scheduleSave();
+}
+function edHead(){$("edTitle").textContent=curName();$("sub").textContent=$("sub").textContent}
+function openPass(p,step){
+  const c=cfgOf(p);if(!c){toastMsg(T("Passet kunde inte läsas."));return}
+  if(curId&&curId!==p.id)saveNow();
+  if(running)$("bMain").click();started=false;
+  cfg=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),c,deviceOf(cfg));fixCfg();
+  curId=p.id;writeLocal("ccage_cur",curId);curMeta={name:p.name||"",desc:p.desc||"",lastRun:p.lastRun||0};
+  $("passName").value=curMeta.name;$("passDesc").value=curMeta.desc;
+  syncInputs();render();lastStored=curKey();setSaveState(T("Sparat"));edHead();
+  if(step==="run")showTab("run");else{showTab("plan");setStep(step||"ex")}
+}
+function toastMsg(m){undoable(m,null)}
+$("passName").addEventListener("input",()=>{curMeta.name=$("passName").value.trim();edHead();render()});
+$("passDesc").addEventListener("input",()=>{curMeta.desc=$("passDesc").value;scheduleSave()});
+// When a workout is started on the timer, it moves to the top of the list.
+function markRun(){if(!curId)return;curMeta.lastRun=Date.now();lastStored="";scheduleSave()}
+
+// Steps inside a workout: 1 Workout, 2 Exercises, 3 Times, 4 Run.
+const STEPS={pass:["panePass","stepPass"],ex:["paneEx","stepEx"],time:["paneTime","stepTime"]};
+let step="ex";
+function setStep(s,quiet){if(!STEPS[s])s="ex";step=s;writeLocal("ccage_step",s);
+  Object.entries(STEPS).forEach(([k,[pane,btn]])=>{$(pane).hidden=k!==s;$(btn).setAttribute("aria-selected",k===s)});
+  $("stepRun").setAttribute("aria-selected","false");
+  $("goBtn").textContent=T(s==="pass"?"Nästa: Övningar →":s==="ex"?"Nästa: Tider →":"Till klockan →");
+  if(!quiet)window.scrollTo(0,0)}
+document.querySelectorAll("[data-step-to]").forEach(b=>b.onclick=()=>{const s=b.dataset.stepTo;if(s==="run"){saveNow();showTab("run")}else setStep(s)});
+$("goBtn").onclick=()=>{if(step==="pass")setStep("ex");else if(step==="ex")setStep("time");else{saveNow();showTab("run")}};
+$("edBack").onclick=()=>{saveNow();showTab("passes")};
+
+// The list: most recently used first, with Run, Edit, Duplicate and Delete.
+const fmtDay=ts=>{try{return new Date(ts).toLocaleDateString(lang==="en"?"en-GB":"sv-SE",{day:"numeric",month:"short"})}catch(e){return ""}};
+function lastUsed(p){return Math.max(p.updated||0,p.lastRun||0)}
 function renderPasses(){
   const box=$("passList");if(!box)return;box.innerHTML="";
-  passes.sort((a,b)=>a.name.localeCompare(b.name,lang));
-  if(!passes.length){const s=document.createElement("div");s.className="sub";s.textContent=T("Inga sparade pass än. Bygg ett pass i Plan och tryck Spara.");box.appendChild(s);return}
+  passes.sort((a,b)=>lastUsed(b)-lastUsed(a)||a.name.localeCompare(b.name,lang));
+  if(!passes.length){const s=document.createElement("div");s.className="sub";s.textContent=T("Inga pass än. Tryck Nytt pass för att börja.");box.appendChild(s);return}
   passes.forEach(p=>{const c=cfgOf(p)||{};
     const it=document.createElement("div");it.className="item";
     const top=document.createElement("div");top.className="top";const nm=document.createElement("div");nm.className="nm";nm.textContent=p.name;top.appendChild(nm);
-    const meta=document.createElement("div");meta.className="meta2";meta.textContent=passSummary(c);
+    if(p.id===curId){const tg=document.createElement("span");tg.className="tag";tg.textContent=T("Öppet");top.appendChild(tg)}
+    it.appendChild(top);
+    if(p.desc){const d=document.createElement("div");d.className="desc";d.style.cssText="font-size:13px;-webkit-line-clamp:2";d.textContent=p.desc;it.appendChild(d)}
+    const meta=document.createElement("div");meta.className="meta2";meta.textContent=passSummary(c)+(p.lastRun?" · "+T("kört {d}",{d:fmtDay(p.lastRun)}):"");it.appendChild(meta);
     const acts=document.createElement("div");acts.className="acts";
     const b=(txt,fn,cls)=>{const x=document.createElement("button");x.textContent=T(txt);if(cls)x.className=cls;x.onclick=fn;acts.appendChild(x)};
-    b("Kör",()=>loadPass(p,true),"primary");b("Öppna i Plan",()=>loadPass(p,false));
-    b("Ta bort",async()=>{const keep=Object.assign({},p);delete keep.id;
-      try{await dropPass(p.id)}catch(e){passMsg(T("Kunde inte ta bort passet. Försök igen."),true);showTab("passes");undoable(T("Kunde inte ta bort passet. Försök igen."),null);return}
-      await loadPasses();undoable(T("Tog bort {x}.",{x:p.name}),async()=>{await storePass(keep,p.id);await loadPasses()})});
-    it.append(top,meta,acts);box.appendChild(it)});
+    b("Kör",()=>openPass(p,"run"),"primary");b("Redigera",()=>openPass(p,"ex"));
+    b("Duplicera",()=>duplicatePass(p));b("Ta bort",()=>deletePass(p));
+    it.appendChild(acts);box.appendChild(it)});
 }
-// The save bar shows while the plan differs from the workout last saved or loaded (or from the plan at the
-// first start), so saving is never only at the top of a long page.
-let savedSnap=null;
-function planKey(){return JSON.stringify(passData())}
-function markSaved(name){savedSnap={name:name||"",data:planKey()};writeLocal("ccage_saved",savedSnap);checkDirty()}
-function checkDirty(){if(!savedSnap)return;const dirty=planKey()!==savedSnap.data,nm=$("passName").value.trim();
-  $("saveBar").hidden=!dirty||$("plan").hidden;
-  $("saveBarMsg").textContent=nm?T("Ändringar i {x} är inte sparade",{x:nm}):T("Ändringarna är inte sparade");}
-$("passName").addEventListener("input",checkDirty);
-$("saveBarBtn").onclick=()=>{if($("passName").value.trim())$("passSave").click();else{window.scrollTo({top:0,behavior:"smooth"});$("passName").focus();passMsg(T("Skriv ett namn på passet och tryck Spara."))}};
-function syncInputs(){roundsKey="";namesKey="";setsKey="";bankKey="";fields.forEach(f=>{$(f).value=cfg[f]});$("ratio").value=cfg.ratio;$("vol").value=cfg.vol;$("stretchList").value=cfg.stretchList.join("\n");$("midList").value=cfg.midList.join("\n");buildNames();buildSnd()}
-$("passSave").onclick=async()=>{
-  const name=$("passName").value.trim();
-  if(!name){passMsg(T("Skriv ett namn på passet först."),true);$("passName").focus();return}
-  const ex=passes.find(p=>p.name.toLowerCase()===name.toLowerCase());
-  const data={name,cfg:JSON.stringify(passData()),updated:Date.now()};
-  $("passSave").disabled=true;
-  try{await storePass(data,ex&&ex.id);markSaved(name);await loadPasses();passMsg(T(ex?"Uppdaterade {x}.":"Sparade {x}.",{x:name})+" "+where())}
-  catch(e){passMsg(T("Passet sparades inte. Kontrollera anslutningen och försök igen."),true)}
-  $("passSave").disabled=false;
+async function duplicatePass(p){
+  const c=cfgOf(p);if(!c)return;if(p.id===curId)await saveNow();
+  const rec={name:T("{x} (kopia)",{x:p.name}).slice(0,40),desc:p.desc||"",cfg:JSON.stringify(c),updated:Date.now(),lastRun:0};
+  try{const id=await storePass(rec);await loadPasses();openPass(Object.assign({id},rec),"pass");toastMsg(T("Kopian {x} är öppen.",{x:rec.name}))}
+  catch(e){toastMsg(T("Passet kunde inte sparas. Kontrollera anslutningen och försök igen."))}
+}
+async function deletePass(p){
+  if(p.id===curId)await saveNow();
+  const keep=Object.assign({},passes.find(x=>x.id===p.id)||p);delete keep.id;
+  try{await dropPass(p.id)}catch(e){toastMsg(T("Kunde inte ta bort passet. Försök igen."));return}
+  const wasOpen=p.id===curId;if(wasOpen){curId=null;writeLocal("ccage_cur",null);showTab("passes")}
+  await loadPasses();
+  undoable(T("Tog bort {x}.",{x:p.name}),async()=>{await storePass(keep,p.id);await loadPasses();if(wasOpen)openPass(Object.assign({id:p.id},keep),"pass")});
+}
+$("passDup").onclick=()=>{const p=passes.find(x=>x.id===curId);if(p)duplicatePass(p)};
+$("passDel").onclick=()=>{const p=passes.find(x=>x.id===curId);if(p)deletePass(p)};
+$("passDefault").onclick=()=>$("defSave").click();
+
+// New workout: name, description and what to start from (your defaults, a built-in template or a copy).
+let newFrom="defaults";
+function openNew(){
+  const d=new Date();$("newName").value=T("Pass {d}",{d:fmtDay(d)});$("newDesc").value="";newFrom="defaults";
+  const box=$("newFrom");box.innerHTML="";
+  const opt=(key,title,sub)=>{const b=document.createElement("button");b.className="opt";b.dataset.k=key;const s1=document.createElement("span");s1.textContent=title;const s2=document.createElement("small");s2.textContent=sub;b.append(s1,s2);
+    b.onclick=()=>{newFrom=key;box.querySelectorAll(".opt").forEach(o=>o.setAttribute("aria-pressed",o.dataset.k===key))};b.setAttribute("aria-pressed",key===newFrom);box.appendChild(b)};
+  const dc=userDefs?Object.assign({},DEFAULTS,cleanCfg(userDefs)):DEFAULTS;
+  opt("defaults",T(userDefs?"Mina standardvärden":"Appens standard"),passSummary(dc));
+  TEMPLATES.forEach((x,i)=>opt("tpl:"+i,lang==="en"?x[1]:x[0],passSummary(Object.assign({},DEFAULTS,x[2]))));
+  passes.slice(0,8).forEach(p=>opt("copy:"+p.id,T("Kopia av {x}",{x:p.name}),passSummary(cfgOf(p)||{})));
+  $("newSheet").hidden=false;setTimeout(()=>{$("newName").focus();$("newName").select()},50);
+}
+$("passNew").onclick=openNew;
+$("newCancel").onclick=()=>{$("newSheet").hidden=true};
+$("newSheet").addEventListener("click",e=>{if(e.target===$("newSheet"))$("newSheet").hidden=true});
+$("newCreate").onclick=async()=>{
+  const name=$("newName").value.trim()||T("Pass utan namn"),desc=$("newDesc").value.trim();
+  let c=newPlanCfg();
+  if(newFrom.indexOf("tpl:")===0){const x=TEMPLATES[+newFrom.slice(4)];c=Object.assign(c,JSON.parse(JSON.stringify(TPL_BASE)),JSON.parse(JSON.stringify(x[2])));c.st=1;c.ex=1}
+  else if(newFrom.indexOf("copy:")===0){const p=passes.find(x=>x.id===newFrom.slice(5));if(p)c=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),cfgOf(p)||{})}
+  else{c.st=1;c.ex=1}
+  DEVICE_KEYS.forEach(k=>delete c[k]);
+  const rec={name,desc,cfg:JSON.stringify(c),updated:Date.now(),lastRun:0};
+  $("newCreate").disabled=true;
+  try{const id=await storePass(rec);$("newSheet").hidden=true;await loadPasses();openPass(Object.assign({id},rec),"ex");if(cfg.stretch>0&&!lines(cfg.stretchList).length)suggestStretch(true)}
+  catch(e){toastMsg(T("Passet kunde inte sparas. Kontrollera anslutningen och försök igen."))}
+  $("newCreate").disabled=false;
 };
+
+// First start after this update: the plan you had becomes a workout, so nothing is lost.
+async function ensureCurrent(){
+  if(curId&&passes.some(p=>p.id===curId)){const p=passes.find(x=>x.id===curId);curMeta={name:p.name||"",desc:p.desc||"",lastRun:p.lastRun||0};
+    $("passName").value=curMeta.name;$("passDesc").value=curMeta.desc;lastStored=curKey();
+    if(lastStored!==JSON.stringify([curMeta.name,curMeta.desc,cfgOf(p)]))lastStored="";setSaveState(T("Sparat"));edHead();render();return}
+  curId=null;writeLocal("ccage_cur",null);
+  const snap=readLocal("ccage_saved",null),hadPlan=localStorage.getItem("ccage")!=null;
+  if(snap&&snap.name){const p=passes.find(x=>x.name===snap.name);if(p&&snap.data===JSON.stringify(passData())){openPass(p,"ex");showTab("passes");return}}
+  if(hadPlan&&(snap||passes.length)){
+    const rec={name:(snap&&snap.name?T("{x} (ändrad)",{x:snap.name}):T("Pass utan namn")),desc:"",cfg:JSON.stringify(passData()),updated:Date.now(),lastRun:0};
+    try{const id=await storePass(rec);await loadPasses();openPass(Object.assign({id},rec),"ex");showTab("passes");toastMsg(T("Din plan sparades som {x}.",{x:rec.name}))}catch(e){}
+  }
+  try{localStorage.removeItem("ccage_saved")}catch(e){}
+}
 
 // Defaults for new workouts: what "New workout" starts from. Stored on this phone and in the backup.
 // They hold the structure and times, not the exercise names or per-exercise times.
@@ -884,17 +1038,8 @@ function newPlanCfg(){const c=Object.assign(JSON.parse(JSON.stringify(DEFAULTS))
 function renderDefs(){const c=userDefs?Object.assign({},DEFAULTS,cleanCfg(userDefs)):DEFAULTS;
   const parts=[passSummary(c),T("{n} övn",{n:c.ex}),T("{n} set",{n:c.sets}),T("uppvärmning {n} min",{n:c.warm})];
   $("defSum").textContent=(userDefs?T("Dina standardvärden"):T("Appens standard"))+": "+parts.join(" · ");$("defReset").disabled=!userDefs}
-function newPass(){
-  const before=JSON.parse(JSON.stringify(cfg)),nameBefore=$("passName").value;
-  cfg=newPlanCfg();fixCfg();if(running)$("bMain").click();started=false;
-  syncInputs();$("passName").value="";if(cfg.stretch>0)suggestStretch(true);render();markSaved("");
-  passMsg(T(userDefs?"Nytt pass med dina standardvärden.":"Nytt pass med appens standard."));
-  undoable(T("Nytt pass."),()=>{cfg=before;started=false;syncInputs();$("passName").value=nameBefore;markSaved(nameBefore)});
-  showTab("plan");
-}
-$("passNew").onclick=newPass;$("passNew2").onclick=newPass;
 $("defSave").onclick=()=>{const old=userDefs;userDefs=defsFrom(passData());writeLocal(DEF_KEY,userDefs);renderDefs();
-  undoable(T("Plan används som standard för nya pass."),()=>{userDefs=old;if(old)writeLocal(DEF_KEY,old);else try{localStorage.removeItem(DEF_KEY)}catch(e){}renderDefs()})};
+  undoable(T("Passet används som standard för nya pass."),()=>{userDefs=old;if(old)writeLocal(DEF_KEY,old);else try{localStorage.removeItem(DEF_KEY)}catch(e){}renderDefs()})};
 $("defReset").onclick=()=>{const old=userDefs;userDefs=null;try{localStorage.removeItem(DEF_KEY)}catch(e){}renderDefs();
   undoable(T("Nya pass börjar med appens standard."),()=>{userDefs=old;writeLocal(DEF_KEY,old);renderDefs()})};
 
@@ -961,7 +1106,7 @@ $("exAdd").onclick=()=>{const q=$("exSearch").value.trim();const id="u"+Date.now
 // Backup: one JSON file with saved workouts, the exercise library, the plan and this phone's settings.
 function bkMsg(t,bad){const m=$("bkMsg");m.textContent=t;m.style.color=bad?"var(--danger)":""}
 function backupData(){return{format:"crosscage-klocka",version:1,appVersion:APP_VERSION,exported:new Date().toISOString(),
-  passes:passes.map(p=>({name:p.name,cfg:cfgOf(p),updated:p.updated||0})),exercises:lib,plan:passData(),settings:deviceOf(cfg),defaults:userDefs,lang}}
+  passes:passes.map(p=>({name:p.name,desc:p.desc||"",cfg:cfgOf(p),updated:p.updated||0,lastRun:p.lastRun||0})),exercises:lib,current:curId?curMeta.name:"",settings:deviceOf(cfg),defaults:userDefs,lang}}
 $("expBtn").onclick=async()=>{
   const d=new Date(),stamp=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
   const name="crosscage-"+stamp+".json",text=JSON.stringify(backupData(),null,1);
@@ -996,24 +1141,26 @@ $("impFile").addEventListener("change",async()=>{
   for(const p of (Array.isArray(d.passes)?d.passes:[]).slice(0,500)){
     const name=str(p&&p.name,40).trim();if(!name)continue;const c=cleanCfg(p.cfg);const up=typeof p.updated==="number"?p.updated:0;
     const ex=passes.find(x=>x.name.toLowerCase()===name.toLowerCase());if(ex&&(ex.updated||0)>=up)continue;
-    let id;try{id=await storePass({name,cfg:JSON.stringify(c),updated:up||Date.now()},ex&&ex.id)}catch(e){bkMsg(T("Passen kunde inte sparas. Kontrollera anslutningen eller lagringsutrymmet och försök igen."),true);break}
-    touched.push({id,before:ex?{name:ex.name,cfg:ex.cfg,updated:ex.updated}:null});np++}
+    let id;try{id=await storePass({name,desc:str(p.desc,500),cfg:JSON.stringify(c),updated:up||Date.now(),lastRun:typeof p.lastRun==="number"?p.lastRun:0},ex&&ex.id)}catch(e){bkMsg(T("Passen kunde inte sparas. Kontrollera anslutningen eller lagringsutrymmet och försök igen."),true);break}
+    touched.push({id,before:ex?{name:ex.name,desc:ex.desc||"",cfg:ex.cfg,updated:ex.updated,lastRun:ex.lastRun||0}:null});np++}
   // Exercises: the newer copy of each entry wins.
   (Array.isArray(d.exercises)?d.exercises:[]).slice(0,2000).forEach(x=>{if(!x||typeof x.id!=="string")return;const id=x.id.slice(0,80);if(id[0]!=="u"&&id.indexOf("b:")!==0)return;
     const e={id,desc:str(x.desc,2000),updated:typeof x.updated==="number"?x.updated:0};if(id[0]==="u"){e.name=str(x.name,60).trim();e.group=GROUPS.includes(x.group)?x.group:"";e.deleted=x.deleted===true;if(!e.name)return}
     const cur=lib.find(y=>y.id===id);if(cur&&(cur.updated||0)>=e.updated)return;lib=lib.filter(y=>y.id!==id);lib.push(e);ne++});
   saveLib();
-  const before=JSON.parse(JSON.stringify(cfg));
+  const before=JSON.parse(JSON.stringify(cfg)),curBefore=curId;
   if(d.defaults&&typeof d.defaults==="object"){userDefs=defsFrom(cleanCfg(d.defaults));writeLocal(DEF_KEY,userDefs);renderDefs()}
-  cfg=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),cleanCfg(d.plan),cleanCfg(d.settings));fixCfg();
-  if(running)$("bMain").click();started=false;syncInputs();
+  Object.assign(cfg,cleanCfg(d.settings));fixCfg();syncInputs();
   if(d.lang==="sv"||d.lang==="en")setLang(d.lang);else render();
   await loadPasses();renderLib();
-  bkMsg(T("Klart: {n} pass och {e} övningar lästes in. Passet i Plan och inställningarna återställdes.",{n:np,e:ne}));
+  // with no workout open, open the one that was open when the backup was made
+  if(!curId){const want=str(d.current,40).trim().toLowerCase();const p=passes.find(x=>want&&x.name.toLowerCase()===want)||passes[0];if(p){openPass(p,"ex");showTab("passes")}}
+  bkMsg(T("Klart: {n} pass och {e} övningar lästes in. Inställningarna återställdes.",{n:np,e:ne}));
   undoable(T("Säkerhetskopian lästes in."),async()=>{
     for(const x of touched.reverse()){if(x.before)await storePass(x.before,x.id);else await dropPass(x.id)}
     userDefs=defsBefore;if(userDefs)writeLocal(DEF_KEY,userDefs);else try{localStorage.removeItem(DEF_KEY)}catch(e){}renderDefs();
     lib=libBefore;saveLib();cfg=before;started=false;syncInputs();if(lang!==langBefore)setLang(langBefore);
+    if(!curBefore&&curId){curId=null;writeLocal("ccage_cur",null)}
     await loadPasses();renderLib();bkMsg(T("Inläsningen ångrades."))});
 });
 
@@ -1024,13 +1171,12 @@ renderPasses();
     if(use){const[d,u]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
       if(d&&u){const id=await u.id();if(id){db=d;uid=id}}}
   }catch(e){}
-  loadPasses();
+  await loadPasses();await ensureCurrent();renderPasses();
 })();
 
 function setLang(l){
   lang=l;try{localStorage.setItem("ccage_lang",l)}catch(e){}
-  buildTpl();
-  roundsKey="";setsKey="";applyStatic();buildNames();buildSnd();soundLbl();awakeLbl();if(spOn())spFill();$("bFocus").textContent=T(document.body.classList.contains("focus")?"Visa allt":"Fokusläge");renderPasses();renderLib();renderDefs();
+  roundsKey="";setsKey="";applyStatic();buildNames();buildSnd();soundLbl();awakeLbl();if(spOn())spFill();$("bFocus").textContent=T(document.body.classList.contains("focus")?"Visa allt":"Fokusläge");renderPasses();renderLib();renderDefs();try{setStep(step,true);edHead()}catch(e){}
   const pm=$("passMsg");if(!pm.style.color)passMsg(where());
   const wm=$("wakeMsg");if(!wm.hidden)wakeMsg(wm.dataset.ok==="1");
   render();draw();
@@ -1206,5 +1352,5 @@ if("serviceWorker" in navigator){
 
 renderDefs();
 $("appVer").textContent=APP_VERSION?T("Version {v}",{v:APP_VERSION}):"";
-buildTpl();render();savedSnap=readLocal("ccage_saved",null)||{name:$("passName").value,data:planKey()};writeLocal("ccage_saved",savedSnap);checkDirty();
+render();setStep(readLocal("ccage_step","ex"),true);showTab(curId?"plan":"passes");
 })();

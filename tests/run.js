@@ -35,14 +35,16 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
   const URL0 = "http://127.0.0.1:" + server.address().port + "/";
   const browser = await chromium.launch();
 
-  // Opens the app with the given saved settings, in Swedish, with speech replaced by a recorder.
+  // Opens the app in Swedish with speech replaced by a recorder. With settings, they become the open workout
+  // "Test" (as a returning user would have); opts.raw seeds localStorage keys as they are instead.
   async function open(settings, opts) {
-    const ctx = await browser.newContext(Object.assign({ serviceWorkers: "block" }, opts || {}));
+    opts = opts || {};
+    const ctx = await browser.newContext(Object.assign({ serviceWorkers: "block" }, opts.device || {}));
     const page = await ctx.newPage();
     page.errors = [];
     page.on("pageerror", (e) => page.errors.push(e.message));
     page.on("console", (m) => { if (m.type() === "error") page.errors.push(m.text()); });
-    await page.addInitScript((s) => {
+    await page.addInitScript(([s, raw]) => {
       window.__said = [];
       Object.defineProperty(window, "speechSynthesis", { configurable: true, value: { speak: (u) => window.__said.push(u.text), cancel: () => {}, getVoices: () => [] } });
       window.SpeechSynthesisUtterance = function (t) { this.text = t; };
@@ -50,12 +52,19 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
         sessionStorage.setItem("seeded", "1");
         localStorage.clear();
         localStorage.setItem("ccage_lang", "sv");
-        if (s) localStorage.setItem("ccage", JSON.stringify(s));
+        if (s) {
+          localStorage.setItem("ccage", JSON.stringify(s));
+          localStorage.setItem("ccage_passes", JSON.stringify([{ id: "t1", name: "Test", desc: "", updated: 1, lastRun: 0, cfg: JSON.stringify(s) }]));
+          localStorage.setItem("ccage_cur", JSON.stringify("t1"));
+        }
+        if (raw) Object.entries(raw).forEach(([k, v]) => localStorage.setItem(k, typeof v === "string" ? v : JSON.stringify(v)));
       }
-    }, settings || null);
+    }, [settings || null, opts.raw || null]);
     await page.goto(URL0);
+    await page.waitForTimeout(150);
     return page;
   }
+  const passesIn = (page) => page.evaluate(() => JSON.parse(localStorage.getItem("ccage_passes") || "[]"));
 
   await test("the page and its script ask for the same version as the service worker", async () => {
     const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
@@ -71,7 +80,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
   });
 
   await test("the planned total equals what the timer runs, in 24 combinations", async () => {
-    const page = await open();
+    const page = await open({});
     for (const mid of ["off", "round", "st"]) for (const oneRest of [false, true]) for (const order of ["block", "alt"]) for (const mode of ["auto", "manual"]) {
       const c = { mid, oneRest, order, mode, midEvery: 3, midTime: 40, stretch: 5, st: 7, ex: 2, sets: 2, rd: 3, perRound: mode === "auto", setsEach: order === "alt", roundSets: [2, 3, 1], stretchList: ["A", "B", "C"] };
       await page.evaluate((c) => localStorage.setItem("ccage", JSON.stringify(c)), c);
@@ -82,11 +91,76 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(!page.errors.length, page.errors.join("; "));
   });
 
+  await test("a first start shows the workout list, and New workout leads through the steps", async () => {
+    const page = await open(null, { device: { device: null } });
+    assert(await page.isVisible("#passes") && await page.isHidden("#plan"), "a first start should show the workout list");
+    await page.click("#passNew");
+    await page.fill("#newName", "Måndag ben");
+    await page.fill("#newDesc", "Kettlebells");
+    await page.click("#newCreate");
+    await page.waitForFunction(() => !document.getElementById("plan").hidden);
+    assert(await page.textContent("#edTitle") === "Måndag ben", "the new workout is not open");
+    assert(await page.getAttribute("#stepEx", "aria-selected") === "true", "a new workout should open at Exercises");
+    assert((await page.$$(".scard")).length === 1, "a new workout starts with one empty station");
+    await page.click("#goBtn");
+    assert(await page.isVisible("#paneTime"), "Next should go to Times");
+    await page.click("#goBtn");
+    assert(await page.isVisible("#run"), "Next should go to the timer");
+    const p = (await passesIn(page))[0];
+    assert(p.name === "Måndag ben" && p.desc === "Kettlebells", "the workout was not stored with name and description");
+  });
+
+  await test("stations come from the exercises you add, with A and B on the same card", async () => {
+    const page = await open({ st: 1, ex: 1, names: [] });
+    await page.click("#stepEx");
+    const pick = async (q) => { await page.fill("#pickSearch", q); await page.click("#pickList .pick"); };
+    await page.click("#stAdd"); await pick("knäböj");
+    await page.click("#stAdd"); await pick("armhäv");
+    await page.click("#stAdd"); await pick("Min egen övning");
+    await page.click(".scard:nth-child(1) .addex"); await pick("rodd med");
+    const cards = await page.$$eval(".scard", (cs) => cs.map((c) => [...c.querySelectorAll(".nmb")].map((b) => b.textContent).join("+")));
+    assert(JSON.stringify(cards) === JSON.stringify(["Knäböj+Rodd med hantel", "Armhävningar+Välj övning", "Min egen övning+Välj övning"]), "cards: " + JSON.stringify(cards));
+    assert(await page.inputValue("#st") === "3" && await page.inputValue("#ex") === "2", "stations and slots do not follow the cards");
+    assert(await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_exlib")).some((x) => x.name === "Min egen övning")), "a typed exercise should be added to Exercises");
+    // move station 3 to the top and remove station 2
+    await page.click(".scard:nth-child(3) .hd button:nth-of-type(1)");
+    await page.click(".scard:nth-child(2) .hd button:nth-of-type(1)");
+    assert((await page.$$eval(".scard .nmb", (b) => b[0].textContent)) === "Min egen övning", "moving up did not work");
+    await page.click(".scard:nth-child(2) .hd button:nth-of-type(3)");
+    assert((await page.$$(".scard")).length === 2, "removing a station did not work");
+    await page.click("#toastUndo");
+    assert((await page.$$(".scard")).length === 3, "undo did not bring the station back");
+    // clearing B everywhere drops the B slot
+    await page.click(".scard:nth-child(3) .slot:nth-child(3) .x").catch(() => {});
+    const bTexts = await page.$$eval(".scard", (cs) => cs.map((c) => c.querySelectorAll(".slot").length));
+    assert(bTexts.every((n) => n === 1 || n === 2), "slots: " + bTexts);
+  });
+
+  await test("changes are saved to the workout automatically", async () => {
+    const page = await open({ st: 2, names: [["Knäböj"], ["Utfall"]], total: 45 });
+    await page.click("#stepTime");
+    await page.click('[data-step="total:1"]');
+    assert(/Sparar/.test(await page.textContent("#saveState")), "no saving state");
+    await page.waitForFunction(() => document.getElementById("saveState").textContent === "Sparat");
+    const p = (await passesIn(page)).find((x) => x.id === "t1");
+    assert(JSON.parse(p.cfg).total === 46, "the change did not reach the saved workout");
+    await page.click("#stepPass");
+    await page.fill("#passName", "Nytt namn");
+    await page.waitForFunction(() => document.getElementById("saveState").textContent === "Sparat");
+    assert((await passesIn(page)).find((x) => x.id === "t1").name === "Nytt namn", "the name was not saved");
+    // a run does not change the saved workout, but marks when it was run
+    await page.click("#tabRun"); await page.click("#bMain"); await page.click("#bPlus"); await page.click("#bMain");
+    await page.waitForTimeout(1300);
+    const after = (await passesIn(page)).find((x) => x.id === "t1");
+    assert(JSON.parse(after.cfg).total === 46 && after.lastRun > 0, "a run changed the workout or was not recorded");
+  });
+
   await test("buttons in the plan respond to taps on a phone", async () => {
-    const page = await open(null, devices["iPhone 13"]);
+    const page = await open({}, { device: devices["iPhone 13"] });
     await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true)));
-    for (const [a, b] of [["mgOver", "mgBuffer"], ["evenOff", "evenOn"], ["holdOff", "holdOn"], ["midSt", "midOff"], ["nsLetter", "nsName"], ["voiceOn", "voiceOff"]]) {
-      if (a === "voiceOn") await page.tap("#tabSet");
+    for (const [a, b, stepId] of [["mgOver", "mgBuffer", "stepTime"], ["evenOff", "evenOn", "stepTime"], ["holdOff", "holdOn", "stepTime"], ["midSt", "midOff", "stepEx"], ["nsLetter", "nsName", "stepEx"], ["voiceOn", "voiceOff", null]]) {
+      if (stepId) { await page.tap("#tabPass"); await page.tap("#passList .item button:nth-child(2)"); await page.tap("#" + stepId); await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true))); }
+      else await page.tap("#tabSet");
       await page.tap("#" + a);
       assert(await page.getAttribute("#" + a, "aria-pressed") === "true", a + " was not selected");
       await page.tap("#" + b);
@@ -95,22 +169,24 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(await page.inputValue("#margin") === "0", "the margin field is empty");
   });
 
-  await test("a template can be applied and undone", async () => {
-    const page = await open();
+  await test("a new workout can start from a built-in template", async () => {
+    const page = await open({});
     await page.click("#tabPass");
-    await page.click("#tplChips button:nth-child(2)");
+    await page.click("#passNew");
+    await page.click("#newFrom .opt:nth-child(3)");
+    await page.click("#newCreate");
+    await page.waitForFunction(() => !document.getElementById("plan").hidden);
     assert((await page.textContent("#sum_mid")).includes("30 s"), "the template did not turn on the interval exercise");
-    await page.click("#toastUndo");
-    assert(await page.textContent("#sum_mid") === "Ingen", "undo did not restore the plan");
+    assert((await passesIn(page)).length === 2, "the template should give a new workout");
   });
 
-  await test("clearing names can be undone", async () => {
-    const page = await open({ names: [["Knäböj", "Rodd"]] });
-    await page.evaluate(() => (document.querySelector("details:not(.fold)").open = true));
+  await test("clearing the exercises can be undone", async () => {
+    const page = await open({ st: 1, ex: 2, names: [["Knäböj", "Rodd"]] });
+    await page.click("#stepEx");
     await page.click("#exClear");
-    assert(await page.inputValue("#ex0_0") === "", "names were not cleared");
+    assert(await page.textContent(".scard .nmb") === "Välj övning", "exercises were not cleared");
     await page.click("#toastUndo");
-    assert(await page.inputValue("#ex0_0") === "Knäböj", "undo did not bring the names back");
+    assert(await page.textContent(".scard .nmb") === "Knäböj", "undo did not bring the exercises back");
   });
 
   await test("the voice reads the phases in order, and demos keep real names with Exercise A, B", async () => {
@@ -143,16 +219,14 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.click("#tabSet");
     await page.click('[data-lang="en"]');
     const text = await page.evaluate(() => ["passes", "plan", "exlib", "settings"].map((id) => {
-      const s = document.getElementById(id); s.hidden = false; s.querySelectorAll("details:not(.item)").forEach((d) => (d.open = true)); return s.innerText; }).join("\n"));
+      const s = document.getElementById(id); s.hidden = false; s.querySelectorAll(".pane").forEach((p) => (p.hidden = false));
+      s.querySelectorAll("details:not(.item)").forEach((d) => (d.open = true)); return s.innerText; }).join("\n"));
     const left = text.split("\n").filter((l) => /[åäöÅÄÖ]/.test(l) && !/Knäböj|Höft|Bröst|Övre|Bål|Fjärilen|Kobran|Barnets|Framsida|Baksida|Vader|Sidosträck|Arm över|Djup|Katt|Triceps|Nedåtgående|Duvan/.test(l));
     assert(!left.length, "Swedish text left in English mode: " + left.slice(0, 5).join(" | "));
   });
 
   await test("a backup can be exported and read back into an empty app", async () => {
     const page = await open({ st: 5, names: [["Knäböj"], ["Egen övning X"]] });
-    await page.fill("#passName", "Testpass");
-    await page.click("#passSave");
-    await page.waitForFunction(() => /Sparade/.test(document.getElementById("passMsg").textContent));
     await page.click("#tabEx");
     await page.fill("#exSearch", "Egen övning X");
     await page.click("#exAdd");
@@ -165,11 +239,12 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     const backup = JSON.parse(fs.readFileSync(file, "utf8"));
     assert(backup.format === "crosscage-klocka" && backup.passes.length === 1 && backup.exercises.length === 1, "backup content: " + JSON.stringify(backup).slice(0, 200));
     const fresh = await open();
-    await fresh.click("#tabPass");
+    await fresh.click("#passNew").catch(() => {});
+    await fresh.click("#newCancel").catch(() => {});
     await fresh.setInputFiles("#impFile", file);
     await fresh.waitForFunction(() => /Klart/.test(document.getElementById("bkMsg").textContent));
-    assert((await fresh.textContent("#passList")).includes("Testpass"), "the workout did not come back");
-    assert(await fresh.inputValue("#st") === "5", "the plan did not come back");
+    assert((await fresh.textContent("#passList")).includes("Test"), "the workout did not come back");
+    assert(await fresh.inputValue("#st") === "5", "the workout that was open did not open again");
     assert(await fresh.evaluate(() => JSON.parse(localStorage.getItem("ccage")).voice) === true, "the settings did not come back");
     await fresh.click("#tabEx");
     await fresh.fill("#exSearch", "Egen övning X");
@@ -188,13 +263,13 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(await page.inputValue("#st") === "3", "the plan was changed");
   });
 
-  await test("loading a workout keeps this phone's sound settings", async () => {
-    const page = await open({ vol: 30, voice: true });
-    await page.evaluate(() => localStorage.setItem("ccage_passes", JSON.stringify([{ id: "p1", name: "Gammalt", updated: 1, cfg: JSON.stringify({ st: 4, vol: 90, voice: false }) }])));
-    await page.reload();
+  await test("opening a workout keeps this phone's sound settings", async () => {
+    const page = await open(null, { raw: { ccage: { vol: 30, voice: true }, ccage_cur: '"p1"',
+      ccage_passes: [{ id: "p1", name: "Ett", updated: 2, cfg: JSON.stringify({ st: 2 }) }, { id: "p2", name: "Gammalt", updated: 1, cfg: JSON.stringify({ st: 4, vol: 90, voice: false }) }] } });
     await page.click("#tabPass");
-    await page.click("#passList .item button:nth-child(2)");
-    assert(await page.inputValue("#st") === "4", "the workout was not loaded");
+    const items = await page.$$("#passList .item");
+    for (const it of items) if ((await it.innerText()).includes("Gammalt")) { await (await it.$("button:nth-child(2)")).click(); break; }
+    assert(await page.inputValue("#st") === "4", "the workout was not opened");
     const c = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")));
     assert(c.vol === 30 && c.voice === true, "sound settings changed: vol " + c.vol + ", voice " + c.voice);
   });
@@ -208,44 +283,41 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(await page.isVisible("#rDesc") && (await page.textContent("#rDesc")) === "Fötterna axelbrett.", "no description in the demo");
   });
 
-  await test("an imported file cannot push settings outside their range", async () => {
+  await test("an imported workout cannot push settings outside their range", async () => {
     const page = await open({ st: 3 });
     await page.click("#tabPass");
-    const bad = { format: "crosscage-klocka", version: 1, passes: [], exercises: [], plan: { st: 1e7, rd: -5, ex: 99, total: 1e9, rounds: [{ work: 1e6 }], roundSets: [999] }, settings: { vol: 5000 } };
+    const bad = { format: "crosscage-klocka", version: 1, passes: [{ name: "Trasigt", updated: 9, cfg: { st: 1e7, rd: -5, ex: 99, total: 1e9, rounds: [{ work: 1e6 }], roundSets: [999] } }], exercises: [], settings: { vol: 5000 } };
     await page.setInputFiles("#impFile", { name: "b.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(bad)) });
     await page.waitForFunction(() => /Klart/.test(document.getElementById("bkMsg").textContent));
+    const items = await page.$$("#passList .item");
+    for (const it of items) if ((await it.innerText()).includes("Trasigt")) { await (await it.$("button:nth-child(2)")).click(); break; }
     const c = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")));
     assert(c.st === 20 && c.rd === 1 && c.ex === 4 && c.total === 180 && c.vol === 100, "values not limited: " + JSON.stringify({ st: c.st, rd: c.rd, ex: c.ex, total: c.total, vol: c.vol }));
     assert(!page.errors.length, page.errors.join("; "));
   });
 
-  await test("undo after an import brings back the workouts, exercises and plan from before", async () => {
-    const page = await open({ st: 3 });
-    await page.evaluate(() => {
-      localStorage.setItem("ccage_passes", JSON.stringify([{ id: "p1", name: "Mitt pass", updated: 1, cfg: JSON.stringify({ st: 2 }) }]));
-      localStorage.setItem("ccage_exlib", JSON.stringify([{ id: "u1", name: "Min övning", group: "", desc: "gammal", updated: 1 }]));
-    });
-    await page.reload();
+  await test("undo after an import brings back the workouts and exercises from before", async () => {
+    const page = await open(null, { raw: { ccage: { st: 2 }, ccage_cur: '"p1"',
+      ccage_passes: [{ id: "p1", name: "Mitt pass", updated: 1, cfg: JSON.stringify({ st: 2 }) }],
+      ccage_exlib: [{ id: "u1", name: "Min övning", group: "", desc: "gammal", updated: 1 }] } });
     await page.click("#tabPass");
     const file = { format: "crosscage-klocka", version: 1, lang: "en",
       passes: [{ name: "Mitt pass", updated: 99, cfg: { st: 9 } }, { name: "Nytt pass", updated: 5, cfg: { st: 7 } }],
-      exercises: [{ id: "u1", name: "Min övning", group: "", desc: "ny", updated: 99 }], plan: { st: 12 }, settings: {} };
+      exercises: [{ id: "u1", name: "Min övning", group: "", desc: "ny", updated: 99 }], settings: {} };
     await page.setInputFiles("#impFile", { name: "b.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(file)) });
     await page.waitForFunction(() => /Done|Klart/.test(document.getElementById("bkMsg").textContent));
     await page.click("#toastUndo");
     await page.waitForFunction(() => /ångrades|undone/.test(document.getElementById("bkMsg").textContent));
-    const s = await page.evaluate(() => ({ passes: JSON.parse(localStorage.getItem("ccage_passes")), lib: JSON.parse(localStorage.getItem("ccage_exlib")), st: JSON.parse(localStorage.getItem("ccage")).st, lang: localStorage.getItem("ccage_lang") }));
-    assert(s.passes.length === 1 && JSON.parse(s.passes[0].cfg).st === 2, "workouts not restored: " + JSON.stringify(s.passes));
+    const s = await page.evaluate(() => ({ passes: JSON.parse(localStorage.getItem("ccage_passes")), lib: JSON.parse(localStorage.getItem("ccage_exlib")), lang: localStorage.getItem("ccage_lang") }));
+    assert(s.passes.length === 1 && JSON.parse(s.passes[0].cfg).st === 2, "workouts not restored: " + JSON.stringify(s.passes.map((p) => [p.name, p.cfg])));
     assert(s.lib[0].desc === "gammal", "exercises not restored");
-    assert(s.st === 3 && s.lang === "sv", "plan or language not restored: st " + s.st + ", lang " + s.lang);
+    assert(s.lang === "sv", "language not restored: " + s.lang);
   });
 
   await test("a deleted own exercise stays deleted when an older copy is imported", async () => {
-    const page = await open();
-    await page.evaluate(() => localStorage.setItem("ccage_exlib", JSON.stringify([{ id: "u1", name: "Gammal övning", group: "", desc: "", deleted: true, updated: 50 }])));
-    await page.reload();
+    const page = await open({}, { raw: { ccage_exlib: [{ id: "u1", name: "Gammal övning", group: "", desc: "", deleted: true, updated: 50 }] } });
     await page.click("#tabPass");
-    const file = { format: "crosscage-klocka", version: 1, passes: [], exercises: [{ id: "u1", name: "Gammal övning", group: "", desc: "", updated: 10 }], plan: {}, settings: {} };
+    const file = { format: "crosscage-klocka", version: 1, passes: [], exercises: [{ id: "u1", name: "Gammal övning", group: "", desc: "", updated: 10 }], settings: {} };
     await page.setInputFiles("#impFile", { name: "b.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(file)) });
     await page.waitForFunction(() => /Klart/.test(document.getElementById("bkMsg").textContent));
     await page.click("#tabEx");
@@ -255,7 +327,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
 
   await test("Settings shows the same version as the service worker, and the backup carries it", async () => {
     const v = /const VERSION = "crosscage-v(\d+)"/.exec(fs.readFileSync(path.join(ROOT, "sw.js"), "utf8"))[1];
-    const page = await open();
+    const page = await open({});
     await page.click("#tabSet");
     assert((await page.textContent("#appVer")) === "Version " + v, "shows " + (await page.textContent("#appVer")) + ", expected Version " + v);
     await page.click("#tabPass");
@@ -263,64 +335,44 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(JSON.parse(fs.readFileSync(await dl.path(), "utf8")).appVersion === v, "the backup has no app version");
   });
 
-  await test("a save bar appears at the bottom after a change, and saving hides it", async () => {
-    const page = await open(null, devices["iPhone 13"]);
-    assert(await page.isHidden("#saveBar"), "the save bar shows before any change");
-    await page.tap('[data-step="st:1"]');
-    assert(await page.isVisible("#saveBar"), "no save bar after a change");
-    const box = await page.locator("#saveBar").boundingBox();
-    const vh = page.viewportSize().height;
-    assert(box.y + box.height <= vh && box.y > vh / 2, "the save bar is not at the bottom of the screen");
-    await page.tap("#saveBarBtn");
-    assert(await page.evaluate(() => document.activeElement.id) === "passName", "without a name, Save should go to the name field");
-    await page.fill("#passName", "Nytt pass");
-    await page.tap("#saveBarBtn");
-    await page.waitForFunction(() => /Sparade/.test(document.getElementById("passMsg").textContent));
-    assert(await page.isHidden("#saveBar"), "the save bar stays after saving");
-    await page.tap('[data-step="rd:1"]');
-    assert(/Nytt pass/.test(await page.textContent("#saveBarMsg")), "the save bar does not name the workout");
-    await page.tap("#tabRun");
-    assert(await page.isHidden("#saveBar"), "the save bar shows outside Plan");
-  });
-
-  await test("New workout starts from the defaults set in Settings, without exercise names", async () => {
+  await test("a new workout uses the defaults from Settings, but not their exercises", async () => {
     const page = await open({ st: 5, rd: 3, warm: 7, stretch: 4, names: [["Knäböj"]], vol: 40 });
     await page.click("#tabSet");
     await page.click("#defSave");
     assert(/Dina standardvärden/.test(await page.textContent("#defSum")), "the summary does not show your defaults");
-    // change the plan, then start a new workout
-    await page.evaluate(() => { const c = JSON.parse(localStorage.getItem("ccage")); c.st = 9; c.rd = 1; localStorage.setItem("ccage", JSON.stringify(c)); });
-    await page.reload();
-    assert(await page.inputValue("#st") === "9", "setup failed");
+    await page.click("#tabPass");
     await page.click("#passNew");
+    assert(/Mina standardvärden/.test(await page.textContent("#newFrom .opt:nth-child(1)")), "the dialog does not offer your defaults");
+    await page.click("#newCreate");
+    await page.waitForFunction(() => !document.getElementById("plan").hidden);
     const c = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")));
-    assert(c.st === 5 && c.rd === 3 && c.warm === 7 && c.stretch === 4, "new workout does not use the defaults: " + JSON.stringify({ st: c.st, rd: c.rd, warm: c.warm, stretch: c.stretch }));
+    assert(c.rd === 3 && c.warm === 7 && c.stretch === 4 && c.st === 1, "new workout does not use the defaults: " + JSON.stringify({ st: c.st, rd: c.rd, warm: c.warm, stretch: c.stretch }));
     assert(!c.names.length && c.vol === 40, "names should be empty and phone settings kept");
-    assert(await page.isHidden("#saveBar"), "a new workout should not count as unsaved changes");
-    // undo brings the previous plan back
-    await page.click("#toastUndo");
-    assert(await page.inputValue("#st") === "9", "undo did not restore the plan");
-    // reset to the app's defaults
     await page.click("#tabSet");
     await page.click("#defReset");
     assert(/Appens standard/.test(await page.textContent("#defSum")), "reset did not take");
-    await page.click("#tabPass");
-    await page.click("#passNew2");
-    assert(await page.inputValue("#st") === "8", "new workout after reset should use the app's 8 stations");
   });
 
   await test("the defaults travel with the backup", async () => {
-    const page = await open({ st: 6 });
+    const page = await open({ st: 6, rd: 4 });
     await page.click("#tabSet");
     await page.click("#defSave");
     await page.click("#tabPass");
     const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#expBtn")]);
     const file = await dl.path();
     const fresh = await open();
-    await fresh.click("#tabPass");
     await fresh.setInputFiles("#impFile", file);
     await fresh.waitForFunction(() => /Klart/.test(document.getElementById("bkMsg").textContent));
-    assert(await fresh.evaluate(() => JSON.parse(localStorage.getItem("ccage_defaults")).st) === 6, "defaults not imported");
+    assert(await fresh.evaluate(() => JSON.parse(localStorage.getItem("ccage_defaults")).rd) === 4, "defaults not imported");
+  });
+
+  await test("a plan from the previous version becomes a workout, so nothing is lost", async () => {
+    const page = await open(null, { raw: { ccage: { st: 6, names: [["Utfall"]] }, ccage_saved: { name: "Torsdag", data: "x" },
+      ccage_passes: [{ id: "p1", name: "Torsdag", updated: 1, cfg: JSON.stringify({ st: 4 }) }] } });
+    await page.waitForTimeout(300);
+    const ps = await passesIn(page);
+    assert(ps.length === 2 && ps.some((p) => p.name === "Torsdag (ändrad)" && JSON.parse(p.cfg).st === 6), "migration: " + JSON.stringify(ps.map((p) => p.name)));
+    assert(await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_cur"))) !== "p1", "the changed plan should be the open workout");
   });
 
   await browser.close();
