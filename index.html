@@ -85,6 +85,13 @@ textarea{width:100%;min-height:72px;resize:vertical;background:var(--panel);bord
 .legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted)}
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c);opacity:var(--o,1)}
 details{border-top:1px solid var(--line);padding-top:12px}
+details.fold{padding-block:0;gap:0}
+details.fold>summary{list-style:none;display:flex;align-items:center;gap:10px;padding-block:14px}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin-left:4px;transition:transform .15s}
+details.fold[open]>summary::after{transform:rotate(225deg)}
+details.fold .fsum{margin-left:auto;font-family:var(--body);font-weight:500;font-size:13px;letter-spacing:0;text-transform:none;color:var(--fg);text-align:right}
+details.fold .foldin{display:flex;flex-direction:column;gap:12px;padding-bottom:14px}
 summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .ex{display:grid;grid-template-columns:28px repeat(var(--n),minmax(0,1fr));gap:6px;align-items:center;margin-top:8px}
 .ex b{font-family:var(--display);font-size:18px;color:var(--muted);text-align:center}
@@ -113,6 +120,9 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 .face.cool{background:var(--cool);color:#062010}
 .face.mid{background:var(--mid);color:#2a0d00}
 .face.done{background:var(--panel)}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(520px,calc(100% - 32px));display:flex;align-items:center;gap:12px;background:var(--fg);color:var(--bg);border-radius:10px;padding:10px 10px 10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);z-index:20;font-size:14px}
+.toast span{flex:1}
+.toast button{background:none;border:0;color:var(--bg);font:inherit;font-weight:700;text-decoration:underline;padding:6px 8px;cursor:pointer}
 .flash{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.12em;text-transform:uppercase;background:var(--bg);color:var(--fg);border-radius:8px;padding:2px 14px}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 .face.hit{animation:pulse .35s 2}
@@ -148,11 +158,12 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 code.uri{display:block;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px;font-size:12px;overflow-wrap:anywhere;color:var(--fg);user-select:all}
 ol.steps{margin:0;padding-left:20px;color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:4px}
 ol.steps a{color:var(--fg)}
-.runbar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.runbar,.adj{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.adj button{background:none;border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:8px;font:inherit;font-size:14px;font-variant-numeric:tabular-nums;cursor:pointer}
 .runbar button{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px 8px;font:inherit;font-size:14px;cursor:pointer}
 .runbar button[aria-pressed="true"]{border-color:var(--work);color:var(--work)}
 body.focus header,body.focus .tabs,body.focus .meta,body.focus #mEnd,body.focus .tiny,body.focus #wakeMsg{display:none!important}
-body.focus .music,body.focus .next,body.focus .ctrls,body.focus .runbar{opacity:.3;transition:opacity .2s}
+body.focus .music,body.focus .next,body.focus .ctrls,body.focus .runbar,body.focus .adj{opacity:.3;transition:opacity .2s}
 body.focus .music:hover,body.focus .music:focus-within,body.focus .next:hover,body.focus .ctrls:hover,body.focus .runbar:hover,body.focus .ctrls:focus-within,body.focus .runbar:focus-within{opacity:1}
 body.focus .face{padding-block:28px}
 body.focus .clock{font-size:clamp(120px,42vw,260px)}
@@ -181,6 +192,9 @@ body.focus .wrap{gap:12px}
       <div class="passrow"><select id="passSel" aria-label="Sparade pass"><option value="">Inga sparade pass än</option></select><button class="btn" id="passLoad">Ladda</button><button class="btn" id="passDel">Ta bort</button></div>
       <div class="passrow"><input id="passName" maxlength="40" placeholder="Namn, t.ex. Ben 45 min" aria-label="Passets namn"><button class="btn primary" id="passSave">Spara</button></div>
       <div class="sub" id="passMsg">Laddar sparade pass…</div>
+      <div class="label" style="margin-top:6px">Mallar</div>
+      <div class="chips" id="tplChips"></div>
+      <div class="sub">En mall ställer in upplägget. Namnen på övningarna behålls.</div>
     </div>
 
     <div class="block">
@@ -243,8 +257,8 @@ body.focus .wrap{gap:12px}
       </div>
     </div>
 
-    <div class="block">
-      <div class="label">Stretch i slutet</div>
+    <details class="block fold" data-fold="stretch"><summary><span>Stretch i slutet</span><span class="fsum" id="sum_stretch"></span></summary><div class="foldin">
+      
       <div class="row">
         <label for="stretch">Stretch<small id="stretchSub">efter sista varvet</small></label>
         <div class="num"><button data-step="stretch:-1" aria-label="Minska">−</button><input id="stretch" type="number" inputmode="numeric" min="0" max="20"><button data-step="stretch:1" aria-label="Öka">+</button></div><span class="unit">min</span>
@@ -255,10 +269,10 @@ body.focus .wrap{gap:12px}
         <div class="chips"><button id="stretchSuggest">Föreslå stretch</button></div>
         <div class="sub" id="stretchHint"></div>
       </div>
-    </div>
+    </div></details>
 
-    <div class="block">
-      <div class="label">Mellanövning</div>
+    <details class="block fold" data-fold="mid"><summary><span>Mellanövning</span><span class="fsum" id="sum_mid"></span></summary><div class="foldin">
+      
       <div class="mode three" role="group" aria-label="Mellanövning">
         <button id="midOff" aria-pressed="true">Ingen</button>
         <button id="midRound" aria-pressed="false">Mellan varv</button>
@@ -277,7 +291,7 @@ body.focus .wrap{gap:12px}
         <textarea id="midList" rows="3" maxlength="1000"></textarea>
         <div class="sub" id="midHint"></div>
       </div>
-    </div>
+    </div></details>
 
     <div class="label" style="margin-top:4px">Fördelning arbete och vila</div>
     <div class="mode" role="group" aria-label="Läge">
@@ -328,14 +342,14 @@ body.focus .wrap{gap:12px}
       </div>
     </div>
 
-    <div class="block">
-      <div class="label">Under passet</div>
+    <details class="block fold" data-fold="hold"><summary><span>Under passet</span><span class="fsum" id="sum_hold"></span></summary><div class="foldin">
+      
       <div class="mode" role="group" aria-label="Under passet">
         <button id="holdOn" aria-pressed="true">Håll sluttiden</button>
         <button id="holdOff" aria-pressed="false">Följ planen</button>
       </div>
       <div class="sub" id="holdHint"></div>
-    </div>
+    </div></details>
 
     <div class="block">
       <div class="label">Pauser vid byten</div>
@@ -390,8 +404,8 @@ body.focus .wrap{gap:12px}
       </div>
     </div>
 
-    <div class="block">
-      <div class="label">Ljud</div>
+    <details class="block fold" data-fold="sound"><summary><span>Ljud</span><span class="fsum" id="sum_sound"></span></summary><div class="foldin">
+      
       <div class="row">
         <label for="countdown">Nedräkning före slut<small>pip varje sekund de sista sekunderna av övningen</small></label>
         <div class="num"><button data-step="countdown:-1" aria-label="Minska">−</button><input id="countdown" type="number" inputmode="numeric" min="0" max="15"><button data-step="countdown:1" aria-label="Öka">+</button></div><span class="unit">s</span>
@@ -410,6 +424,11 @@ body.focus .wrap{gap:12px}
         <button id="halfOn" aria-pressed="true">Halvtidssignal på (byt sida)</button>
         <button id="halfOff" aria-pressed="false">Ingen halvtidssignal</button>
       </div>
+      <div class="mode" role="group" aria-label="Röst">
+        <button id="voiceOn" aria-pressed="false">Röst läser upp övningar</button>
+        <button id="voiceOff" aria-pressed="true">Ingen röst</button>
+      </div>
+      <div class="sub" id="voiceHint"></div>
       <div class="label">Med musik i bakgrunden</div>
       <div class="mode stack" role="group" aria-label="Ljud tillsammans med musik">
         <button id="mixAmb" aria-pressed="true">Blanda med musiken (tyst i ljudlöst läge)</button>
@@ -417,19 +436,19 @@ body.focus .wrap{gap:12px}
         <button id="mixPlay" aria-pressed="false">Hörs alltid, även i ljudlöst läge (kan pausa musiken)</button>
       </div>
       <div class="sub">Starta musiken i Spotify först och tryck sedan Start här. På iPhone: stäng av ljudlös-reglaget på sidan av telefonen, annars hörs inte klockan. Om det ändå är tyst, prova "Sänk musiken vid signal".</div>
-    </div>
+    </div></details>
 
-    <div class="block">
-      <div class="label">Låsskärm</div>
+    <details class="block fold" data-fold="lock"><summary><span>Låsskärm</span><span class="fsum" id="sum_lock"></span></summary><div class="foldin">
+      
       <div class="mode stack" role="group" aria-label="Låsskärm">
         <button id="lockOn" aria-pressed="false">Visa klockan på låsskärmen</button>
         <button id="lockOff" aria-pressed="true">Visa inte på låsskärmen</button>
       </div>
       <div class="sub">Med låsskärm på visas fas och tid som en spelare på låsskärmen, och klockan fortsätter pipa när skärmen är låst. Det fungerar bäst i den installerade appen. På iPhone kan det pausa musik från Spotify, eftersom bara en app i taget kan synas på låsskärmen.</div>
-    </div>
+    </div></details>
 
-    <div class="block" id="spBlock">
-      <div class="label"><span class="sp-green">●</span> Spotify</div>
+    <details class="block fold" data-fold="spotify" id="spBlock"><summary><span><span class="sp-green">●</span> Spotify</span><span class="fsum" id="sum_spotify"></span></summary><div class="foldin">
+      
       <div id="spSetup" style="display:flex;flex-direction:column;gap:10px">
         <ol class="steps">
           <li>Skapa en app på <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">developer.spotify.com/dashboard</a> och välj Web API.</li>
@@ -455,7 +474,7 @@ body.focus .wrap{gap:12px}
           <div class="num"><button data-step="spRestVol:-10" aria-label="Minska">−</button><input id="spRestVol" type="number" inputmode="numeric" min="0" max="100"><button data-step="spRestVol:10" aria-label="Öka">+</button></div><span class="unit">%</span></div>
       </div>
       <div class="sub" id="spMsg"></div>
-    </div>
+    </div></details>
 
     <details>
       <summary>Övningar: namn och egna tider <span id="exCount"></span></summary>
@@ -502,6 +521,7 @@ body.focus .wrap{gap:12px}
       <button id="bMain" class="main">Start</button>
       <button id="bNext" aria-label="Nästa intervall">Fram ▶</button>
     </div>
+    <div class="adj" role="group" aria-label="Ändra tiden"><button id="bMinus" aria-label="30 sekunder kortare">−30 s</button><button id="bPlus" aria-label="30 sekunder längre">+30 s</button></div>
     <div class="music" id="musicBar" hidden>
       <button id="mPrev" aria-label="Föregående låt">⏮</button>
       <div class="np"><div class="t" id="npTitle">Spotify</div><div class="a" id="npArtist"></div></div>
@@ -517,8 +537,9 @@ body.focus .wrap{gap:12px}
     <div class="tiny"><button id="bReset">Börja om</button><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
     <div class="sub" id="wakeMsg" style="text-align:center" hidden></div>
   </section>
+  <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=crosscage-v11"></script>
+<script src="app.js?v=crosscage-v12"></script>
 </body>
 </html>
