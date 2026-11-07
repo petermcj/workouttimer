@@ -373,7 +373,8 @@ $("exFill").onclick=()=>{
 $("exClear").onclick=()=>{const before=JSON.parse(JSON.stringify(cfg.names));cfg.names=[];namesKey="";render();undoable(T("Alla övningar togs bort."),()=>{cfg.names=before;namesKey=""})};
 // A short "Undo" bar instead of asking first: the change happens at once and can be taken back for 8 seconds.
 let undoFn=null,undoT=0;
-function undoable(msg,fn,label){undoFn=fn;$("toastMsg").textContent=msg;$("toastUndo").hidden=!fn;$("toastUndo").textContent=label||T("Ångra");$("toast").hidden=false;clearTimeout(undoT);undoT=setTimeout(()=>{$("toast").hidden=true;undoFn=null},8000)}
+let undoLabel="Ångra";
+function undoable(msg,fn,label){undoFn=fn;$("toastMsg").textContent=msg;$("toastUndo").hidden=!fn;undoLabel=label||"Ångra";$("toastUndo").textContent=T(undoLabel);$("toast").hidden=false;clearTimeout(undoT);undoT=setTimeout(()=>{$("toast").hidden=true;undoFn=null},8000)}
 $("toastUndo").onclick=async()=>{const fn=undoFn;undoFn=null;clearTimeout(undoT);if(!fn){$("toast").hidden=true;return}
   $("toastUndo").disabled=true;
   try{await fn();render();$("toast").hidden=true}
@@ -436,7 +437,7 @@ function buildRounds(){
 $("modeAuto").onclick=()=>setMode("auto");$("modeManual").onclick=()=>setMode("manual");
 $("cdWorkOnly").onclick=()=>{cfg.cdRest=false;render()};$("cdAll").onclick=()=>{cfg.cdRest=true;render()};
 $("instrPer").onclick=()=>{cfg.instrUnit="per";render()};$("instrAll").onclick=()=>{cfg.instrUnit="total";render()};
-$("lockOn").onclick=()=>{cfg.lock=true;render()};$("lockOff").onclick=()=>{cfg.lock=false;stopLock();render()};
+$("lockOn").onclick=()=>{cfg.lock=true;render()};$("lockOff").onclick=()=>{musicMode();render()};
 $("instrBlock").onclick=()=>{cfg.instrMode="block";render()};$("instrStation").onclick=()=>{cfg.instrMode="station";render()};
 
 function buildNames(){
@@ -840,8 +841,12 @@ function startLock(){
 // The lock screen player needs the phone's audio for itself, so iPhone pauses music in other apps. Say so once per
 // app start, with a button that switches to mixing with the music instead.
 let lockNoted=false;
-function lockMusicNote(){if(!cfg.lock||lockNoted)return;lockNoted=true;
-  undoable(T("Klockan visas på låsskärmen, därför pausas musik i andra appar."),()=>{cfg.lock=false;stopLock();setSession();render()},T("Stäng av"))}
+// 4: same condition as startLock, so the note only shows when the lock screen player really runs
+function lockMusicNote(){if(!cfg.lock||lockNoted||!("mediaSession" in navigator))return;lockNoted=true;
+  undoable(T("Klockan visas på låsskärmen, därför pausas musik i andra appar."),()=>musicMode(true),"Stäng av")}
+// Music in another app: no lock screen player, and sounds that mix with the music.
+function musicMode(resume){cfg.lock=false;if(cfg.mix==="playback")cfg.mix="ambient";stopLock();setSession();
+  if(resume&&running&&spOn()&&cfg.spStart)spPlay(false).catch(()=>{})}
 function stopLock(){try{if(lockAudio){lockAudio.pause()}if("mediaSession" in navigator){navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState="none"}}catch(e){}}
 function updateLock(force){
   if(!cfg.lock||!lockAudio||!("mediaSession" in navigator))return;
@@ -1284,6 +1289,7 @@ renderPasses();
 
 function setLang(l){
   lang=l;try{localStorage.setItem("ccage_lang",l)}catch(e){}
+  $("toastUndo").textContent=T(undoLabel);
   roundsKey="";setsKey="";applyStatic();buildNames();buildSnd();soundLbl();awakeLbl();if(spOn())spFill();$("bFocus").textContent=T(document.body.classList.contains("focus")?"Visa allt":"Fokusläge");renderPasses();renderLib();renderDefs();try{setStep(step,true);edHead()}catch(e){}
   const pm=$("passMsg");if(!pm.style.color)passMsg(where());
   const wm=$("wakeMsg");if(!wm.hidden)wakeMsg(wm.dataset.ok==="1");
