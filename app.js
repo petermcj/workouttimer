@@ -1441,6 +1441,15 @@ let deferredPrompt=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBtn").hidden=false});
 $("installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;$("installBtn").hidden=true};
 window.addEventListener("appinstalled",()=>{$("installBtn").hidden=true});
+// iOS can leave the whole page shifted up after the keyboard, the share sheet or the file picker closes, which pushes
+// the menu off the bottom of the screen. Only the middle part is meant to scroll, so put the page back in place.
+function settle(){if(window.scrollX||window.scrollY)window.scrollTo(0,0);if(document.documentElement.scrollTop)document.documentElement.scrollTop=0;if(document.body.scrollTop)document.body.scrollTop=0}
+["resize","orientationchange","pageshow","focus"].forEach(ev=>window.addEventListener(ev,()=>setTimeout(settle,60)));
+document.addEventListener("focusout",()=>setTimeout(settle,60));
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")setTimeout(settle,60)});
+document.addEventListener("change",e=>{if(e.target&&e.target.type==="file")setTimeout(settle,60)},true);
+if(window.visualViewport)window.visualViewport.addEventListener("resize",()=>setTimeout(settle,60));
+window.addEventListener("scroll",()=>{if(!document.activeElement||!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))settle()});
 // When a new version's service worker takes over, offer a reload instead of waiting for the next start.
 // Not during a running workout: the bar waits until the clock is paused or finished.
 if("serviceWorker" in navigator){

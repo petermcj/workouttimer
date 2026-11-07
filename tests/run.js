@@ -519,6 +519,18 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(/Lyft säcken till axeln/.test(d) && /Titta på: Rak rygg i lyftet/.test(d), "the own exercise's instructions are not on the timer: " + d);
   });
 
+  await test("the menu comes back to the bottom of the screen if the page gets shifted, as iOS does after the keyboard or a file picker", async () => {
+    const page = await open({}, { device: devices["iPhone 13"] });
+    await page.click("#tabPass");
+    // let the document scroll the way iOS shifts it, then shift it
+    await page.evaluate(() => { document.documentElement.style.overflow = "visible"; document.body.style.overflow = "visible"; document.body.style.height = "3000px"; window.scrollTo(0, 300); });
+    assert(await page.evaluate(() => window.scrollY) > 0, "could not simulate the shift");
+    await page.evaluate(() => document.dispatchEvent(new FocusEvent("focusout")));
+    await page.waitForTimeout(200);
+    const r = await page.evaluate(() => ({ y: window.scrollY, bottom: Math.round(document.querySelector(".nav").getBoundingClientRect().bottom), vh: innerHeight }));
+    assert(r.y === 0 && r.bottom === r.vh, "the page stayed shifted: " + JSON.stringify(r));
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;
