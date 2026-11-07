@@ -5,11 +5,11 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://api.spotify.com https://accounts.spotify.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#11151b">
-<meta name="description" content="Intervallklocka för CrossCage-pass: stationer, övningar, set, varv, uppvärmning och genomgång.">
+<meta name="description" content="Intervallklocka för pass med stationer, övningar, set, varv, uppvärmning och genomgång. För instruktörer och för dig som tränar själv.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CrossCage">
+<meta name="apple-mobile-web-app-title" content="WorkoutTimer">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -21,7 +21,7 @@ img{max-width:100%}
 [hidden]{display:none!important}
 button,input,select{touch-action:manipulation}
 </style>
-<title>CrossCage Passklocka</title>
+<title>WorkoutTimer</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 /* Layout: one-column gym clock. Plan tab (inputs + session strip) and Kör tab (huge countdown). Deliberately single dark theme, like a box clock on the wall. */
@@ -689,6 +689,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=crosscage-v18"></script>
+<script src="app.js?v=workouttimer-v19"></script>
 </body>
 </html>

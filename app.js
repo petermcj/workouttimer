@@ -1,6 +1,8 @@
 (function(){
-// The app version is the one in the script link (app.js?v=crosscage-vN), which matches VERSION in sw.js.
-const APP_VERSION=(/[?&]v=crosscage-v(\d+)/.exec((document.currentScript||{}).src||"")||[])[1]||"";
+// The app version is the one in the script link (app.js?v=workouttimer-vN), which matches VERSION in sw.js.
+// Storage keys ("ccage...") and the backup format ("crosscage-klocka") keep the app's first name, so saved data and
+// backups still work in every version.
+const APP_VERSION=(/[?&]v=workouttimer-v(\d+)/.exec((document.currentScript||{}).src||"")||[])[1]||"";
 const $=id=>document.getElementById(id);
 const EN={
 "Plan":"Plan","Kör":"Run","Sparade pass":"Saved workouts","Ladda":"Load","Ta bort":"Delete",
@@ -855,7 +857,7 @@ function updateLock(force){
     const title=lb.phase+" · "+time;
     if(!force&&title===lockLast)return;lockLast=title;
     const ms=navigator.mediaSession;
-    ms.metadata=new MediaMetadata({title,artist:lb.what,album:lb.where||"CrossCage",artwork:[{src:"icons/icon-512.png",sizes:"512x512",type:"image/png"},{src:"icons/icon-192.png",sizes:"192x192",type:"image/png"}]});
+    ms.metadata=new MediaMetadata({title,artist:lb.what,album:lb.where||"WorkoutTimer",artwork:[{src:"icons/icon-512.png",sizes:"512x512",type:"image/png"},{src:"icons/icon-192.png",sizes:"192x192",type:"image/png"}]});
     ms.playbackState=running?"playing":"paused";
     if(it&&ms.setPositionState)ms.setPositionState({duration:it.d,position:Math.min(it.d,Math.max(0,it.d-remain)),playbackRate:1});
     if(running&&lockAudio.paused){const p=lockAudio.play();if(p&&p.catch)p.catch(()=>{})}
@@ -1221,7 +1223,7 @@ function backupData(){return{format:"crosscage-klocka",version:1,appVersion:APP_
   passes:passes.map(p=>({name:p.name,desc:p.desc||"",cfg:cfgOf(p),updated:p.updated||0,lastRun:p.lastRun||0})),exercises:lib,current:curId?curMeta.name:"",settings:deviceOf(cfg),defaults:userDefs,lang}}
 $("expBtn").onclick=async()=>{
   const d=new Date(),stamp=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-  const name="crosscage-"+stamp+".json",text=JSON.stringify(backupData(),null,1);
+  const name="workouttimer-"+stamp+".json",text=JSON.stringify(backupData(),null,1);
   try{const file=new File([text],name,{type:"application/json"});
     if(matchMedia("(pointer:coarse)").matches&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});bkMsg(T("Säkerhetskopian är klar: {n} pass och {e} egna övningar och beskrivningar.",{n:passes.length,e:lib.length}));return}
   }catch(e){if(e&&e.name==="AbortError")return}

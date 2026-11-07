@@ -329,7 +329,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
   });
 
   await test("Settings shows the same version as the service worker, and the backup carries it", async () => {
-    const v = /const VERSION = "crosscage-v(\d+)"/.exec(fs.readFileSync(path.join(ROOT, "sw.js"), "utf8"))[1];
+    const v = /const VERSION = "workouttimer-v(\d+)"/.exec(fs.readFileSync(path.join(ROOT, "sw.js"), "utf8"))[1];
     const page = await open({});
     await page.click("#tabSet");
     assert((await page.textContent("#appVer")) === "Version " + v, "shows " + (await page.textContent("#appVer")) + ", expected Version " + v);
