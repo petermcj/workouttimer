@@ -53,7 +53,7 @@ Appen måste ligga på en webbadress med https, till exempel GitHub Pages (se ne
 
 Appen använder inga bibliotek och laddar ingen kod från andra servrar. Typsnitten ligger i `fonts/` i stället för att hämtas från Google Fonts. De enda externa anropen går till Spotifys API.
 
-`index.html` har en Content-Security-Policy som bara tillåter skript, typsnitt och stilar från appens egen adress, och anrop till `api.spotify.com` och `accounts.spotify.com`. Den skyddar Spotify-inloggningen som sparas i telefonen om en bugg skulle släppa in främmande kod.
+`index.html` har en Content-Security-Policy som bara tillåter skript och typsnitt från appens egen adress, och anrop till `api.spotify.com` och `accounts.spotify.com`. Den skyddar Spotify-inloggningen som sparas i telefonen om en bugg skulle släppa in främmande kod.
 
 Tänk på detta när du ändrar appen:
 
