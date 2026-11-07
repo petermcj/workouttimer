@@ -15,6 +15,13 @@ Intervallklocka för CrossCage-pass, byggd som en webbapp (PWA) som installeras 
 - Ordning på stationen: alla set av en övning i taget (A A B B) eller växla mellan övningarna (A B A B)
 - Egna tider för arbete och vila per övning och varv
 - Pauser för byte av övning, byte av station och mellan varv
+- Mallar för att komma igång snabbt, och Ångra efter större ändringar
+- Röst som läser upp övningar, byten och stretch (valfritt)
+- Knappar för −30 s och +30 s under passet
+- Mellanövning som alla gör samtidigt, mellan varv eller efter var X:e station
+- Stretch i slutet med förslag som anpassas efter passets övningar
+- Övningsbank att välja övningar från, och knapp som fyller tomma stationer med förslag
+- Välj om klockan visar övningens namn, Övning 1, 2, 3 eller Övning A, B (bra när deltagarna börjar på olika stationer)
 - Ljud: startsignal, halvtidssignal (byt sida), nedräkning, slutsignal, volym och flera ljud att välja mellan
 - Spara pass med namn (sparas i telefonen)
 - Styr Spotify: spellista vid start, spela/pausa med passet, nästa låt och lägre volym under vila (kräver Premium, se [SPOTIFY.md](SPOTIFY.md))
@@ -46,6 +53,7 @@ Appen måste ligga på en webbadress med https, till exempel GitHub Pages (se ne
 | --- | --- |
 | `index.html` | Appens HTML och CSS, och säkerhetspolicyn (CSP) |
 | `app.js` | All JavaScript |
+| `tests/run.js` | Tester som körs i webbläsaren (`npm install` och sedan `npm test`). De körs också automatiskt i GitHub vid varje pull request |
 | `fonts/` | Typsnitten Barlow och Barlow Condensed (SIL Open Font License, se `fonts/OFL.txt`) |
 | `manifest.webmanifest` | Appens namn, ikoner och färger |
 | `sw.js` | Service worker som gör att appen fungerar offline |

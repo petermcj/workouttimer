@@ -1,0 +1,11 @@
+{
+  "name": "crosscage-klocka",
+  "private": true,
+  "description": "Intervallklocka för CrossCage-pass. Appen själv har inga beroenden; Playwright används bara för testerna.",
+  "scripts": {
+    "test": "node tests/run.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
