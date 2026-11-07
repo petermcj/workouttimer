@@ -19,6 +19,7 @@ Intervallklocka för CrossCage-pass, byggd som en webbapp (PWA) som installeras 
 - Egna pass med övningar, som kan köras direkt eller användas som mall, plus inbyggda mallar och Ångra efter större ändringar
 - Övningsbibliotek med egna övningar och beskrivningar som visas i klockan under genomgång och arbete
 - Säkerhetskopia: exportera pass, övningar, plan och inställningar till en fil och läs in den igen
+- Egna standardvärden för nya pass (Inställningar → Standard för nya pass) och knappen Nytt pass
 - Röst som läser upp övningar, byten och stretch (valfritt)
 - Knappar för −30 s och +30 s under passet
 - Mellanövning som alla gör samtidigt, mellan varv eller efter var X:e station
