@@ -86,6 +86,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     const page = await open(null, devices["iPhone 13"]);
     await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true)));
     for (const [a, b] of [["mgOver", "mgBuffer"], ["evenOff", "evenOn"], ["holdOff", "holdOn"], ["midSt", "midOff"], ["nsLetter", "nsName"], ["voiceOn", "voiceOff"]]) {
+      if (a === "voiceOn") await page.tap("#tabSet");
       await page.tap("#" + a);
       assert(await page.getAttribute("#" + a, "aria-pressed") === "true", a + " was not selected");
       await page.tap("#" + b);
@@ -96,6 +97,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
 
   await test("a template can be applied and undone", async () => {
     const page = await open();
+    await page.click("#tabPass");
     await page.click("#tplChips button:nth-child(2)");
     assert((await page.textContent("#sum_mid")).includes("30 s"), "the template did not turn on the interval exercise");
     await page.click("#toastUndo");
@@ -139,10 +141,70 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
   await test("all new text is translated to English", async () => {
     const page = await open({ stretch: 3, mid: "st", voice: true });
     await page.click('[data-lang="en"]');
-    await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true)));
-    const text = await page.evaluate(() => document.getElementById("plan").innerText);
+    const text = await page.evaluate(() => ["passes", "plan", "exlib", "settings"].map((id) => {
+      const s = document.getElementById(id); s.hidden = false; s.querySelectorAll("details:not(.item)").forEach((d) => (d.open = true)); return s.innerText; }).join("\n"));
     const left = text.split("\n").filter((l) => /[åäöÅÄÖ]/.test(l) && !/Knäböj|Höft|Bröst|Övre|Bål|Fjärilen|Kobran|Barnets|Framsida|Baksida|Vader|Sidosträck|Arm över|Djup|Katt|Triceps|Nedåtgående|Duvan/.test(l));
     assert(!left.length, "Swedish text left in English mode: " + left.slice(0, 5).join(" | "));
+  });
+
+  await test("a backup can be exported and read back into an empty app", async () => {
+    const page = await open({ st: 5, names: [["Knäböj"], ["Egen övning X"]] });
+    await page.fill("#passName", "Testpass");
+    await page.click("#passSave");
+    await page.waitForFunction(() => /Sparade/.test(document.getElementById("passMsg").textContent));
+    await page.click("#tabEx");
+    await page.fill("#exSearch", "Egen övning X");
+    await page.click("#exAdd");
+    await page.fill("#exItems details[open] textarea", "Håll ryggen rak.");
+    await page.click("#tabSet");
+    await page.click("#voiceOn");
+    await page.click("#tabPass");
+    const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#expBtn")]);
+    const file = await dl.path();
+    const backup = JSON.parse(fs.readFileSync(file, "utf8"));
+    assert(backup.format === "crosscage-klocka" && backup.passes.length === 1 && backup.exercises.length === 1, "backup content: " + JSON.stringify(backup).slice(0, 200));
+    const fresh = await open();
+    await fresh.click("#tabPass");
+    await fresh.setInputFiles("#impFile", file);
+    await fresh.waitForFunction(() => /Klart/.test(document.getElementById("bkMsg").textContent));
+    assert((await fresh.textContent("#passList")).includes("Testpass"), "the workout did not come back");
+    assert(await fresh.inputValue("#st") === "5", "the plan did not come back");
+    assert(await fresh.evaluate(() => JSON.parse(localStorage.getItem("ccage")).voice) === true, "the settings did not come back");
+    await fresh.click("#tabEx");
+    await fresh.fill("#exSearch", "Egen övning X");
+    assert((await fresh.$$("#exItems details")).length === 1, "the own exercise did not come back");
+    await fresh.click("#exItems summary");
+    assert(await fresh.inputValue("#exItems details[open] textarea") === "Håll ryggen rak.", "the description did not come back");
+    assert(!page.errors.length && !fresh.errors.length, page.errors.concat(fresh.errors).join("; "));
+  });
+
+  await test("a file that is not a backup is refused", async () => {
+    const page = await open({ st: 3 });
+    await page.click("#tabPass");
+    await page.setInputFiles("#impFile", { name: "x.json", mimeType: "application/json", buffer: Buffer.from('{"hello":1}') });
+    await page.waitForFunction(() => document.getElementById("bkMsg").textContent.length > 0);
+    assert(/inte en säkerhetskopia/.test(await page.textContent("#bkMsg")), "no refusal message");
+    assert(await page.inputValue("#st") === "3", "the plan was changed");
+  });
+
+  await test("loading a workout keeps this phone's sound settings", async () => {
+    const page = await open({ vol: 30, voice: true });
+    await page.evaluate(() => localStorage.setItem("ccage_passes", JSON.stringify([{ id: "p1", name: "Gammalt", updated: 1, cfg: JSON.stringify({ st: 4, vol: 90, voice: false }) }])));
+    await page.reload();
+    await page.click("#tabPass");
+    await page.click("#passList .item button:nth-child(2)");
+    assert(await page.inputValue("#st") === "4", "the workout was not loaded");
+    const c = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")));
+    assert(c.vol === 30 && c.voice === true, "sound settings changed: vol " + c.vol + ", voice " + c.voice);
+  });
+
+  await test("an exercise description shows on the timer during the demo", async () => {
+    const page = await open({ st: 1, ex: 1, names: [["Knäböj"]], instr: 20 });
+    await page.evaluate(() => localStorage.setItem("ccage_exlib", JSON.stringify([{ id: "b:Knäböj", desc: "Fötterna axelbrett.", updated: 1 }])));
+    await page.reload();
+    await page.click("#tabRun");
+    for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Genomgång"; i++) await page.click("#bNext");
+    assert(await page.isVisible("#rDesc") && (await page.textContent("#rDesc")) === "Fötterna axelbrett.", "no description in the demo");
   });
 
   await browser.close();
