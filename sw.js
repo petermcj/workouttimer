@@ -1,5 +1,6 @@
-// Bump VERSION when files change so phones pick up the new app.
-const VERSION = "crosscage-v9";
+// Bump VERSION when files change so phones pick up the new app,
+// and use the same value in the app.js?v= link in index.html.
+const VERSION = "crosscage-v10";
 const SHELL = [
   "./",
   "./index.html",
@@ -21,7 +22,9 @@ const SHELL = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // cache: "reload" skips the browser's HTTP cache (GitHub Pages lets it keep files for 10 minutes),
+  // so a new version never stores an old copy of a file.
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {
@@ -42,7 +45,8 @@ self.addEventListener("fetch", (e) => {
   if (req.mode === "navigate" || isScript) {
     const key = isScript ? "./app.js" : "./index.html";
     e.respondWith(
-      fetch(req)
+      // cache: "no-cache" asks the server every time, so the page and its script are always the same version.
+      fetch(req, { cache: "no-cache" })
         .then((res) => { if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(key, copy)); } return res; })
         .catch(() => caches.match(key))
     );

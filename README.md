@@ -38,7 +38,7 @@ Appen måste ligga på en webbadress med https, till exempel GitHub Pages (se ne
 
 ## Uppdatera appen
 
-Ändra filerna och höj `VERSION` i `sw.js` (till exempel `crosscage-v2`). Då hämtar telefonerna den nya versionen nästa gång appen öppnas med internet.
+Ändra filerna och höj `VERSION` i `sw.js` (till exempel `crosscage-v11`). Skriv samma värde i länken till skriptet i `index.html` (`app.js?v=crosscage-v11`), så att sidan aldrig kör ihop med ett gammalt skript. Då hämtar telefonerna den nya versionen nästa gång appen öppnas med internet.
 
 ## Filer
 
