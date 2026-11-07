@@ -281,7 +281,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.click("#tabRun");
     for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Genomgång"; i++) await page.click("#bNext");
     const d = await page.textContent("#rDesc");
-    assert(await page.isVisible("#rDesc") && d.startsWith("Fötterna axelbrett.") && /Sätt dig bakåt/.test(d) && /Titta på: Knäna följer tårna/.test(d), "the demo should show your comment, how to do it and what to watch: " + d);
+    assert(await page.isVisible("#rDesc") && /^Fötterna axelbrett, tårna lätt utåt/.test(d) && /\nTitta på: Knäna följer tårna/.test(d) && d.endsWith("\nFötterna axelbrett."), "the demo should show how to do it, what to watch and then your comment: " + d);
     for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Arbete"; i++) await page.click("#bNext");
     assert((await page.textContent("#rDesc")) === "Fötterna axelbrett.", "during work your own comment should show");
   });
@@ -467,6 +467,14 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
   });
 
   await test("every built-in exercise and stretch has instructions, in Swedish and English", async () => {
+    const src = fs.readFileSync(path.join(ROOT, "app.js"), "utf8");
+    const grab = (name) => { const s = src.indexOf("const " + name + "="); assert(s >= 0, name + " missing"); let i = src.indexOf("=", s) + 1, depth = 0, e = i;
+      for (; e < src.length; e++) { const ch = src[e]; if (ch === "[" || ch === "{") depth++; else if (ch === "]" || ch === "}") { depth--; if (!depth) break; } } return eval("(" + src.slice(i, e + 1) + ")"); };
+    const BANK = grab("BANK"), STRETCH = grab("STRETCH"), INFO = grab("INFO"), STRETCH_INFO = grab("STRETCH_INFO");
+    const noInfo = BANK.filter((b) => !(INFO[b[0]] && INFO[b[0]].length === 4 && INFO[b[0]].every((x) => typeof x === "string" && x.length > 20))).map((b) => b[0]);
+    const noStretch = STRETCH.filter((s) => !(STRETCH_INFO[s[0]] && STRETCH_INFO[s[0]].length === 2 && STRETCH_INFO[s[0]].every((x) => typeof x === "string" && x.length > 20))).map((s) => s[0]);
+    const unknown = Object.keys(INFO).filter((k) => !BANK.some((b) => b[0] === k)).concat(Object.keys(STRETCH_INFO).filter((k) => !STRETCH.some((s) => s[0] === k)));
+    assert(!noInfo.length && !noStretch.length && !unknown.length, "missing: " + noInfo.concat(noStretch).join(", ") + (unknown.length ? "; no such exercise: " + unknown.join(", ") : ""));
     const page = await open({});
     const r = await page.evaluate(() => {
       const fails = [];
@@ -504,7 +512,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await areas[1].fill("Rak rygg i lyftet.");
     const lib = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_exlib")));
     assert(lib.some((x) => x.id === "b:Planka" && x.desc === "Vi kör på knä första veckan."), "the comment on Planka was not saved");
-    assert(lib.some((x) => x.name === "Sandsäck" && x.desc === "Lyft säcken till axeln." && x.look === "Rak rygg i lyftet."), "the own exercise was not saved");
+    assert(lib.some((x) => x.name === "Sandsäck" && x.how === "Lyft säcken till axeln." && x.look === "Rak rygg i lyftet."), "the own exercise was not saved");
     await page.click("#tabRun");
     for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Genomgång"; i++) await page.click("#bNext");
     const d = await page.textContent("#rDesc");
