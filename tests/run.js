@@ -280,7 +280,10 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.reload();
     await page.click("#tabRun");
     for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Genomgång"; i++) await page.click("#bNext");
-    assert(await page.isVisible("#rDesc") && (await page.textContent("#rDesc")) === "Fötterna axelbrett.", "no description in the demo");
+    const d = await page.textContent("#rDesc");
+    assert(await page.isVisible("#rDesc") && /^Fötterna axelbrett, tårna lätt utåt/.test(d) && /\nTitta på: Knäna följer tårna/.test(d) && d.endsWith("\nFötterna axelbrett."), "the demo should show how to do it, what to watch and then your comment: " + d);
+    for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Arbete"; i++) await page.click("#bNext");
+    assert((await page.textContent("#rDesc")) === "Fötterna axelbrett.", "during work your own comment should show");
   });
 
   await test("an imported workout cannot push settings outside their range", async () => {
@@ -461,6 +464,71 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.fill("#pickSearch", "Rodd");
     await page.press("#pickSearch", "Enter");
     assert(await page.textContent(".scard:nth-child(2) .nmb") === "Rodd", "Enter picked a partial match instead of the typed exercise");
+  });
+
+  await test("every built-in exercise and stretch has instructions, in Swedish and English", async () => {
+    const src = fs.readFileSync(path.join(ROOT, "app.js"), "utf8");
+    const grab = (name) => { const s = src.indexOf("const " + name + "="); assert(s >= 0, name + " missing"); let i = src.indexOf("=", s) + 1, depth = 0, e = i;
+      for (; e < src.length; e++) { const ch = src[e]; if (ch === "[" || ch === "{") depth++; else if (ch === "]" || ch === "}") { depth--; if (!depth) break; } } return eval("(" + src.slice(i, e + 1) + ")"); };
+    const BANK = grab("BANK"), STRETCH = grab("STRETCH"), INFO = grab("INFO"), STRETCH_INFO = grab("STRETCH_INFO");
+    const noInfo = BANK.filter((b) => !(INFO[b[0]] && INFO[b[0]].length === 4 && INFO[b[0]].every((x) => typeof x === "string" && x.length > 20))).map((b) => b[0]);
+    const noStretch = STRETCH.filter((s) => !(STRETCH_INFO[s[0]] && STRETCH_INFO[s[0]].length === 2 && STRETCH_INFO[s[0]].every((x) => typeof x === "string" && x.length > 20))).map((s) => s[0]);
+    const unknown = Object.keys(INFO).filter((k) => !BANK.some((b) => b[0] === k)).concat(Object.keys(STRETCH_INFO).filter((k) => !STRETCH.some((s) => s[0] === k)));
+    assert(!noInfo.length && !noStretch.length && !unknown.length, "missing: " + noInfo.concat(noStretch).join(", ") + (unknown.length ? "; no such exercise: " + unknown.join(", ") : ""));
+    const page = await open({});
+    const r = await page.evaluate(() => {
+      const fails = [];
+      for (const lang of ["sv", "en"]) {
+        document.querySelector('[data-lang="' + lang + '"]').click();
+        const all = [...document.querySelectorAll("#exItems details")];
+        if (all.length < 46) fails.push(lang + ": only " + all.length + " exercises listed");
+      }
+      document.querySelector('[data-lang="sv"]').click();
+      return fails;
+    });
+    assert(!r.length, r.join("; "));
+    await page.click("#tabEx");
+    await page.fill("#exSearch", "kettlebell swing");
+    await page.click("#exItems summary");
+    const txt = await page.textContent("#exItems details[open]");
+    assert(/Utförande/.test(txt) && /Titta särskilt på/.test(txt) && /Kraften kommer från höften/.test(txt), "the instructions are not shown: " + txt.slice(0, 200));
+    await page.click("#tabSet"); await page.click('[data-lang="en"]'); await page.click("#tabEx");
+    await page.fill("#exSearch", "kettlebell swing");
+    await page.evaluate(() => (document.querySelector("#exItems details").open = true));
+    assert(/Power comes from the hips/.test(await page.textContent("#exItems details[open]")), "no English instructions");
+  });
+
+  await test("own comments on a built-in exercise and own exercises with instructions are saved", async () => {
+    const page = await open({ st: 1, ex: 1, names: [["Sandsäck"]], instr: 20 });
+    await page.click("#tabEx");
+    await page.fill("#exSearch", "Planka");
+    await page.click("#exItems summary");
+    await page.fill("#exItems details[open] textarea", "Vi kör på knä första veckan.");
+    await page.fill("#exSearch", "Sandsäck");
+    await page.click("#exAdd");
+    const areas = await page.$$("#exItems details[open] textarea");
+    assert(areas.length === 2, "an own exercise should have How and Watch fields");
+    await areas[0].fill("Lyft säcken till axeln.");
+    await areas[1].fill("Rak rygg i lyftet.");
+    const lib = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_exlib")));
+    assert(lib.some((x) => x.id === "b:Planka" && x.desc === "Vi kör på knä första veckan."), "the comment on Planka was not saved");
+    assert(lib.some((x) => x.name === "Sandsäck" && x.how === "Lyft säcken till axeln." && x.look === "Rak rygg i lyftet."), "the own exercise was not saved");
+    await page.click("#tabRun");
+    for (let i = 0; i < 10 && (await page.textContent("#rPhase")) !== "Genomgång"; i++) await page.click("#bNext");
+    const d = await page.textContent("#rDesc");
+    assert(/Lyft säcken till axeln/.test(d) && /Titta på: Rak rygg i lyftet/.test(d), "the own exercise's instructions are not on the timer: " + d);
+  });
+
+  await test("the menu comes back to the bottom of the screen if the page gets shifted, as iOS does after the keyboard or a file picker", async () => {
+    const page = await open({}, { device: devices["iPhone 13"] });
+    await page.click("#tabPass");
+    // let the document scroll the way iOS shifts it, then shift it
+    await page.evaluate(() => { document.documentElement.style.overflow = "visible"; document.body.style.overflow = "visible"; document.body.style.height = "3000px"; window.scrollTo(0, 300); });
+    assert(await page.evaluate(() => window.scrollY) > 0, "could not simulate the shift");
+    await page.evaluate(() => document.dispatchEvent(new FocusEvent("focusout")));
+    await page.waitForTimeout(200);
+    const r = await page.evaluate(() => ({ y: window.scrollY, bottom: Math.round(document.querySelector(".nav").getBoundingClientRect().bottom), vh: innerHeight }));
+    assert(r.y === 0 && r.bottom === r.vh, "the page stayed shifted: " + JSON.stringify(r));
   });
 
   await browser.close();
