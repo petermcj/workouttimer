@@ -375,6 +375,21 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_cur"))) !== "p1", "the changed plan should be the open workout");
   });
 
+  await test("the menu and the workout banner stay in place while the content scrolls", async () => {
+    const page = await open({ st: 8, names: [["Knäböj"], ["Utfall"], ["Planka"], ["Burpees"], ["Hopprep"], ["Dips"], ["Chins"], ["Situps"]] }, { device: devices["iPhone SE"] });
+    await page.click("#stepTime");
+    const before = await page.evaluate(() => [document.querySelector(".nav").getBoundingClientRect().top, document.getElementById("curBar").getBoundingClientRect().top]);
+    await page.evaluate(() => document.getElementById("scroller").scrollTo(0, 99999));
+    const after = await page.evaluate(() => ({ pos: [document.querySelector(".nav").getBoundingClientRect().top, document.getElementById("curBar").getBoundingClientRect().top],
+      scrolled: document.getElementById("scroller").scrollTop, page: document.documentElement.scrollHeight, vh: innerHeight, wide: document.documentElement.scrollWidth > innerWidth }));
+    assert(after.scrolled > 0, "the content did not scroll");
+    assert(after.pos[0] === before[0] && after.pos[1] === before[1], "the menu or banner moved: " + JSON.stringify([before, after.pos]));
+    assert(after.page <= after.vh && !after.wide, "the page itself scrolls; only the middle should");
+    assert((await page.textContent("#edTitle")) === "Test" && (await page.textContent("#goBtn")) === "▶ Kör passet", "banner or Run button text is wrong");
+    await page.click("#curRun");
+    assert(await page.isVisible("#run"), "Run in the banner should open the timer");
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;

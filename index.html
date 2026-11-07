@@ -35,13 +35,21 @@ button,input,select{touch-action:manipulation}
 }
 html,body{background:var(--bg);color:var(--fg)}
 body{font-family:var(--body);font-size:15px;line-height:1.45;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px calc(88px + env(safe-area-inset-bottom,0px))}
-.wrap{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+  padding:0}
+html,body{height:100%;overflow:hidden}
+.wrap{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px))}
+.inner{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.curbar{flex:none;display:flex;align-items:center;gap:10px;background:var(--panel);border-bottom:1px solid var(--line);padding:calc(8px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
+.curbar .ci{flex:1;min-width:0;background:none;border:0;color:var(--fg);text-align:left;padding:0;font:inherit;cursor:pointer}
+.curbar .cn{display:block;font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.curbar .cs{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.curbar .crun{flex:none;background:var(--work);color:var(--work-ink);border:0;border-radius:8px;padding:8px 14px;font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
 header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
 h1{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.02em;margin:0;text-transform:uppercase;line-height:1}
 h1 span{color:var(--work)}
 .sub{color:var(--muted);font-size:13px}
-.nav{position:fixed;left:0;right:0;bottom:0;z-index:10;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--panel);border-top:1px solid var(--line);padding:4px max(6px,env(safe-area-inset-left,0px)) calc(4px + env(safe-area-inset-bottom,0px))}
+.nav{flex:none;z-index:10;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--panel);border-top:1px solid var(--line);padding:4px max(6px,env(safe-area-inset-left,0px)) calc(4px + env(safe-area-inset-bottom,0px))}
 .nav button{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:var(--muted);padding:6px 2px;border-radius:8px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.02em;text-transform:uppercase}
 .nav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:380px){.nav button{letter-spacing:0;font-size:11px}}@media (max-width:340px){.nav button{font-size:10px}}
@@ -217,30 +225,31 @@ body.focus .music,body.focus .next,body.focus .ctrls,body.focus .runbar,body.foc
 body.focus .music:hover,body.focus .music:focus-within,body.focus .next:hover,body.focus .ctrls:hover,body.focus .runbar:hover,body.focus .ctrls:focus-within,body.focus .runbar:focus-within{opacity:1}
 body.focus .face{padding-block:28px}
 body.focus .clock{font-size:clamp(120px,42vw,260px)}
-body.focus .wrap{gap:12px}
+body.focus .inner{gap:12px}
+body.focus .curbar{display:none!important}
+body.onrun header{display:none}
+body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--line)}
 @media (prefers-reduced-motion:reduce){.face{transition:none}}
 </style>
 
 </head>
 <body>
 <div class="wrap">
+  <div class="curbar" id="curBar" hidden>
+    <button class="ci" id="curOpen" aria-label="Öppna passet"><span class="cn" id="edTitle"></span><span class="cs"><span id="curSum"></span> · <span class="status" id="saveState"></span></span></button>
+    <button class="crun" id="curRun">▶ Kör</button>
+  </div>
+  <div class="scroll" id="scroller"><div class="inner">
   <header>
     <h1>Cross<span>Cage</span> klocka</h1>
     <div class="sub" id="sub"></div>
   </header>
 
-  <nav class="nav" role="tablist" aria-label="Meny">
-    <button id="tabPass" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg><span>Pass</span></button>
-    <button id="tabRun" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Klocka</span></button>
-    <button id="tabEx" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/></svg><span>Övningar</span></button>
-    <button id="tabSet" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span>Inställningar</span></button>
-  </nav>
 
   <!-- PLAN -->
   <section id="plan" hidden>
     <div class="edhead">
       <button class="back" id="edBack">‹ Alla pass</button>
-      <div class="edtitle"><span id="edTitle"></span><span class="status" id="saveState"></span></div>
     </div>
     <div class="steps" role="tablist" aria-label="Steg">
       <button id="stepPass" role="tab" data-step-to="pass"><b>1</b>Pass</button>
@@ -647,6 +656,13 @@ body.focus .wrap{gap:12px}
     <div class="tiny"><button id="bReset">Börja om</button><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
     <div class="sub" id="wakeMsg" style="text-align:center" hidden></div>
   </section>
+  </div></div>
+  <nav class="nav" role="tablist" aria-label="Meny">
+    <button id="tabPass" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg><span>Pass</span></button>
+    <button id="tabRun" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Klocka</span></button>
+    <button id="tabEx" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/></svg><span>Övningar</span></button>
+    <button id="tabSet" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span>Inställningar</span></button>
+  </nav>
   <div class="sheet" id="newSheet" hidden role="dialog" aria-modal="true" aria-labelledby="newTitle">
     <div class="sheetbox">
       <div class="label" id="newTitle">Nytt pass</div>
