@@ -523,12 +523,40 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     const page = await open({}, { device: devices["iPhone 13"] });
     await page.click("#tabPass");
     // let the document scroll the way iOS shifts it, then shift it
-    await page.evaluate(() => { document.documentElement.style.overflow = "visible"; document.body.style.overflow = "visible"; document.body.style.height = "3000px"; window.scrollTo(0, 300); });
-    assert(await page.evaluate(() => window.scrollY) > 0, "could not simulate the shift");
+    // read the shift in the same step: the app's own scroll handler puts the page back right after
+    const shifted = await page.evaluate(() => { document.documentElement.style.overflow = "visible"; document.body.style.overflow = "visible"; document.body.style.height = "3000px"; window.scrollTo(0, 300); return window.scrollY; });
+    assert(shifted > 0, "could not simulate the shift");
     await page.evaluate(() => document.dispatchEvent(new FocusEvent("focusout")));
     await page.waitForTimeout(200);
     const r = await page.evaluate(() => ({ y: window.scrollY, bottom: Math.round(document.querySelector(".nav").getBoundingClientRect().bottom), vh: innerHeight }));
     assert(r.y === 0 && r.bottom === r.vh, "the page stayed shifted: " + JSON.stringify(r));
+  });
+
+  await test("starting with the timer on the lock screen says that other music is paused, and one tap turns it off", async () => {
+    const page = await open({ lock: true });
+    await page.click("#tabRun");
+    await page.click("#bMain");
+    assert(await page.isVisible("#toast") && /pausas musik i andra appar/.test(await page.textContent("#toastMsg")), "no note about music being paused");
+    assert(await page.textContent("#toastUndo") === "Stäng av", "the button should turn the lock screen off");
+    await page.click("#toastUndo");
+    assert(await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")).lock) === false, "the lock screen was not turned off");
+    await page.click("#bMain"); await page.click("#bMain");
+    assert(await page.isHidden("#toast"), "the note should not come back");
+    // without the lock screen there is no note
+    const quiet = await open({ lock: false });
+    await quiet.click("#tabRun"); await quiet.click("#bMain");
+    assert(await quiet.isHidden("#toast"), "a note showed without the lock screen");
+    // the next undo bar says Undo again, and the label follows the language
+    await page.click("#tabPass"); await page.click("#passList .item button:nth-child(4)");
+    await page.waitForFunction(() => !document.getElementById("toast").hidden && /Tog bort/.test(document.getElementById("toastMsg").textContent));
+    assert(await page.textContent("#toastUndo") === "Ångra", "the button text stayed from the lock note: " + await page.textContent("#toastUndo"));
+    await page.click("#tabSet"); await page.click('[data-lang="en"]');
+    assert(await page.textContent("#toastUndo") === "Undo", "the button label did not follow the language");
+    // "always audible" pauses music too, so turning the lock screen off from the note also leaves it
+    const loud = await open({ lock: true, mix: "playback" });
+    await loud.click("#tabRun"); await loud.click("#bMain"); await loud.click("#toastUndo");
+    const c = await loud.evaluate(() => JSON.parse(localStorage.getItem("ccage")));
+    assert(c.lock === false && c.mix === "ambient", "still set to pause music: " + JSON.stringify({ lock: c.lock, mix: c.mix }));
   });
 
   await browser.close();
