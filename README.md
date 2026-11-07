@@ -1,6 +1,9 @@
-# CrossCage klocka
+# WorkoutTimer
 
-Intervallklocka för CrossCage-pass, byggd som en webbapp (PWA) som installeras på telefonens hemskärm och fungerar utan internet.
+Intervallklocka för pass med stationer, byggd som en webbapp (PWA) som installeras på telefonens hemskärm och fungerar utan internet. Den passar för cirkelträning, CrossCage och andra stationspass.
+
+- **Instruktörer** planerar ett pass så att uppvärmning, genomgång av övningar, stationsbyten, arbete och vila ryms i den tid passet har fått.
+- **Tränar du själv** skapar du passet på samma sätt och sätter tiderna för genomgång till noll.
 
 ## Funktioner
 
@@ -53,7 +56,7 @@ Appen måste ligga på en webbadress med https, till exempel GitHub Pages (se ne
 
 ## Uppdatera appen
 
-Ändra filerna och höj `VERSION` i `sw.js` (till exempel `crosscage-v11`). Skriv samma värde i länken till skriptet i `index.html` (`app.js?v=crosscage-v11`), så att sidan aldrig kör ihop med ett gammalt skript. Versionsnumret visas längst ner under Inställningar och sparas i säkerhetskopian. När en telefon har hämtat en ny version visas en rad med **Ladda om**, så att den nya versionen används direkt (dock inte mitt i ett pass som pågår). Då hämtar telefonerna den nya versionen nästa gång appen öppnas med internet.
+Ändra filerna och höj `VERSION` i `sw.js` (till exempel `workouttimer-v20`). Skriv samma värde i länken till skriptet i `index.html` (`app.js?v=workouttimer-v20`), så att sidan aldrig kör ihop med ett gammalt skript. Versionsnumret visas längst ner under Inställningar och sparas i säkerhetskopian. När en telefon har hämtat en ny version visas en rad med **Ladda om**, så att den nya versionen används direkt (dock inte mitt i ett pass som pågår). Då hämtar telefonerna den nya versionen nästa gång appen öppnas med internet.
 
 ## Filer
 

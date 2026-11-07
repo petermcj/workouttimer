@@ -1,7 +1,7 @@
 {
-  "name": "CrossCage klocka",
-  "short_name": "CrossCage",
-  "description": "Intervallklocka för CrossCage-pass med stationer, övningar, set, varv, uppvärmning och genomgång.",
+  "name": "WorkoutTimer",
+  "short_name": "WorkoutTimer",
+  "description": "Intervallklocka för pass med stationer, övningar, set, varv, uppvärmning och genomgång. För instruktörer och för dig som tränar själv.",
   "lang": "sv",
   "start_url": "./",
   "scope": "./",

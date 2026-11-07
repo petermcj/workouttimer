@@ -1,4 +1,4 @@
-# Koppla Spotify till CrossCage klocka
+# Koppla Spotify till WorkoutTimer
 
 Appen kan starta och pausa musiken med passet, v채lja spellista, hoppa mellan l책tar och s채nka volymen under vila. Det kr채ver **Spotify Premium**.
 
@@ -7,7 +7,7 @@ Appen kan starta och pausa musiken med passet, v채lja spellista, hoppa mellan l�
 1. G책 till [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) och logga in med ditt Spotify-konto.
 2. Tryck **Create app**.
 3. Fyll i:
-   - **App name:** till exempel `CrossCage klocka`
+   - **App name:** till exempel `WorkoutTimer`
    - **App description:** till exempel `Intervallklocka`
    - **Redirect URI:** `https://petermcj.github.io/workouttimer/` (exakt s책, med snedstreck p책 slutet). Tryck **Add**.
    - **Which API/SDKs are you planning to use?** Kryssa i **Web API**.
