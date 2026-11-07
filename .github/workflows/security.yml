@@ -1,0 +1,33 @@
+name: Sårbarheter
+
+# Checks the exact versions in package-lock.json against known CVEs, and that every package is signed by the registry.
+# Runs when the dependencies change, and once a week so that new CVEs in versions we already use are found too.
+# A new CVE therefore does not fail PRs that only change the app.
+on:
+  pull_request:
+    paths: ["package.json", "package-lock.json", ".github/**"]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      # Needs only package-lock.json, so it runs before anything is installed
+      - run: npm audit --audit-level=moderate
+      # Needs the installed packages; no install scripts run
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm audit signatures
