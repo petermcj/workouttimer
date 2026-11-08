@@ -578,6 +578,24 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(pad === "12px", "unexpected top padding without safe areas: " + pad);
   });
 
+  await test("a combined demo lists the exercises at every station", async () => {
+    const page = await open({ st: 3, ex: 2, warm: 0, instrMode: "block", instrUnit: "total", instrTot: 3, names: [["Knäböj", "Armhävning"], ["Rodd", ""], ["Utfall", "Plankan"]] });
+    await page.click("#tabRun");
+    for (let i = 0; i < 3 && !/Genomgång/i.test(await page.textContent("#rPhase")); i++) await page.click("#bNext");
+    assert(/Genomgång/i.test(await page.textContent("#rPhase")), "the demo was not reached: " + await page.textContent("#rPhase"));
+    const d = await page.textContent("#rDesc");
+    assert(d === "1. A Knäböj · B Armhävning\n2. A Rodd · B –\n3. A Utfall · B Plankan", "the list of exercises: " + JSON.stringify(d));
+    assert(await page.isVisible("#rDesc"), "the list is not shown");
+  });
+
+  await test("in focus mode the timer keeps clear of the status bar", async () => {
+    const page = await open({});
+    await page.click("#tabRun");
+    await page.evaluate(() => document.body.classList.add("focus"));
+    const rule = await page.evaluate(() => [...document.styleSheets].flatMap((s) => [...s.cssRules]).some((r) => r.selectorText && r.selectorText.includes("body.focus .scroll") && /safe-area-inset-top/.test(r.style.paddingTop)));
+    assert(rule, "focus mode does not keep the page clear of the status bar");
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;
