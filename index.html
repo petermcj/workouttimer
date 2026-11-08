@@ -8,7 +8,9 @@
 <meta name="description" content="Intervallklocka för pass med stationer, övningar, set, varv, uppvärmning och genomgång. För instruktörer och för dig som tränar själv.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- An opaque status bar: with a see-through one, iOS 26 makes the installed app as tall as the screen minus the
+     status bar but puts it at the top, which leaves an empty strip at the bottom and blurs the banner under the clock. -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="WorkoutTimer">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
@@ -692,6 +694,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=workouttimer-v20"></script>
+<script src="app.js?v=workouttimer-v21"></script>
 </body>
 </html>

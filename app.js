@@ -1457,16 +1457,9 @@ $("installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.promp
 window.addEventListener("appinstalled",()=>{$("installBtn").hidden=true});
 // iOS can leave the whole page shifted up after the keyboard, the share sheet or the file picker closes, which pushes
 // the menu off the bottom of the screen. Only the middle part is meant to scroll, so put the page back in place.
-// Installed on iPhone, iOS can end the frame (pinned to bottom:0) a status bar's height above the bottom edge,
-// which leaves a gap under the menu. The app always fills the whole screen there, so where the frame really ends is
-// measured against the screen, and a small shortfall is stretched away. A large one is the keyboard and is left alone.
+// iosApp() is only used to show "app" or "web" in the screen measurements under the version.
 function iosApp(){return /iPhone/.test(navigator.userAgent)&&(navigator.standalone===true||matchMedia("(display-mode: standalone)").matches)}
-function screenH(){const sw=screen.width,sh=screen.height;return innerWidth>innerHeight?Math.min(sw,sh):Math.max(sw,sh)}
-function fitFrame(){const w=document.querySelector(".wrap");if(!w)return;
-  let want="";if(iosApp()){const gap=Math.round(screenH()-(w.getBoundingClientRect().bottom+(parseFloat(w.style.bottom)||0)));if(gap>0&&gap<=80)want=-gap+"px"}
-  if(w.style.bottom!==want)w.style.bottom=want}
-fitFrame();
-function settle(){if(window.scrollX||window.scrollY)window.scrollTo(0,0);if(document.documentElement.scrollTop)document.documentElement.scrollTop=0;if(document.body.scrollTop)document.body.scrollTop=0;fitFrame()}
+function settle(){if(window.scrollX||window.scrollY)window.scrollTo(0,0);if(document.documentElement.scrollTop)document.documentElement.scrollTop=0;if(document.body.scrollTop)document.body.scrollTop=0}
 ["resize","orientationchange","pageshow","focus"].forEach(ev=>window.addEventListener(ev,()=>setTimeout(settle,60)));
 document.addEventListener("focusout",()=>setTimeout(settle,60));
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")setTimeout(settle,60)});
@@ -1492,7 +1485,7 @@ let verInfo=false;
 $("appVer").onclick=()=>{verInfo=!verInfo;const wr=document.querySelector(".wrap");if(!verInfo||!wr){$("appVer").textContent=APP_VERSION?T("Version {v}",{v:APP_VERSION}):"";return}
   const w=wr.getBoundingClientRect(),v=window.visualViewport;
   $("appVer").textContent=T("Version {v}",{v:APP_VERSION||"?"})+" · "+[screen.width+"×"+screen.height,innerWidth+"×"+innerHeight,
-    v?Math.round(v.height)+"+"+Math.round(v.offsetTop):"-",Math.round(w.top)+"–"+Math.round(w.bottom),wr.style.bottom||"0",
+    v?Math.round(v.height)+"+"+Math.round(v.offsetTop):"-",Math.round(w.top)+"–"+Math.round(w.bottom),
     iosApp()?"app":"web"].join(" · ")};
 render();setStep(readLocal("ccage_step","ex"),true);showTab(curId?"plan":"passes");
 })();

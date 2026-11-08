@@ -56,7 +56,7 @@ Appen måste ligga på en webbadress med https, till exempel GitHub Pages (se ne
 
 ## Uppdatera appen
 
-Ändra filerna och höj `VERSION` i `sw.js` (till exempel `workouttimer-v20`). Skriv samma värde i länken till skriptet i `index.html` (`app.js?v=workouttimer-v20`), så att sidan aldrig kör ihop med ett gammalt skript. Versionsnumret visas längst ner under Inställningar och sparas i säkerhetskopian. När en telefon har hämtat en ny version visas en rad med **Ladda om**, så att den nya versionen används direkt (dock inte mitt i ett pass som pågår). Då hämtar telefonerna den nya versionen nästa gång appen öppnas med internet.
+Ändra filerna och höj `VERSION` i `sw.js` (till exempel `workouttimer-v20`). Skriv samma värde i länken till skriptet i `index.html` (`app.js?v=workouttimer-v20`), så att sidan aldrig kör ihop med ett gammalt skript. Ändringar i hur appen ser ut på hemskärmen (namn, ikon, statusrad) gäller först när appen läggs till på hemskärmen igen. Exportera en säkerhetskopia först, för när hemskärmsappen tas bort raderas dess data. Versionsnumret visas längst ner under Inställningar och sparas i säkerhetskopian. När en telefon har hämtat en ny version visas en rad med **Ladda om**, så att den nya versionen används direkt (dock inte mitt i ett pass som pågår). Då hämtar telefonerna den nya versionen nästa gång appen öppnas med internet.
 
 ## Filer
 
