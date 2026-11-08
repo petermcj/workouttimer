@@ -559,16 +559,18 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(c.lock === false && c.mix === "ambient", "still set to pause music: " + JSON.stringify({ lock: c.lock, mix: c.mix }));
   });
 
-  await test("installed on iPhone, the menu reaches the bottom edge even when iOS measures the screen without the status bar", async () => {
+  await test("installed on iPhone, the frame ends with the window and is never stretched past it, where nothing is drawn", async () => {
     const at = async (height, standalone) => {
       const dev = Object.assign({}, devices["iPhone 13"], { viewport: { width: 390, height }, screen: { width: 390, height: 844 } });
       const page = await open({}, { device: dev });
       if (standalone) { await page.evaluate(() => Object.defineProperty(navigator, "standalone", { value: true })); await page.evaluate(() => window.dispatchEvent(new Event("resize"))); await page.waitForTimeout(150); }
       return page.evaluate(() => Math.round(document.querySelector(".nav").getBoundingClientRect().bottom));
     };
-    assert(await at(797, true) === 844, "a gap the size of the status bar was left under the menu");
+    assert(await at(797, true) === 797, "the menu was pushed below the window");
     assert(await at(797, false) === 797, "in the browser the menu must stay above the toolbar");
-    assert(await at(500, true) === 500, "with the keyboard open the frame must not be stretched");
+    // the gap itself is fixed by an opaque status bar, which iOS reads when the app is added to the Home Screen
+    const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+    assert(/name="apple-mobile-web-app-status-bar-style" content="black"/.test(html), "a see-through status bar leaves an empty strip under the menu on iOS 26");
   });
 
   await test("without an open workout, the heading keeps clear of the status bar", async () => {
