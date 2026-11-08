@@ -729,8 +729,9 @@ function label(it){
 }
 // The exercise description is shown during demos, and during work when the timer shows exercise names.
 let descKey="",descVal="";
-function descFor(it){const k=idx+"|"+(typeof libVer==="number"?libVer:0)+"|"+cfg.nameStyle+"|"+lang+"|"+seq.length;if(k===descKey)return descVal;descKey=k;descVal=descFor0(it);return descVal}
+function descFor(it){const k=idx+"|"+(typeof libVer==="number"?libVer:0)+"|"+cfg.nameStyle+"|"+lang+"|"+seq.length+"|"+JSON.stringify(cfg.names);if(k===descKey)return descVal;descKey=k;descVal=descFor0(it);return descVal}
 function descFor0(it){if(!it||typeof descOf!=="function")return "";
+  if(it.type==="instr"&&it.all){const k=counts(),rows=[];for(let s=0;s<k.ST;s++){const n=[];for(let e=0;e<k.EX;e++)n.push((k.EX>1?L[e]+" ":"")+(((cfg.names[s]||[])[e]||"").trim()||"–"));rows.push((s+1)+". "+n.join(" · "))}return rows.join("\n")}
   if(it.type==="instr"&&!it.all){const i=exInfo(exName(it.s,it.e,true));return[i.how,i.look?T("Titta på: {x}",{x:i.look}):"",i.note].filter(Boolean).join("\n")}
   if(it.type==="work"&&cfg.nameStyle==="name")return noteOf(exName(it.s,it.e,true));
   if(it.type==="mid")return descOf(midName(it.m));
@@ -742,7 +743,7 @@ function draw(){
   const it=seq[idx],lb=label(it);
   $("face").className="face "+lb.cls;
   $("rPhase").textContent=lb.phase;$("rWhat").textContent=lb.what;$("rWhere").textContent=lb.where;
-  const ds=descFor(it);$("rDesc").hidden=!ds;$("rDesc").textContent=ds;$("rDesc").classList.toggle("long",!!it&&it.type==="instr");
+  const ds=descFor(it);$("rDesc").hidden=!ds;$("rDesc").textContent=ds;$("rDesc").classList.toggle("long",!!it&&it.type==="instr");$("rDesc").classList.toggle("all",!!it&&it.type==="instr"&&!!it.all);
   $("rClock").textContent=it?fmt(Math.ceil(remain-1e-6)):"0:00";
   $("rProg").style.width=it?(100*(1-remain/it.d))+"%":"100%";
   const nx=seq[idx+1];$("nWhat").textContent=nextLabel(nx);$("nDur").textContent=nx?fmt(nx.d):"";
@@ -1456,14 +1457,16 @@ $("installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.promp
 window.addEventListener("appinstalled",()=>{$("installBtn").hidden=true});
 // iOS can leave the whole page shifted up after the keyboard, the share sheet or the file picker closes, which pushes
 // the menu off the bottom of the screen. Only the middle part is meant to scroll, so put the page back in place.
-// Installed on iPhone, iOS can measure the screen without the status bar, so the frame (pinned to bottom:0) ends
-// that far above the bottom edge and leaves a gap under the menu. The app always fills the whole screen there,
-// so a small shortfall against the screen size is stretched away. A large one is the keyboard and is left alone.
+// Installed on iPhone, iOS can end the frame (pinned to bottom:0) a status bar's height above the bottom edge,
+// which leaves a gap under the menu. The app always fills the whole screen there, so where the frame really ends is
+// measured against the screen, and a small shortfall is stretched away. A large one is the keyboard and is left alone.
+function iosApp(){return /iPhone/.test(navigator.userAgent)&&(navigator.standalone===true||matchMedia("(display-mode: standalone)").matches)}
+function screenH(){const sw=screen.width,sh=screen.height;return innerWidth>innerHeight?Math.min(sw,sh):Math.max(sw,sh)}
 function fitFrame(){const w=document.querySelector(".wrap");if(!w)return;
-  const sw=screen.width,sh=screen.height,gap=(innerWidth>innerHeight?Math.min(sw,sh):Math.max(sw,sh))-innerHeight;
-  w.style.bottom=navigator.standalone===true&&gap>0&&gap<=80?-gap+"px":""}
+  let want="";if(iosApp()){const gap=Math.round(screenH()-(w.getBoundingClientRect().bottom+(parseFloat(w.style.bottom)||0)));if(gap>0&&gap<=80)want=-gap+"px"}
+  if(w.style.bottom!==want)w.style.bottom=want}
 fitFrame();
-function settle(){fitFrame();if(window.scrollX||window.scrollY)window.scrollTo(0,0);if(document.documentElement.scrollTop)document.documentElement.scrollTop=0;if(document.body.scrollTop)document.body.scrollTop=0}
+function settle(){if(window.scrollX||window.scrollY)window.scrollTo(0,0);if(document.documentElement.scrollTop)document.documentElement.scrollTop=0;if(document.body.scrollTop)document.body.scrollTop=0;fitFrame()}
 ["resize","orientationchange","pageshow","focus"].forEach(ev=>window.addEventListener(ev,()=>setTimeout(settle,60)));
 document.addEventListener("focusout",()=>setTimeout(settle,60));
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")setTimeout(settle,60)});
@@ -1484,5 +1487,12 @@ if("serviceWorker" in navigator){
 
 renderDefs();
 $("appVer").textContent=APP_VERSION?T("Version {v}",{v:APP_VERSION}):"";
+// Tapping the version shows how the screen is measured, to send along if the layout is wrong on a phone.
+let verInfo=false;
+$("appVer").onclick=()=>{verInfo=!verInfo;const wr=document.querySelector(".wrap");if(!verInfo||!wr){$("appVer").textContent=APP_VERSION?T("Version {v}",{v:APP_VERSION}):"";return}
+  const w=wr.getBoundingClientRect(),v=window.visualViewport;
+  $("appVer").textContent=T("Version {v}",{v:APP_VERSION||"?"})+" · "+[screen.width+"×"+screen.height,innerWidth+"×"+innerHeight,
+    v?Math.round(v.height)+"+"+Math.round(v.offsetTop):"-",Math.round(w.top)+"–"+Math.round(w.bottom),wr.style.bottom||"0",
+    iosApp()?"app":"web"].join(" · ")};
 render();setStep(readLocal("ccage_step","ex"),true);showTab(curId?"plan":"passes");
 })();

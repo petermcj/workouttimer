@@ -41,7 +41,7 @@ html,body{height:100%;overflow:hidden}
    in installed web apps and after the keyboard, share sheet or file picker. */
 .wrap{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column}
 /* Without the workout banner, the page itself keeps clear of the status bar. */
-.curbar[hidden]+.scroll{padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.curbar[hidden]+.scroll,body.focus .scroll{padding-top:calc(12px + env(safe-area-inset-top,0px))}
 .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px))}
 .inner{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 .curbar{flex:none;display:flex;align-items:center;gap:10px;background:var(--panel);border-bottom:1px solid var(--line);padding:calc(8px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
@@ -104,6 +104,7 @@ details.item{border-top:1px solid var(--line)}
 .field input,.field select,.search{background:var(--bg);border:1px solid var(--line);border-radius:6px;color:var(--fg);padding:8px;font:inherit;font-size:14px;min-width:0}
 .desc{font-size:14px;line-height:1.35;opacity:.85;max-width:34em;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .desc.long{-webkit-line-clamp:12;text-align:left}
+.desc.all{display:block;-webkit-line-clamp:unset;max-height:40vh;overflow-y:auto}
 .info{display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:1.4}
 .info b{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .pick .nm small{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -691,6 +692,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=workouttimer-v19"></script>
+<script src="app.js?v=workouttimer-v20"></script>
 </body>
 </html>
