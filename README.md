@@ -3,7 +3,7 @@
 Intervallklocka för pass med stationer, byggd som en webbapp (PWA) som installeras på telefonens hemskärm och fungerar utan internet. Den passar för cirkelträning, CrossCage och andra stationspass.
 
 - **Instruktörer** planerar ett pass så att uppvärmning, genomgång av övningar, stationsbyten, arbete och vila ryms i den tid passet har fått.
-- **Tränar du själv** skapar du passet på samma sätt och sätter tiderna för genomgång till noll.
+- **Tränar du själv** väljer du För egen träning under Inställningar. Då försvinner genomgång av övningar och instruktörstexter, och klockan blir enklare.
 
 ## Funktioner
 
@@ -11,7 +11,8 @@ Intervallklocka för pass med stationer, byggd som en webbapp (PWA) som installe
 - Uppvärmning och genomgång av övningar: tid per övning eller en total tid, samlad eller vid varje station
 - Räknar ut arbete och vila utifrån total tid, eller så sätter du arbetstiden själv
 - Jämna tider (steg om 5 s) som passar i passets tid, med val av tid kvar i slutet eller hur mycket passet får dra över
-- Håller sluttiden under passet: pausar du eller backar kortas resten av arbetet och setvilan så att passet ändå slutar i tid
+- Tid kvar av passet räknas mot sluttiden från första Start, även under paus, och visar hur mycket planen ligger efter eller före
+- Optimera anpassar resten av passet till tiden som är kvar: arbete, vila, byten, varvvila och stretch kortas eller förlängs lika mycket (minst 10 s arbete och 5 s övrigt, högst 50 % längre). Uppvärmning, genomgång och mellanövningar ändras inte, och det går att ångra
 - Samma tider alla varv eller olika arbete/vila per varv, inklusive egna tider för byten per varv
 - Möjlighet att låta byten ta samma tid som vilan (till exempel 35/10 i varv 1 och 25/10 i varv 2)
 - Olika antal set per varv

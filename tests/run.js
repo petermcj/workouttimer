@@ -158,7 +158,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
   await test("buttons in the plan respond to taps on a phone", async () => {
     const page = await open({}, { device: devices["iPhone 13"] });
     await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true)));
-    for (const [a, b, stepId] of [["mgOver", "mgBuffer", "stepTime"], ["evenOff", "evenOn", "stepTime"], ["holdOff", "holdOn", "stepTime"], ["midSt", "midOff", "stepEx"], ["nsLetter", "nsName", "stepEx"], ["voiceOn", "voiceOff", null]]) {
+    for (const [a, b, stepId] of [["mgOver", "mgBuffer", "stepTime"], ["evenOff", "evenOn", "stepTime"], ["midSt", "midOff", "stepEx"], ["nsLetter", "nsName", "stepEx"], ["voiceOn", "voiceOff", null]]) {
       if (stepId) { await page.tap("#tabPass"); await page.tap("#passList .item button:nth-child(2)"); await page.tap("#" + stepId); await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true))); }
       else await page.tap("#tabSet");
       await page.tap("#" + a);
@@ -200,13 +200,14 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(!page.errors.length, page.errors.join("; "));
   });
 
-  await test("keeping the end time absorbs a pause", async () => {
+  await test("after a pause, Optimise makes the workout end in time", async () => {
     const page = await open({ total: 45 });
     await page.clock.install();
     await page.reload();
     await page.click("#tabRun");
     await page.click("#bMain"); await page.clock.runFor(30000);
     await page.click("#bMain"); await page.clock.runFor(180000);
+    await page.click("#bOpt");
     await page.click("#bMain");
     const t0 = await page.evaluate(() => Date.now());
     for (let i = 0; i < 4000 && (await page.textContent("#bMain")) !== "Start"; i++) await page.clock.runFor(1000);
@@ -596,6 +597,107 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.evaluate(() => document.body.classList.add("focus"));
     const rule = await page.evaluate(() => [...document.styleSheets].flatMap((s) => [...s.cssRules]).some((r) => r.selectorText && r.selectorText.includes("body.focus .scroll") && /safe-area-inset-top/.test(r.style.paddingTop)));
     assert(rule, "focus mode does not keep the page clear of the status bar");
+  });
+
+  await test("the time left in the workout keeps running during a pause, and says how far behind the plan is", async () => {
+    const page = await open({ total: 45 });
+    await page.clock.install();
+    await page.reload();
+    await page.click("#tabRun");
+    assert(await page.isHidden("#passLeft"), "time left showed before the start");
+    await page.click("#bMain"); await page.clock.runFor(30000);
+    assert(/^44:[34]\d$/.test(await page.textContent("#plTime")), "time left after 30 s: " + await page.textContent("#plTime"));
+    assert(/i tid/.test(await page.textContent("#plState")) && await page.isHidden("#bOpt"), "on time at the start: " + await page.textContent("#plState"));
+    await page.click("#bMain"); await page.clock.runFor(120000);
+    assert(/^42:[34]\d$/.test(await page.textContent("#plTime")), "the time left stopped during the pause: " + await page.textContent("#plTime"));
+    const st = await page.textContent("#plState");
+    assert(/Planen ligger 2:0\d efter/.test(st) && await page.isVisible("#bOpt"), "the pause was not shown as behind: " + st);
+    assert(await page.evaluate(() => document.getElementById("passLeft").classList.contains("late")), "behind is not marked");
+  });
+
+  await test("Optimise shortens work, rest, switches and stretching but not the warm-up or demos, and can be undone", async () => {
+    const page = await open({ total: 45, stretch: 3 });
+    await page.clock.install();
+    await page.reload();
+    await page.click("#tabRun");
+    await page.click("#bMain"); await page.clock.runFor(5000);
+    await page.click("#bMain"); await page.clock.runFor(240000);
+    await page.click("#bOpt");
+    assert(/kortades \d+ %/.test(await page.textContent("#toastMsg")), "no message: " + await page.textContent("#toastMsg"));
+    assert(/i tid/.test(await page.textContent("#plState")), "still not on time: " + await page.textContent("#plState"));
+    await page.click("#bNext");
+    assert(await page.textContent("#rPhase") === "Uppvärmning" && await page.textContent("#rClock") === "10:00", "the warm-up was changed: " + await page.textContent("#rClock"));
+    await page.click("#toastUndo");
+    // (stepping to the warm-up skipped the last 5 s of the get-ready countdown)
+    assert(/Planen ligger 3:5\d efter/.test(await page.textContent("#plState")), "undo did not bring the plan back: " + await page.textContent("#plState"));
+  });
+
+  await test("Optimise never goes below 10 s of work and 5 s of rest, and says when it cannot catch up", async () => {
+    const page = await open({ total: 20, warm: 0, instr: 0, ready: 0, stretch: 0, st: 4, ex: 1, sets: 2, rd: 2 });
+    await page.clock.install();
+    await page.reload();
+    await page.click("#tabRun");
+    await page.click("#bMain"); await page.clock.runFor(2000);
+    await page.click("#bMain"); await page.clock.runFor(18 * 60000);
+    await page.click("#bOpt");
+    assert(/ändå .* sent/.test(await page.textContent("#toastMsg")), "it did not say the workout ends late: " + await page.textContent("#toastMsg"));
+    // run through and check every interval
+    await page.click("#bMain");
+    const seen = [];
+    for (let i = 0; i < 400 && (await page.textContent("#bMain")) !== "Start"; i++) {
+      const ph = await page.textContent("#rPhase"), c = await page.textContent("#rClock");
+      if (!seen.length || seen[seen.length - 1][0] !== ph + i) seen.push([ph, c]);
+      await page.click("#bNext");
+    }
+    const work = seen.filter(([p]) => p === "Arbete").map(([, c]) => mmss(c)), rest = seen.filter(([p]) => p === "Vila" || p === "Byt station").map(([, c]) => mmss(c));
+    assert(work.length && Math.min(...work) >= 10, "work below 10 s: " + work.join(","));
+    assert(rest.every((x) => x >= 5), "rest below 5 s: " + rest.join(","));
+  });
+
+  await test("Optimise lengthens the rest of the workout when there is time to spare, at most by half", async () => {
+    const page = await open({ total: 30, warm: 0, instr: 0, ready: 0, stretch: 0, st: 4, ex: 1, sets: 1, rd: 2 });
+    await page.clock.install();
+    await page.reload();
+    await page.click("#tabRun");
+    await page.click("#bMain");
+    for (let i = 0; i < 6; i++) await page.click("#bNext");
+    assert(/över i slutet/.test(await page.textContent("#plState")), "skipping ahead did not leave time to spare: " + await page.textContent("#plState"));
+    await page.click("#bOpt");
+    assert(/förlängdes \d+ %/.test(await page.textContent("#toastMsg")), "nothing was lengthened: " + await page.textContent("#toastMsg"));
+    const pct = +/(\d+) %/.exec(await page.textContent("#toastMsg"))[1];
+    assert(pct > 0 && pct <= 50, "lengthened by " + pct + " %");
+  });
+
+  await test("for own training there are no demos, no instructor texts and a simpler timer", async () => {
+    const page = await open({ total: 45, instrMode: "block", instrUnit: "per", instr: 30, st: 3, ex: 2, names: [["Knäböj", "Armhävning"]] });
+    const total = async () => page.evaluate(() => document.getElementById("oTotal").textContent);
+    const coachTotal = await total();
+    await page.click("#tabSet"); await page.click("#roleSelf");
+    assert(await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")).role) === "self", "the choice was not saved");
+    await page.click("#tabRun");
+    assert(await page.isHidden(".adj"), "the ±30 s buttons are shown");
+    for (let i = 0; i < 4; i++) { assert(!/Genomgång/.test(await page.textContent("#rPhase")), "a demo is in the timer"); await page.click("#bNext"); }
+    await page.click("#tabPass"); await page.click("#passList .item button:nth-child(2)"); await page.click("#stepTime");
+    assert(await page.isHidden("#instrBox"), "the demo settings are shown");
+    await page.click("#tabEx"); await page.fill("#exSearch", "kettlebell swing");
+    await page.click("#exItems summary");
+    const txt = await page.textContent("#exItems details[open]");
+    assert(/Utförande/.test(txt) && !/Titta särskilt på/.test(txt), "instructor texts are shown: " + txt.slice(0, 160));
+    await page.click("#tabSet"); await page.click("#roleCoach");
+    assert(await page.isVisible("#roleHint"), "no hint");
+    assert(await total() === coachTotal, "the plan did not come back for an instructor");
+  });
+
+  await test("changing a setting during the workout does not move its end", async () => {
+    const page = await open({ total: 45, mode: "manual" });
+    await page.clock.install();
+    await page.reload();
+    await page.click("#tabRun");
+    await page.click("#bMain"); await page.clock.runFor(20000); await page.click("#bMain");
+    const before = [await page.textContent("#plEnd"), await page.textContent("#plState")];
+    await page.click("#tabSet"); await page.click("#roleSelf"); await page.click("#tabRun");
+    const after = [await page.textContent("#plEnd"), await page.textContent("#plState")];
+    assert(before[0] === after[0] && before[1] === after[1], "the end moved: " + before.join(" / ") + " -> " + after.join(" / "));
   });
 
   await browser.close();

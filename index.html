@@ -203,6 +203,15 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 .prog{width:100%;height:6px;border-radius:3px;background:rgba(0,0,0,.18);overflow:hidden}
 .prog i{display:block;height:100%;background:currentColor;opacity:.75}
 .next{display:flex;justify-content:space-between;gap:10px;background:var(--panel);border-radius:10px;padding:12px 14px;align-items:center}
+.passleft{display:flex;justify-content:space-between;gap:12px;align-items:center;background:var(--panel);border-radius:10px;padding:12px 14px;border-left:4px solid var(--cool)}
+.passleft .t{font-family:var(--display);font-weight:700;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.passleft .t small{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted)}
+.passleft .st{font-size:14px;color:var(--muted)}
+.passleft.late{border-left-color:var(--danger)}.passleft.late .st{color:var(--danger);font-weight:600}
+/* Own training has no Optimise button, so being behind is shown, but not as an alarm. */
+body.self .passleft.late{border-left-color:var(--cool)}body.self .passleft.late .st{color:var(--muted);font-weight:400}
+/* For own training: no demos, no instructor texts and a simpler timer. */
+body.self #instrBox,body.self .adj,body.self #bOpt{display:none!important}
 .next div{min-width:0}
 .next .t{font-family:var(--display);font-weight:700;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .next .d{font-family:var(--display);font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -231,7 +240,7 @@ ol.steps a{color:var(--fg)}
 .adj button{background:none;border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:8px;font:inherit;font-size:14px;font-variant-numeric:tabular-nums;cursor:pointer}
 .runbar button{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px 8px;font:inherit;font-size:14px;cursor:pointer}
 .runbar button[aria-pressed="true"]{border-color:var(--work);color:var(--work)}
-body.focus header,body.focus .nav,body.focus .meta,body.focus #mEnd,body.focus .tiny,body.focus #wakeMsg{display:none!important}
+body.focus header,body.focus .nav,body.focus .meta,body.focus .tiny,body.focus #wakeMsg{display:none!important}
 body.focus .music,body.focus .next,body.focus .ctrls,body.focus .runbar,body.focus .adj{opacity:.3;transition:opacity .2s}
 body.focus .music:hover,body.focus .music:focus-within,body.focus .next:hover,body.focus .ctrls:hover,body.focus .runbar:hover,body.focus .ctrls:focus-within,body.focus .runbar:focus-within{opacity:1}
 body.focus .face{padding-block:28px}
@@ -370,6 +379,7 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
         <label for="warm">Uppvärmning<small>i början av passet</small></label>
         <div class="num"><button data-step="warm:-1" aria-label="Minska">−</button><input id="warm" type="number" inputmode="numeric" min="0" max="60"><button data-step="warm:1" aria-label="Öka">+</button></div><span class="unit">min</span>
       </div>
+      <div id="instrBox">
       <div class="mode" role="group" aria-label="Hur genomgången räknas">
         <button id="instrPer" aria-pressed="true">Tid per övning</button>
         <button id="instrAll" aria-pressed="false">En total tid</button>
@@ -385,6 +395,7 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
       <div class="mode" role="group" aria-label="När instruktionen ges">
         <button id="instrBlock" aria-pressed="true">Samlad genomgång efter uppvärmning</button>
         <button id="instrStation" aria-pressed="false">Vid varje station i varv 1</button>
+      </div>
       </div>
       <div class="row">
         <label for="ready">Tid innan första övningen<small>efter uppvärmning och genomgång, för att gå till stationen</small></label>
@@ -457,14 +468,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
         <div class="num"><button data-step="rdRest:-15" aria-label="Minska">−</button><input id="rdRest" type="number" inputmode="numeric" min="0" max="600"><button data-step="rdRest:15" aria-label="Öka">+</button></div><span class="unit">s</span>
       </div>
     </div>
-      <details class="block fold" data-fold="hold"><summary><span>Under passet</span><span class="fsum" id="sum_hold"></span></summary><div class="foldin">
-      
-      <div class="mode" role="group" aria-label="Under passet">
-        <button id="holdOn" aria-pressed="true">Håll sluttiden</button>
-        <button id="holdOff" aria-pressed="false">Följ planen</button>
-      </div>
-      <div class="sub" id="holdHint"></div>
-    </div></details>
       <div class="block">
       <div class="result">
         <div class="w"><b id="oWork">–</b><span>Arbete/set</span></div>
@@ -555,6 +558,11 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
       <div class="mode" role="group" aria-label="Språk"><button data-lang="sv">Svenska</button><button data-lang="en">English</button></div>
     </div>
     <div class="block">
+      <div class="label">Jag använder appen</div>
+      <div class="mode" role="group" aria-label="Jag använder appen"><button id="roleCoach" aria-pressed="true">Som instruktör</button><button id="roleSelf" aria-pressed="false">För egen träning</button></div>
+      <div class="sub" id="roleHint"></div>
+    </div>
+    <div class="block">
       <div class="label">Ljud</div>
       
       <div class="row">
@@ -640,6 +648,10 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
       <div class="where" id="rWhere"></div>
       <div class="prog"><i id="rProg" style="width:0%"></i></div>
     </div>
+    <div class="passleft" id="passLeft" hidden>
+      <div><div class="label">Tid kvar av passet</div><div class="t"><span id="plTime">0:00</span> <small id="plEnd"></small></div><div class="st" id="plState"></div></div>
+      <button class="btn" id="bOpt" hidden>Optimera</button>
+    </div>
     <div class="next">
       <div><div class="label">Härnäst</div><div class="t" id="nWhat">–</div></div>
       <div class="d" id="nDur"></div>
@@ -660,8 +672,7 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
       <button id="bAwake" aria-pressed="true">☀ Skärm tänd</button>
       <button id="bFocus" aria-pressed="false">Fokusläge</button>
     </div>
-    <div class="meta"><span>Gått <strong id="mEl">0:00</strong></span><span>Intervall <strong id="mIdx">0/0</strong></span><span>Kvar <strong id="mLeft">0:00</strong></span></div>
-    <div class="sub" id="mEnd" style="text-align:center" hidden></div>
+    <div class="meta"><span>Gått <strong id="mEl">0:00</strong></span><span>Intervall <strong id="mIdx">0/0</strong></span><span>Kvar i planen <strong id="mLeft">0:00</strong></span></div>
     <div class="tiny"><button id="bReset">Börja om</button><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
     <div class="sub" id="wakeMsg" style="text-align:center" hidden></div>
   </section>
@@ -694,6 +705,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=workouttimer-v21"></script>
+<script src="app.js?v=workouttimer-v22"></script>
 </body>
 </html>
