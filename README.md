@@ -25,7 +25,9 @@ Intervallklocka för pass med stationer, byggd som en webbapp (PWA) som installe
 - Passlista med det senast använda överst: Kör, Redigera, Duplicera och Ta bort. Nya pass kan börja från dina standardvärden, en inbyggd mall eller en kopia
 - Stationer läggs till genom att välja en övning ur övningsbanken (eller skriva en ny). Flera övningar på samma station blir A, B och så vidare
 - Ångra efter större ändringar
-- Övningsbibliotek där appens 46 övningar har instruktioner (utförande och vad instruktören ska titta särskilt på) på svenska och engelska, och stretchövningarna har korta instruktioner. Skriv egna kommentarer på appens övningar eller lägg till egna övningar. Under genomgången visar klockan kommentar, utförande och vad man ska titta på
+- Övningarna är indelade efter kroppsdel (ben, rygg, bröst, axlar, armar, bål) samt kondition och helkropp, och varje grupp har en egen ikon
+- Spotify på klockan: föregående, spela/pausa och nästa, samt volymreglage på enheter där Spotify tillåter det (inte iPhone)
+- Övningsbibliotek där appens 48 övningar har instruktioner (utförande och vad instruktören ska titta särskilt på) på svenska och engelska, och stretchövningarna har korta instruktioner. Skriv egna kommentarer på appens övningar eller lägg till egna övningar. Under genomgången visar klockan kommentar, utförande och vad man ska titta på
 - Säkerhetskopia: exportera pass, övningar, plan och inställningar till en fil och läs in den igen
 - Egna standardvärden för nya pass (Inställningar → Standard för nya pass) och knappen Nytt pass
 - Röst som läser upp övningar, byten och stretch (valfritt)

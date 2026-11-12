@@ -700,6 +700,99 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(before[0] === after[0] && before[1] === after[1], "the end moved: " + before.join(" / ") + " -> " + after.join(" / "));
   });
 
+  // A stand-in for Spotify's API: answers what the app asks for and records what it is told to do.
+  async function spotify(settings, player) {
+    const page = await open(settings || {}, { raw: { ccage_sp: { access: "a", clientId: "c", refresh: "r", exp: 9e15 } } });
+    const calls = [];
+    await page.context().route("https://api.spotify.com/**", (rt) => {
+      const rq = rt.request(), u = new URL(rq.url()), p = u.pathname.replace("/v1", "");
+      if (rq.method() !== "GET") { calls.push(rq.method() + " " + p + u.search); if (player.fail) return rt.fulfill({ status: player.fail, json: { error: { message: "nope" } } }); if (/pause/.test(p)) player.is_playing = false; if (/play$/.test(p)) player.is_playing = true; return rt.fulfill({ status: 204, body: "" }); }
+      if (p === "/me/player") return player.device ? rt.fulfill({ json: { is_playing: player.is_playing, item: { name: "Låt", artists: [{ name: "Artist" }] }, device: player.device } }) : rt.fulfill({ status: 204, body: "" });
+      if (p === "/me") return rt.fulfill({ json: { display_name: "P" } });
+      rt.fulfill({ json: { items: [], devices: [] } });
+    });
+    await page.reload();
+    await page.click("#tabRun");
+    await page.waitForFunction(() => document.getElementById("npTitle").textContent !== "Spotify");
+    return { page, calls };
+  }
+
+  await test("the music has a clear pause button and a volume slider on the timer", async () => {
+    const player = { is_playing: true, device: { volume_percent: 65, supports_volume: true } };
+    const { page, calls } = await spotify({}, player);
+    assert(await page.isVisible("#mPlay .ia") && await page.isHidden("#mPlay .ip"), "no pause symbol while the music plays");
+    assert(await page.getAttribute("#mPlay", "aria-label") === "Pausa musiken", "the button is not named pause");
+    assert(await page.isVisible("#mVol") && await page.inputValue("#mVol") === "65" && await page.textContent("#mVolOut") === "65 %", "the volume is not shown: " + await page.textContent("#mVolOut"));
+    await page.click("#mPlay");
+    await page.waitForFunction(() => !document.getElementById("mPlay").classList.contains("playing"));
+    assert(calls.some((c) => c.startsWith("PUT /me/player/pause")), "pause was not sent: " + calls.join(", "));
+    assert(await page.isVisible("#mPlay .ip") && await page.getAttribute("#mPlay", "aria-label") === "Spela musiken", "the button did not switch to play");
+    await page.fill("#mVol", "40"); await page.dispatchEvent("#mVol", "change");
+    await page.waitForFunction(() => document.getElementById("mVolOut").textContent === "40 %");
+    for (let i = 0; i < 20 && !calls.some((c) => c.includes("volume_percent=40")); i++) await page.waitForTimeout(50);
+    assert(calls.some((c) => c.includes("volume_percent=40")), "the volume was not sent: " + calls.join(", "));
+  });
+
+  await test("with lower volume during rest, the slider sets the level for the running kind of interval", async () => {
+    const { page } = await spotify({ spDuck: true, spWorkVol: 80, spRestVol: 40 }, { is_playing: true, device: { volume_percent: 80, supports_volume: true } });
+    await page.fill("#mVol", "60"); await page.dispatchEvent("#mVol", "change");
+    const c = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")));
+    assert(c.spWorkVol === 60 && c.spRestVol === 40, "the levels: " + c.spWorkVol + " / " + c.spRestVol);
+  });
+
+  await test("a volume change that Spotify refuses is not saved, and says why", async () => {
+    const player = { is_playing: true, device: { id: "d1", volume_percent: 80, supports_volume: true } };
+    const { page } = await spotify({ spDuck: true, spWorkVol: 80, spRestVol: 40 }, player);
+    player.fail = 404;
+    await page.fill("#mVol", "30");
+    await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
+    assert(/Ingen Spotify-enhet/.test(await page.textContent("#mMsg")), "the error: " + await page.textContent("#mMsg"));
+    assert((await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")))).spWorkVol === 80, "a refused level was saved");
+  });
+
+  await test("an arms workout gets upper-body stretches, not only legs", async () => {
+    const page = await open({ st: 3, ex: 1, stretch: 5, names: [["Bicepscurl"], ["Hammercurl"], ["Tricepspress"]] });
+    await page.click("#tabPass"); await page.click("#passList .item button:nth-child(2)"); await page.click("#stepEx");
+    await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true)));
+    await page.click("#stretchSuggest");
+    const list = (await page.inputValue("#stretchList")).split("\n");
+    const upper = list.filter((s) => /Triceps|axel|Bröst|rygg|Sidosträck/i.test(s)).length;
+    assert(upper >= 4, "stretches for an arms workout: " + list.join(" | "));
+  });
+
+  await test("when Spotify cannot set the volume on the device, the timer says so, and errors show by the buttons", async () => {
+    const player = { is_playing: true, device: { volume_percent: 100, supports_volume: false } };
+    const { page } = await spotify({}, player);
+    assert(await page.isHidden("#mVolRow") && await page.isVisible("#mVolNo"), "no note about the volume");
+    assert(/telefonens knappar/.test(await page.textContent("#mVolNo")), "the note: " + await page.textContent("#mVolNo"));
+    player.fail = 403;
+    await page.click("#mPlay");
+    await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
+    assert(/Premium/.test(await page.textContent("#mMsg")), "the error is not shown on the timer: " + await page.textContent("#mMsg"));
+  });
+
+  await test("exercises are grouped by body part, each with an icon, and old groups are carried over", async () => {
+    const page = await open({ st: 2, ex: 2, names: [["Knäböj", "Min rodd"], ["Bicepscurl", "Något eget"]] },
+      { raw: { ccage_exlib: [{ id: "u1", name: "Min rodd", group: "pull", desc: "", updated: 1 }, { id: "u2", name: "Min press", group: "push", desc: "", updated: 1 }] } });
+    await page.click("#tabEx");
+    const chips = await page.$$eval("#exGroups button", (b) => b.map((x) => x.textContent));
+    assert(["Ben", "Rygg", "Bröst", "Axlar", "Armar", "Bål", "Kondition", "Helkropp"].every((g) => chips.includes(g)) && !chips.includes("Drag") && !chips.includes("Press"), "the groups: " + chips.join(", "));
+    const rows = await page.$$eval("#exItems details", (ds) => ds.map((d) => ({ n: d.querySelector(".nm").textContent, g: d.querySelector(".gi").dataset.g, svg: !!d.querySelector(".gi svg"), tags: [...d.querySelectorAll(".tag")].map((x) => x.textContent) })));
+    assert(rows.length >= 50 && rows.every((r) => r.svg), "rows without an icon");
+    const by = (n) => rows.find((r) => r.n === n);
+    assert(by("Min rodd").g === "back" && by("Min rodd").tags.includes("Rygg") && by("Min press").g === "chest", "old groups were not carried over: " + JSON.stringify([by("Min rodd"), by("Min press")]));
+    assert(by("Armhävningar").g === "chest" && by("Axelpress").g === "shoulders" && by("Tricepspress").g === "arms" && by("Burpees").g === "full" && by("Rygglyft").g === "back", "unexpected groups");
+    const empty = ["legs", "back", "chest", "shoulders", "arms", "core", "cardio", "full"].filter((g) => rows.filter((r) => r.g === g).length < 3);
+    assert(!empty.length, "groups with fewer than three exercises: " + empty.join(", "));
+    // the station cards and the picker show the icons too
+    await page.click("#tabPass"); await page.click("#passList .item button:nth-child(2)"); await page.click("#stepEx");
+    const cards = await page.$$eval("#stCards .slot .gi", (g) => g.map((x) => x.dataset.g));
+    assert(cards.join(",") === "legs,back,arms,", "icons on the station cards: " + cards.join(","));
+    await page.click("#stCards .slot .nmb");
+    assert(await page.locator("#pickList .pick .gi svg").count() >= 48, "no icons in the picker");
+    assert(!page.errors.length, page.errors.join("; "));
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;
