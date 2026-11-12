@@ -40,6 +40,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
   async function open(settings, opts) {
     opts = opts || {};
     const ctx = await browser.newContext(Object.assign({ serviceWorkers: "block" }, opts.device || {}));
+    if (opts.before) await opts.before(ctx);
     const page = await ctx.newPage();
     page.errors = [];
     page.on("pageerror", (e) => page.errors.push(e.message));
@@ -702,17 +703,18 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
 
   // A stand-in for Spotify's API: answers what the app asks for and records what it is told to do.
   async function spotify(settings, player) {
-    const page = await open(settings || {}, { raw: { ccage_sp: { access: "a", clientId: "c", refresh: "r", exp: 9e15 } } });
     const calls = [];
-    await page.context().route("https://api.spotify.com/**", (rt) => {
+    // The stand-in is in place before the page first loads, so nothing ever reaches the real Spotify (which would
+    // answer that the login is invalid and log the app out).
+    const before = async (ctx) => { await ctx.route("https://accounts.spotify.com/**", (rt) => rt.abort("internetdisconnected")); await ctx.route("https://api.spotify.com/**", (rt) => {
       const rq = rt.request(), u = new URL(rq.url()), p = u.pathname.replace("/v1", "");
       if (player.down) return rt.abort("internetdisconnected");
       if (rq.method() !== "GET") { calls.push(rq.method() + " " + p + u.search); if (player.fail) return rt.fulfill({ status: player.fail, json: { error: { message: "nope" } } }); if (/pause/.test(p)) player.is_playing = false; if (/play$/.test(p)) player.is_playing = true; return rt.fulfill({ status: 204, body: "" }); }
       if (p === "/me/player") return player.device ? rt.fulfill({ json: { is_playing: player.is_playing, item: { name: "Låt", artists: [{ name: "Artist" }] }, device: player.device } }) : rt.fulfill({ status: 204, body: "" });
       if (p === "/me") return rt.fulfill({ json: { display_name: "P" } });
       rt.fulfill({ json: { items: [], devices: [] } });
-    });
-    await page.reload();
+    }); };
+    const page = await open(settings || {}, { raw: { ccage_sp: { access: "a", clientId: "c", refresh: "r", exp: 9e15 } }, before });
     await page.click("#tabRun");
     await page.waitForFunction(() => document.getElementById("npTitle").textContent !== "Spotify");
     return { page, calls };
