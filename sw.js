@@ -1,6 +1,6 @@
 // Bump VERSION when files change so phones pick up the new app,
 // and use the same value in the app.js?v= link in index.html.
-const VERSION = "workouttimer-v25";
+const VERSION = "workouttimer-v26";
 const SHELL = [
   "./",
   "./index.html",
@@ -38,10 +38,13 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
+  // Only the app's own files are stored. Answers from other services (Spotify) must always come fresh from the
+  // network: a stored "what is playing" would be shown for ever.
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;
 
   // The page and its script: try the network first so updates arrive, fall back to the cache offline.
-  const url = new URL(req.url);
-  const isScript = url.origin === location.origin && url.pathname.endsWith("/app.js");
+  const isScript = url.pathname.endsWith("/app.js");
   if (req.mode === "navigate" || isScript) {
     const key = isScript ? "./app.js" : "./index.html";
     e.respondWith(
@@ -53,10 +56,10 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // Everything else (script, fonts, icons): cache first, then store what the network returns.
+  // The app's other files (fonts, icons, manifest): cache first, then store what the network returns.
   e.respondWith(
     caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-      if (res && (res.ok || res.type === "opaque")) {
+      if (res && res.ok) {
         const copy = res.clone();
         caches.open(VERSION).then((c) => c.put(req, copy));
       }
