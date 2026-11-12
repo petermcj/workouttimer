@@ -226,8 +226,20 @@ body.self #instrBox,body.self .adj,body.self #bOpt{display:none!important}
 .mode.stack{grid-template-columns:1fr}
 .rlabel{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.04em}
 .rval{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
-.music{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:6px;align-items:center;background:var(--panel);border-radius:10px;padding:6px}
-.music button{background:none;border:0;color:var(--fg);font-size:20px;width:44px;height:44px;border-radius:8px;cursor:pointer}
+.music{display:flex;flex-direction:column;gap:8px;background:var(--panel);border-radius:10px;padding:8px 10px}
+.music .mrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px;align-items:center}
+.music button{background:none;border:1px solid var(--line);color:var(--fg);width:46px;height:46px;border-radius:10px;cursor:pointer;display:grid;place-items:center;padding:0}
+.music svg{width:24px;height:24px;fill:currentColor;flex:none}
+.music button.pp{width:58px;background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.music .pp .ia,.music .pp.playing .ip{display:none}.music .pp.playing .ia{display:block}
+.music .mvol{display:flex;align-items:center;gap:10px;color:var(--muted)}
+.music .mvol input{flex:1;min-width:0;height:32px;accent-color:var(--work)}
+.music .mvol output{min-width:3.2em;text-align:right;font-variant-numeric:tabular-nums;color:var(--fg)}
+/* Exercise icons: one figure per group. */
+.gi{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+.gi svg{width:22px;height:22px}
+.gi[data-g=legs]{color:var(--work)}.gi[data-g=back]{color:var(--rest)}.gi[data-g=chest]{color:var(--setup)}.gi[data-g=shoulders]{color:var(--round)}
+.gi[data-g=arms]{color:var(--mid)}.gi[data-g=core]{color:var(--cool)}.gi[data-g=cardio]{color:var(--danger)}.gi[data-g=full]{color:var(--fg)}
 .music button:active{background:var(--line)}
 .np{min-width:0}
 .np .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -663,10 +675,18 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
     </div>
     <div class="adj" role="group" aria-label="Ändra tiden"><button id="bMinus" aria-label="30 sekunder kortare">−30 s</button><button id="bPlus" aria-label="30 sekunder längre">+30 s</button></div>
     <div class="music" id="musicBar" hidden>
-      <button id="mPrev" aria-label="Föregående låt">⏮</button>
-      <div class="np"><div class="t" id="npTitle">Spotify</div><div class="a" id="npArtist"></div></div>
-      <button id="mPlay" aria-label="Spela eller pausa musiken">⏯</button>
-      <button id="mNext" aria-label="Nästa låt">⏭</button>
+      <div class="mrow">
+        <div class="np"><div class="t" id="npTitle">Spotify</div><div class="a" id="npArtist"></div></div>
+        <button id="mPrev" aria-label="Föregående låt"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2.5v14H6zM19 5.5v13L9.5 12z"/></svg></button>
+        <button id="mPlay" class="pp" aria-label="Spela musiken"><svg class="ip" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="ia" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 5h4v14h-4zM13.5 5h4v14h-4z"/></svg></button>
+        <button id="mNext" aria-label="Nästa låt"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5H18v14h-2.5zM5 5.5v13l9.5-6.5z"/></svg></button>
+      </div>
+      <div class="mvol" id="mVolRow" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15 9a4.2 4.2 0 0 1 0 6M17.5 6.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="range" id="mVol" min="0" max="100" step="5" value="50" aria-label="Musikens volym"><output id="mVolOut" for="mVol"></output>
+      </div>
+      <div class="sub" id="mVolNo" hidden>Volymen styrs med telefonens knappar. Spotify låter inte appar ändra volymen på den här enheten.</div>
+      <div class="sub" id="mMsg" role="status" style="color:var(--danger)" hidden></div>
     </div>
     <div class="runbar">
       <button id="bAwake" aria-pressed="true">☀ Skärm tänd</button>
@@ -705,6 +725,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=workouttimer-v22"></script>
+<script src="app.js?v=workouttimer-v23"></script>
 </body>
 </html>
