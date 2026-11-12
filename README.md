@@ -27,6 +27,7 @@ Intervallklocka för pass med stationer, byggd som en webbapp (PWA) som installe
 - Ångra efter större ändringar
 - Övningarna är indelade efter kroppsdel (ben, rygg, bröst, axlar, armar, bål) samt kondition och helkropp, och varje grupp har en egen ikon
 - Spotify på klockan: föregående, spela/pausa och nästa, samt volymreglage på enheter där Spotify tillåter det (inte iPhone)
+- Utan internet (flygplansläge) går klockan som vanligt. Musikknapparna tonas ner med en rad om att musiken styrs i Spotify-appen, och kommer tillbaka när anslutningen gör det
 - Övningsbibliotek där appens 48 övningar har instruktioner (utförande och vad instruktören ska titta särskilt på) på svenska och engelska, och stretchövningarna har korta instruktioner. Skriv egna kommentarer på appens övningar eller lägg till egna övningar. Under genomgången visar klockan kommentar, utförande och vad man ska titta på
 - Säkerhetskopia: exportera pass, övningar, plan och inställningar till en fil och läs in den igen
 - Egna standardvärden för nya pass (Inställningar → Standard för nya pass) och knappen Nytt pass

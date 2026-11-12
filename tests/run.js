@@ -40,6 +40,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
   async function open(settings, opts) {
     opts = opts || {};
     const ctx = await browser.newContext(Object.assign({ serviceWorkers: "block" }, opts.device || {}));
+    if (opts.before) await opts.before(ctx);
     const page = await ctx.newPage();
     page.errors = [];
     page.on("pageerror", (e) => page.errors.push(e.message));
@@ -702,16 +703,18 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
 
   // A stand-in for Spotify's API: answers what the app asks for and records what it is told to do.
   async function spotify(settings, player) {
-    const page = await open(settings || {}, { raw: { ccage_sp: { access: "a", clientId: "c", refresh: "r", exp: 9e15 } } });
     const calls = [];
-    await page.context().route("https://api.spotify.com/**", (rt) => {
+    // The stand-in is in place before the page first loads, so nothing ever reaches the real Spotify (which would
+    // answer that the login is invalid and log the app out).
+    const before = async (ctx) => { await ctx.route("https://accounts.spotify.com/**", (rt) => rt.abort("internetdisconnected")); await ctx.route("https://api.spotify.com/**", (rt) => {
       const rq = rt.request(), u = new URL(rq.url()), p = u.pathname.replace("/v1", "");
+      if (player.down) return rt.abort("internetdisconnected");
       if (rq.method() !== "GET") { calls.push(rq.method() + " " + p + u.search); if (player.fail) return rt.fulfill({ status: player.fail, json: { error: { message: "nope" } } }); if (/pause/.test(p)) player.is_playing = false; if (/play$/.test(p)) player.is_playing = true; return rt.fulfill({ status: 204, body: "" }); }
       if (p === "/me/player") return player.device ? rt.fulfill({ json: { is_playing: player.is_playing, item: { name: "Låt", artists: [{ name: "Artist" }] }, device: player.device } }) : rt.fulfill({ status: 204, body: "" });
       if (p === "/me") return rt.fulfill({ json: { display_name: "P" } });
       rt.fulfill({ json: { items: [], devices: [] } });
-    });
-    await page.reload();
+    }); };
+    const page = await open(settings || {}, { raw: { ccage_sp: { access: "a", clientId: "c", refresh: "r", exp: 9e15 } }, before });
     await page.click("#tabRun");
     await page.waitForFunction(() => document.getElementById("npTitle").textContent !== "Spotify");
     return { page, calls };
@@ -791,6 +794,44 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.click("#stCards .slot .nmb");
     assert(await page.locator("#pickList .pick .gi svg").count() >= 48, "no icons in the picker");
     assert(!page.errors.length, page.errors.join("; "));
+  });
+
+  await test("without internet the music buttons are dimmed with a line about it, the timer runs, and the music starts when the connection is back", async () => {
+    const player = { is_playing: false, device: { id: "d1", volume_percent: 70, supports_volume: true } };
+    const { page, calls } = await spotify({ spStart: true }, player);
+    assert(!await page.evaluate(() => document.getElementById("musicBar").classList.contains("off")) && await page.isVisible("#mVol"), "the buttons should be on with internet");
+    player.down = true; await page.context().setOffline(true);
+    await page.click("#bMain");
+    await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
+    assert(/Når inte Spotify/.test(await page.textContent("#mMsg")), "the line: " + await page.textContent("#mMsg"));
+    assert(await page.evaluate(() => document.getElementById("musicBar").classList.contains("off")) && await page.isHidden("#mVolRow"), "the buttons are not dimmed");
+    assert(await page.isEnabled("#mPlay"), "the button must stay usable, as a way to try again");
+    assert(await page.textContent("#bMain") === "Paus", "the timer did not start");
+    assert(!calls.length, "something reached Spotify without internet: " + calls.join(", "));
+    await page.click("#tabSet"); await page.click('button[data-lang="en"]'); await page.click("#tabRun");
+    assert(/Cannot reach Spotify/.test(await page.textContent("#mMsg")), "the line did not follow the language: " + await page.textContent("#mMsg"));
+    player.down = false; await page.context().setOffline(false);
+    await page.waitForFunction(() => !document.getElementById("musicBar").classList.contains("off"), null, { timeout: 15000 });
+    for (let i = 0; i < 40 && !calls.some((c) => c.startsWith("PUT /me/player/play")); i++) await page.waitForTimeout(50);
+    assert(calls.some((c) => c.startsWith("PUT /me/player/play")), "the music that should have started was not started: " + calls.join(", "));
+    assert(await page.isHidden("#mMsg"), "the line stayed");
+  });
+
+  await test("a request that does not get through dims the buttons even when the phone says it is online, and any answer brings them back", async () => {
+    const player = { is_playing: true, device: { id: "d1", volume_percent: 70, supports_volume: true } };
+    const { page } = await spotify({}, player);
+    let down = true;
+    await page.context().route("https://api.spotify.com/**", (rt) => (down ? rt.abort("internetdisconnected") : rt.fallback()));
+    await page.click("#mPlay");
+    await page.waitForFunction(() => document.getElementById("musicBar").classList.contains("off"));
+    assert(/Når inte Spotify/.test(await page.textContent("#mMsg")), "the line: " + await page.textContent("#mMsg"));
+    await page.click("#mNext");
+    await page.waitForTimeout(300);
+    assert(/Når inte Spotify/.test(await page.textContent("#mMsg")) && await page.isVisible("#mMsg"), "the line went away after a tap while still out of reach");
+    down = false; player.fail = 403;
+    await page.click("#mPlay");
+    await page.waitForFunction(() => !document.getElementById("musicBar").classList.contains("off"));
+    await page.waitForFunction(() => /Premium/.test(document.getElementById("mMsg").textContent));
   });
 
   await browser.close();
