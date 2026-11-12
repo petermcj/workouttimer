@@ -231,6 +231,7 @@ body.self #instrBox,body.self .adj,body.self #bOpt{display:none!important}
 .music button{background:none;border:1px solid var(--line);color:var(--fg);width:46px;height:46px;border-radius:10px;cursor:pointer;display:grid;place-items:center;padding:0}
 .music svg{width:24px;height:24px;fill:currentColor;flex:none}
 .music button.pp{width:58px;background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.music.off button{opacity:.45}
 .music .pp .ia,.music .pp.playing .ip{display:none}.music .pp.playing .ia{display:block}
 .music .mvol{display:flex;align-items:center;gap:10px;color:var(--muted)}
 .music .mvol input{flex:1;min-width:0;height:32px;accent-color:var(--work)}
@@ -725,6 +726,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=workouttimer-v23"></script>
+<script src="app.js?v=workouttimer-v24"></script>
 </body>
 </html>
