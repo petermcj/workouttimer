@@ -709,8 +709,11 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     const before = async (ctx) => { await ctx.route("https://accounts.spotify.com/**", (rt) => rt.abort("internetdisconnected")); await ctx.route("https://api.spotify.com/**", (rt) => {
       const rq = rt.request(), u = new URL(rq.url()), p = u.pathname.replace("/v1", "");
       if (player.down) return rt.abort("internetdisconnected");
-      if (rq.method() !== "GET") { calls.push(rq.method() + " " + p + u.search); if (player.fail) return rt.fulfill({ status: player.fail, json: { error: { message: "nope" } } }); if (/pause/.test(p)) player.is_playing = false; if (/play$/.test(p)) player.is_playing = true; return rt.fulfill({ status: 204, body: "" }); }
-      if (p === "/me/player") return player.device ? rt.fulfill({ json: { is_playing: player.is_playing, item: { name: "Låt", artists: [{ name: "Artist" }] }, device: player.device } }) : rt.fulfill({ status: 204, body: "" });
+      const refused = () => rt.fulfill({ status: 403, json: { error: { status: 403, message: "Player command failed: Restriction violated", reason: "UNKNOWN" } } });
+      if (rq.method() !== "GET") { calls.push(rq.method() + " " + p + u.search); if (player.real && /pause/.test(p) && !player.is_playing) return refused(); if (player.real && /play$/.test(p) && player.is_playing) return refused(); if (player.fail) return rt.fulfill({ status: player.fail, json: { error: { message: "nope", reason: player.reason || "UNKNOWN" } } }); if (/pause/.test(p)) player.is_playing = false; if (/play$/.test(p)) player.is_playing = true; return rt.fulfill({ status: 204, body: "" }); }
+      if (p === "/me/player/currently-playing") return player.silent === "all" ? rt.fulfill({ status: 204, body: "" }) : rt.fulfill({ json: { is_playing: player.is_playing, item: { name: "Låt", artists: [{ name: "Artist" }] } } });
+      if (p === "/me/player/devices") return rt.fulfill({ json: { devices: player.device ? [Object.assign({ is_active: !player.idle }, player.device)] : [] } });
+      if (p === "/me/player") return player.device && !player.silent ? rt.fulfill({ json: { is_playing: player.is_playing, item: { name: "Låt", artists: [{ name: "Artist" }] }, device: player.device } }) : rt.fulfill({ status: 204, body: "" });
       if (p === "/me") return rt.fulfill({ json: { display_name: "P" } });
       rt.fulfill({ json: { items: [], devices: [] } });
     }); };
@@ -768,7 +771,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     const { page } = await spotify({}, player);
     assert(await page.isHidden("#mVolRow") && await page.isVisible("#mVolNo"), "no note about the volume");
     assert(/telefonens knappar/.test(await page.textContent("#mVolNo")), "the note: " + await page.textContent("#mVolNo"));
-    player.fail = 403;
+    player.fail = 403; player.reason = "PREMIUM_REQUIRED";
     await page.click("#mPlay");
     await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
     assert(/Premium/.test(await page.textContent("#mMsg")), "the error is not shown on the timer: " + await page.textContent("#mMsg"));
@@ -828,10 +831,75 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.click("#mNext");
     await page.waitForTimeout(300);
     assert(/Når inte Spotify/.test(await page.textContent("#mMsg")) && await page.isVisible("#mMsg"), "the line went away after a tap while still out of reach");
-    down = false; player.fail = 403;
+    down = false; player.fail = 403; player.reason = "PREMIUM_REQUIRED";
     await page.click("#mPlay");
     await page.waitForFunction(() => !document.getElementById("musicBar").classList.contains("off"));
     await page.waitForFunction(() => /Premium/.test(document.getElementById("mMsg").textContent));
+  });
+
+  await test("when Spotify's player answer is empty although music plays, the song, pause and volume still work", async () => {
+    const player = { real: true, silent: true, is_playing: true, device: { id: "d1", volume_percent: 55, supports_volume: true } };
+    const { page, calls } = await spotify({}, player);
+    assert(await page.textContent("#npTitle") === "Låt", "the song is not shown: " + await page.textContent("#npTitle"));
+    assert(await page.isVisible("#mPlay .ia"), "no pause symbol although the music plays");
+    assert(await page.isVisible("#mVol") && await page.inputValue("#mVol") === "55", "no volume from the list of devices");
+    await page.click("#mPlay");
+    await page.waitForFunction(() => !document.getElementById("mPlay").classList.contains("playing"));
+    assert(player.is_playing === false && await page.isHidden("#mMsg"), "pause did not work: " + calls.join(", ") + " / " + await page.textContent("#mMsg"));
+    await page.click("#mPlay");
+    await page.waitForFunction(() => document.getElementById("mPlay").classList.contains("playing"));
+    assert(player.is_playing === true && await page.isHidden("#mMsg"), "play did not work");
+  });
+
+  await test("when Spotify says nothing about what plays, the button tries the other command instead of showing an error", async () => {
+    const player = { real: true, silent: "all", is_playing: true, device: { id: "d1", volume_percent: 55, supports_volume: true } };
+    const { page, calls } = await spotify({}, player);
+    assert(await page.textContent("#npTitle") === "Inget spelas", "the title: " + await page.textContent("#npTitle"));
+    await page.click("#mPlay");
+    for (let i = 0; i < 40 && player.is_playing; i++) await page.waitForTimeout(50);
+    assert(player.is_playing === false, "the music was not paused: " + calls.join(", "));
+    assert(await page.isHidden("#mMsg"), "an error showed: " + await page.textContent("#mMsg"));
+    assert(await page.isVisible("#mPlay .ip"), "the button does not show play after pausing");
+  });
+
+  await test("a refused pause is never turned into play, and an idle device gets no volume slider", async () => {
+    const player = { silent: true, idle: true, is_playing: true, device: { id: "d1", volume_percent: 55, supports_volume: true } };
+    const { page, calls } = await spotify({}, player);
+    assert(await page.isHidden("#mVolRow"), "a volume slider for a device that is not playing");
+    player.fail = 403;
+    await page.click("#mPlay");
+    await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
+    assert(/nekade kommandot/.test(await page.textContent("#mMsg")), "the text: " + await page.textContent("#mMsg"));
+    assert(!calls.some((c) => /\/player\/play(\?|$)/.test(c)), "play was sent after a refused pause: " + calls.join(", "));
+  });
+
+  await test("a workout start that cannot continue the music says so when Spotify reports it as paused", async () => {
+    const player = { is_playing: false, fail: 403, device: { id: "d1", volume_percent: 55, supports_volume: true } };
+    const { page } = await spotify({ spStart: true }, player);
+    await page.click("#bMain");
+    await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
+    assert(/nekade kommandot/.test(await page.textContent("#mMsg")), "the text: " + await page.textContent("#mMsg"));
+  });
+
+  await test("an account that is not registered with the app gets the text about Premium and User Management", async () => {
+    const player = { is_playing: false, device: { id: "d1", volume_percent: 55, supports_volume: true } };
+    const { page } = await spotify({}, player);
+    await page.context().route("https://api.spotify.com/v1/me/player/play**", (rt) => rt.fulfill({ status: 403, body: "User not registered in the Developer Dashboard" }));
+    await page.click("#mPlay");
+    await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
+    assert(/Premium/.test(await page.textContent("#mMsg")), "the text: " + await page.textContent("#mMsg"));
+  });
+
+  await test("starting the workout while the music already plays is not an error, and a refused command is not blamed on Premium", async () => {
+    const player = { real: true, is_playing: true, device: { id: "d1", volume_percent: 55, supports_volume: true } };
+    const { page } = await spotify({ spStart: true }, player);
+    await page.click("#bMain");
+    await page.waitForTimeout(600);
+    assert(await page.isHidden("#mMsg"), "an error showed at start: " + await page.textContent("#mMsg"));
+    player.real = false; player.fail = 403;
+    await page.click("#mNext");
+    await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
+    assert(/nekade kommandot/.test(await page.textContent("#mMsg")) && !/Premium/.test(await page.textContent("#mMsg")), "the text: " + await page.textContent("#mMsg"));
   });
 
   await browser.close();
