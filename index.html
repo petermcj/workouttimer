@@ -177,7 +177,7 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 
 /* Run view */
 .run{gap:12px}
-.face{border-radius:16px;padding:18px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;background:var(--panel);transition:background .25s}
+.face{position:relative;border-radius:16px;padding:18px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;background:var(--panel);transition:background .25s}
 .face.work{background:var(--work);color:var(--work-ink)}
 .face.rest{background:var(--rest);color:var(--rest-ink)}
 .face.round{background:var(--round);color:#160a33}
@@ -197,6 +197,7 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:13px
 .face.hit{animation:pulse .35s 2}
 @media (prefers-reduced-motion:reduce){.face.hit{animation:none}}
 .phase{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:.14em;text-transform:uppercase}
+.face .phase{padding:0 46px}
 .clock{font-family:var(--display);font-weight:800;font-size:clamp(96px,32vw,180px);line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .what{font-family:var(--display);font-weight:700;font-size:26px;line-height:1.1;text-wrap:balance}
 .where{font-size:14px;font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
@@ -250,6 +251,7 @@ code.uri{display:block;background:var(--panel);border:1px solid var(--line);bord
 ol.steps{margin:0;padding-left:20px;color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:4px}
 ol.steps a{color:var(--fg)}
 .runbar,.adj{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.runbar{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:1fr}
 .adj button{background:none;border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:8px;font:inherit;font-size:14px;font-variant-numeric:tabular-nums;cursor:pointer}
 .runbar button{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px 8px;font:inherit;font-size:14px;cursor:pointer}
 .runbar button[aria-pressed="true"]{border-color:var(--work);color:var(--work)}
@@ -263,6 +265,11 @@ body.focus .curbar{display:none!important}
 body.onrun header{display:none}
 body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--line)}
 @media (prefers-reduced-motion:reduce){.face{transition:none}}
+/* The sound button in the timer box. */
+.fsnd{position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(0,0,0,.16);color:inherit;display:grid;place-items:center;cursor:pointer;padding:0}
+.fsnd svg{width:24px;height:24px}.fsnd .off,.fsnd[data-s=off] .on{display:none}.fsnd[data-s=off] .off{display:block}
+.fsnd[data-s=off]{opacity:.6}.fsnd[data-s=warn]{background:var(--danger);color:#fff;animation:sndpulse 1.2s ease-in-out infinite}
+@keyframes sndpulse{50%{box-shadow:0 0 0 6px rgba(255,107,90,.35)}}@media (prefers-reduced-motion:reduce){.fsnd[data-s=warn]{animation:none}}
 </style>
 
 </head>
@@ -653,6 +660,7 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <section id="run" class="run" hidden>
     <button class="btn danger" id="audioWarn" hidden style="width:100%;padding:12px">Klockans ljud har stoppats av en annan app. Tryck här för att slå på ljudet igen.</button>
     <div class="face" id="face">
+      <button class="fsnd" id="fSnd" data-s="on" aria-label="Ljudet är på"><svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15 9a4.2 4.2 0 0 1 0 6M17.5 6.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9.5l5 5M20.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button>
       <div class="phase" id="rPhase">Redo</div>
       <div class="clock" id="rClock">0:00</div>
       <div class="flash" id="rFlash" hidden>Byt sida</div>
@@ -686,15 +694,15 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15 9a4.2 4.2 0 0 1 0 6M17.5 6.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <input type="range" id="mVol" min="0" max="100" step="5" value="50" aria-label="Musikens volym"><output id="mVolOut" for="mVol"></output>
       </div>
-      <div class="sub" id="mVolNo" hidden>Volymen styrs med telefonens knappar. Spotify låter inte appar ändra volymen på den här enheten.</div>
       <div class="sub" id="mMsg" role="status" style="color:var(--danger)" hidden></div>
     </div>
     <div class="runbar">
       <button id="bAwake" aria-pressed="true">☀ Skärm tänd</button>
       <button id="bFocus" aria-pressed="false">Fokusläge</button>
+      <button id="bReset" hidden>↺ Börja om</button>
     </div>
     <div class="meta"><span>Gått <strong id="mEl">0:00</strong></span><span>Intervall <strong id="mIdx">0/0</strong></span><span>Kvar i planen <strong id="mLeft">0:00</strong></span></div>
-    <div class="tiny"><button id="bReset">Börja om</button><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
+    <div class="tiny"><button id="bSound">Ljud: på</button><a href="https://open.spotify.com" target="_blank" rel="noopener" style="color:var(--muted)">Öppna Spotify</a></div>
     <div class="sub" id="wakeMsg" style="text-align:center" hidden></div>
   </section>
   </div></div>
@@ -726,6 +734,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=workouttimer-v26"></script>
+<script src="app.js?v=workouttimer-v27"></script>
 </body>
 </html>

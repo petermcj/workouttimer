@@ -771,8 +771,8 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
   await test("when Spotify cannot set the volume on the device, the timer says so, and errors show by the buttons", async () => {
     const player = { is_playing: true, device: { volume_percent: 100, supports_volume: false } };
     const { page } = await spotify({}, player);
-    assert(await page.isHidden("#mVolRow") && await page.isVisible("#mVolNo"), "no note about the volume");
-    assert(/telefonens knappar/.test(await page.textContent("#mVolNo")), "the note: " + await page.textContent("#mVolNo"));
+    assert(await page.isHidden("#mVolRow"), "a volume slider for a device that cannot set the volume");
+    assert(!/telefonens knappar/.test(await page.textContent("#musicBar")), "the timer explains the volume, which is not needed there");
     player.fail = 403; player.reason = "PREMIUM_REQUIRED";
     await page.click("#mPlay");
     await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
@@ -917,6 +917,83 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(!(await ask("https://accounts.spotify.com/api/token")), "the service worker answers Spotify sign-in requests");
     assert(await ask("https://petermcj.github.io/workouttimer/fonts/fonts.css"), "the app's own files are no longer handled");
     assert(stored.length === 1 && /fonts\.css/.test(stored[0]), "what was stored: " + stored.join(", "));
+  });
+
+  await test("after a long pause Spotify's device is woken by handing the music to it, instead of an error", async () => {
+    const player = { is_playing: false, device: { id: "d1", volume_percent: 55, supports_volume: true } };
+    const { page, calls } = await spotify({}, player);
+    // Spotify has forgotten the device: commands get "no active device" until the music is handed over
+    let asleep = true;
+    await page.context().route("https://api.spotify.com/v1/me/player/play**", (rt) => asleep ? rt.fulfill({ status: 404, json: { error: { status: 404, message: "Player command failed: No active device found", reason: "NO_ACTIVE_DEVICE" } } }) : rt.fallback());
+    await page.context().route("https://api.spotify.com/v1/me/player", (rt) => { if (rt.request().method() === "PUT") { calls.push("PUT /me/player " + rt.request().postData()); asleep = false; player.is_playing = JSON.parse(rt.request().postData()).play; return rt.fulfill({ status: 204, body: "" }); } return rt.fallback(); });
+    await page.click("#mPlay");
+    for (let i = 0; i < 40 && !player.is_playing; i++) await page.waitForTimeout(50);
+    assert(calls.some((c) => /PUT \/me\/player \{"device_ids":\["d1"\],"play":true\}/.test(c)), "the music was not handed to the device: " + calls.join(", "));
+    assert(player.is_playing && await page.isHidden("#mMsg"), "the music did not start, or an error showed: " + await page.textContent("#mMsg"));
+  });
+
+  await test("Spotify saying it is busy (too many requests) is retried once instead of shown as an error", async () => {
+    const player = { is_playing: true, device: { id: "d1", volume_percent: 55, supports_volume: true } };
+    const { page, calls } = await spotify({}, player);
+    let busy = 1;
+    await page.context().route("https://api.spotify.com/v1/me/player/next**", (rt) => busy-- > 0 ? rt.fulfill({ status: 429, headers: { "Retry-After": "1" }, body: "" }) : rt.fallback());
+    await page.click("#mNext");
+    for (let i = 0; i < 60 && !calls.some((c) => c.startsWith("POST /me/player/next")); i++) await page.waitForTimeout(50);
+    assert(calls.some((c) => c.startsWith("POST /me/player/next")), "the command was not tried again");
+    assert(await page.isHidden("#mMsg"), "an error showed: " + await page.textContent("#mMsg"));
+  });
+
+  await test("the timer box has a sound button that shows and switches the sound", async () => {
+    const page = await open({});
+    await page.click("#tabRun");
+    assert(await page.isVisible("#fSnd") && await page.getAttribute("#fSnd", "data-s") === "on", "no sound button showing on");
+    await page.click("#fSnd");
+    assert(await page.getAttribute("#fSnd", "data-s") === "off" && await page.textContent("#bSound") === "Ljud: av", "the button did not turn the sound off");
+    assert((await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")))).sound === false, "not saved");
+    await page.click("#bSound");
+    assert(await page.getAttribute("#fSnd", "data-s") === "on", "the sound button does not follow the other switch");
+    // iPhone stops the sound: the button turns red, and a tap wakes it
+    await page.click("#bMain");
+    await page.evaluate(() => { const real = Object.getOwnPropertyDescriptor(BaseAudioContext.prototype, "state"); window.__st = real; Object.defineProperty(BaseAudioContext.prototype, "state", { configurable: true, get() { return "interrupted"; } }); });
+    await page.waitForTimeout(1300);
+    assert(await page.getAttribute("#fSnd", "data-s") === "warn", "a stopped sound is not shown: " + await page.getAttribute("#fSnd", "data-s"));
+    await page.click("#fSnd");
+    assert((await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")))).sound !== false, "a tap on the red button turned the sound off");
+    await page.evaluate(() => Object.defineProperty(BaseAudioContext.prototype, "state", window.__st));
+    await page.waitForTimeout(500);
+    assert(await page.getAttribute("#fSnd", "data-s") === "on", "the sound did not come back");
+  });
+
+  await test("a started workout can be started over, with a question while it runs", async () => {
+    const page = await open({ total: 45 });
+    await page.click("#tabRun");
+    assert(await page.isHidden("#bReset"), "start over before anything has started");
+    await page.click("#bMain"); await page.click("#bNext"); await page.click("#bNext");
+    assert(await page.isVisible("#bReset"), "no start over button");
+    page.once("dialog", (d) => d.dismiss());
+    await page.click("#bReset");
+    assert(await page.textContent("#bMain") === "Paus", "a no to the question still started over");
+    page.once("dialog", (d) => d.accept());
+    await page.click("#bReset");
+    assert(await page.textContent("#bMain") === "Start" && await page.isHidden("#bReset") && await page.isHidden("#passLeft"), "the workout did not start over");
+    assert(/Gör dig redo|Redo/i.test(await page.textContent("#rPhase")), "not back at the start: " + await page.textContent("#rPhase"));
+  });
+
+  await test("a device chosen under Settings is never swapped for another one, and a command is not sent twice", async () => {
+    const player = { is_playing: false, device: { id: "other", volume_percent: 55, supports_volume: true } };
+    const { page, calls } = await spotify({}, player);
+    await page.evaluate(() => { const s = JSON.parse(localStorage.getItem("ccage_sp")); s.device = "speaker"; localStorage.setItem("ccage_sp", JSON.stringify(s)); });
+    await page.reload(); await page.click("#tabRun");
+    await page.context().route("https://api.spotify.com/v1/me/player/play**", (rt) => rt.fulfill({ status: 404, json: { error: { status: 404, message: "No active device found", reason: "NO_ACTIVE_DEVICE" } } }));
+    await page.click("#mPlay");
+    await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
+    assert(!calls.some((c) => /^PUT \/me\/player /.test(c)), "the music was moved to another device: " + calls.join(", "));
+    assert(/Ingen Spotify-enhet/.test(await page.textContent("#mMsg")), "the text: " + await page.textContent("#mMsg"));
+    let n = 0;
+    await page.context().route("https://api.spotify.com/v1/me/player/next**", (rt) => { n++; rt.fulfill({ status: 502, body: "" }); });
+    await page.click("#mNext");
+    await page.waitForTimeout(1500);
+    assert(n === 1, "next was sent " + n + " times after an unavailable answer");
   });
 
   await browser.close();
