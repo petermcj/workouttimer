@@ -1,6 +1,6 @@
 // Bump VERSION when files change so phones pick up the new app,
 // and use the same value in the app.js?v= link in index.html.
-const VERSION = "workouttimer-v27";
+const VERSION = "workouttimer-v28";
 const SHELL = [
   "./",
   "./index.html",
