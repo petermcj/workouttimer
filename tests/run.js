@@ -742,6 +742,8 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
   await test("with lower volume during rest, the slider sets the level for the running kind of interval", async () => {
     const { page } = await spotify({ spDuck: true, spWorkVol: 80, spRestVol: 40 }, { is_playing: true, device: { volume_percent: 80, supports_volume: true } });
     await page.fill("#mVol", "60"); await page.dispatchEvent("#mVol", "change");
+    // the level is saved once Spotify has accepted it
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem("ccage")).spWorkVol === 60, null, { timeout: 3000 }).catch(() => {});
     const c = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")));
     assert(c.spWorkVol === 60 && c.spRestVol === 40, "the levels: " + c.spWorkVol + " / " + c.spRestVol);
   });
@@ -900,6 +902,21 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.click("#mNext");
     await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
     assert(/nekade kommandot/.test(await page.textContent("#mMsg")) && !/Premium/.test(await page.textContent("#mMsg")), "the text: " + await page.textContent("#mMsg"));
+  });
+
+  await test("the service worker stores only the app's own files, never answers from Spotify", async () => {
+    // Load sw.js with a stand-in for the browser, and see which requests it answers itself.
+    const src = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8");
+    const handlers = {}, stored = [];
+    const self = { addEventListener: (ev, fn) => (handlers[ev] = fn), skipWaiting() {}, clients: { claim() {} } };
+    const caches = { open: async () => ({ put: (k, res) => stored.push(String((k && k.url) || k) + " " + (res && res.url)), addAll: async () => {} }), match: async () => undefined, keys: async () => [] };
+    const fetchStub = async (rq) => ({ ok: true, url: String(rq.url || rq), clone() { return this; } });
+    new Function("self", "caches", "fetch", "location", src)(self, caches, fetchStub, new URL("https://petermcj.github.io/workouttimer/"));
+    const ask = async (url) => { let answer = null; handlers.fetch({ request: { method: "GET", url, mode: "cors" }, respondWith: (p) => (answer = p) }); if (answer) { await answer; await new Promise((r) => setTimeout(r, 0)); } return !!answer; };
+    assert(!(await ask("https://api.spotify.com/v1/me/player")), "the service worker answers Spotify requests, so an old answer can be shown");
+    assert(!(await ask("https://accounts.spotify.com/api/token")), "the service worker answers Spotify sign-in requests");
+    assert(await ask("https://petermcj.github.io/workouttimer/fonts/fonts.css"), "the app's own files are no longer handled");
+    assert(stored.length === 1 && /fonts\.css/.test(stored[0]), "what was stored: " + stored.join(", "));
   });
 
   await browser.close();

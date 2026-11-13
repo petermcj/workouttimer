@@ -1365,7 +1365,7 @@ async function spConnect(){
 // Without internet (flight mode) a request never reaches Spotify. Every request goes through here: one that does not
 // get through marks the music as out of reach, and any answer at all, also one that says no, marks it as back.
 async function spFetch(url,opt){
-  let r;try{r=await fetch(url,opt)}catch(e){spOff(true);if($("mMsg").hidden)mMsg(spOffText(),true);throw Object.assign(new Error("offline"),{offline:true})}
+  let r;try{r=await fetch(url,Object.assign({cache:"no-store"},opt))}catch(e){spOff(true);if($("mMsg").hidden)mMsg(spOffText(),true);throw Object.assign(new Error("offline"),{offline:true})}
   spOff(false);return r;
 }
 async function spToken(params){
