@@ -608,10 +608,13 @@ function showTab(t){if(t==="run")try{spNowSoon()}catch(e){}document.body.classLi
 Object.entries(TABS).forEach(([sec,btn])=>{if(sec!=="plan")$(btn).onclick=()=>showTab(sec)});
 
 // --- Audio ---
-let ac=null;
+let ac=null,acStale=false;
 let master=null;
 function setSession(){try{if(navigator.audioSession)navigator.audioSession.type=(cfg.lock&&running)?"playback":(cfg.mix||"ambient")}catch(e){}}
-function makeCtx(){try{if(ac&&ac.close)ac.close()}catch(e){}ac=null;master=null;
+// Fresh audio: a new context, made during a tap so that iPhone gives it sound. Two calls in the same tap make one.
+let freshAt=0;
+function freshAudio(){if(!acStale&&Date.now()-freshAt<400)return;freshAt=Date.now();setSession();makeCtx();checkAudio()}
+function makeCtx(){acStale=false;try{if(ac&&ac.close)ac.close()}catch(e){}ac=null;master=null;
   try{ac=new (window.AudioContext||window.webkitAudioContext)();
     const comp=ac.createDynamicsCompressor();comp.threshold.value=-18;comp.knee.value=6;comp.ratio.value=6;comp.attack.value=.002;comp.release.value=.15;
     master=ac.createGain();master.gain.value=1.6;master.connect(comp);comp.connect(ac.destination);
@@ -622,18 +625,26 @@ function makeCtx(){try{if(ac&&ac.close)ac.close()}catch(e){}ac=null;master=null;
 function ensureAudio(){setSession();if(!ac||ac.state==="closed")makeCtx();
   else if(ac.state!=="running"){const p=ac.resume&&ac.resume();if(p&&p.then)p.then(checkAudio,()=>{makeCtx();checkAudio()})}
   checkAudio()}
-function checkAudio(){const w=$("audioWarn");if(w)w.hidden=!(cfg.sound&&ac&&ac.state!=="running"&&running);try{sndShow()}catch(e){}}
+function checkAudio(){const w=$("audioWarn");if(w)w.hidden=!(cfg.sound&&(acStale||(ac&&ac.state!=="running"))&&running);try{sndShow()}catch(e){}}
 // The sound button in the timer box: on, off, or on but stopped by iPhone (then a tap wakes it).
-function sndShow(){const b=$("fSnd");if(!b)return;const s=!cfg.sound?"off":(ac&&ac.state!=="running"&&running?"warn":"on");
+function sndShow(){const b=$("fSnd");if(!b)return;const s=!cfg.sound?"off":((acStale||(ac&&ac.state!=="running"))&&running?"warn":"on");
   if(b.dataset.s===s&&b.dataset.l===lang)return;b.dataset.s=s;b.dataset.l=lang;b.setAttribute("aria-label",T(s==="off"?"Ljudet är av":s==="warn"?"Klockans ljud har stoppats. Tryck för att slå på det igen.":"Ljudet är på"))}
 function out(){return master||ac.destination}
 function wake2(){if(ac&&ac.state!=="running"){try{ac.resume().then(checkAudio,checkAudio)}catch(e){}}}
-$("audioWarn").onclick=()=>{makeCtx();setTimeout(checkAudio,300);play("start")};
+$("audioWarn").onclick=()=>{freshAudio();setTimeout(checkAudio,300);play("start")};
 ["focus","pageshow"].forEach(ev=>window.addEventListener(ev,wake2));
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)wake2()});
+// After the app has been in the background, iPhone can leave the audio silent even when it says it is running, until a
+// new one is made, and a new one only gets sound if it is made during a tap. So it is marked as stale when the app is
+// left; the sound button turns red while the timer runs, and the first tap anywhere makes a fresh one.
+// (Not when the sound is off, and not with the timer on the lock screen, where the sound is meant to go on.)
+function markStale(){if(ac&&cfg.sound&&!(cfg.lock&&running))acStale=true}
+document.addEventListener("visibilitychange",()=>{if(document.hidden)markStale();else{setSession();wake2()}checkAudio()});
+window.addEventListener("pagehide",markStale);
 function setMix(m){cfg.mix=m;render();setSession();makeCtx();play("start")}
 $("mixAmb").onclick=()=>setMix("ambient");$("mixDuck").onclick=()=>setMix("transient");$("mixPlay").onclick=()=>setMix("playback");
-["pointerdown","touchend","click","keydown"].forEach(ev=>document.addEventListener(ev,()=>{if(!ac||ac.state!=="running")ensureAudio()},{capture:true,passive:true}));
+// iPhone counts a tap as a tap when the finger is lifted (touchend, click), not when it comes down, so fresh audio is
+// made then.
+["pointerdown","touchend","click","keydown"].forEach(ev=>document.addEventListener(ev,()=>{if(acStale&&ev!=="pointerdown")freshAudio();else if(!acStale&&(!ac||ac.state!=="running"))ensureAudio()},{capture:true,passive:true}));
 let catchUp=false;
 function beep(f,dur,vol,delay,type,opt){if(!cfg.sound||!ac||catchUp)return;try{opt=opt||{};const o=ac.createOscillator(),g=ac.createGain();o.type=type||"square";const t=ac.currentTime+(delay||0);o.frequency.setValueAtTime(f,t);
   if(opt.to)o.frequency.exponentialRampToValueAtTime(opt.to,t+(opt.toT||dur));
@@ -701,9 +712,10 @@ $("bSound").onclick=()=>{cfg.sound=!cfg.sound;soundLbl();save()};
 // showed is read when the finger comes down (on window, which hears the touch first), and the sound is not turned
 // off by mistake.
 let sndTapWarn=null;
-window.addEventListener("pointerdown",e=>{sndTapWarn=e.target&&e.target.closest&&e.target.closest("#fSnd")?$("fSnd").dataset.s==="warn":null},true);
-$("fSnd").onclick=()=>{const warn=sndTapWarn!==null?sndTapWarn:$("fSnd").dataset.s==="warn";sndTapWarn=null;if(warn){makeCtx();setTimeout(checkAudio,300);play("start");return}
-  cfg.sound=!cfg.sound;soundLbl();save();if(cfg.sound){ensureAudio();play("start")}};
+["pointerdown","keydown"].forEach(ev=>window.addEventListener(ev,e=>{sndTapWarn=e.target&&e.target.closest&&e.target.closest("#fSnd")?$("fSnd").dataset.s==="warn":null},true));
+$("fSnd").onclick=()=>{const warn=sndTapWarn!==null?sndTapWarn:$("fSnd").dataset.s==="warn";sndTapWarn=null;if(warn){freshAudio();setTimeout(checkAudio,300);play("start");return}
+  // Turning the sound on always starts from fresh audio, so off and on is a sure way to get the sound back.
+  cfg.sound=!cfg.sound;soundLbl();save();if(cfg.sound){freshAudio();play("start")}};
 soundLbl();
 
 // --- Runner ---

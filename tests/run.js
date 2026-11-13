@@ -1025,6 +1025,34 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(/Tog bort/.test(await page.textContent("#toastMsg")) && await page.isVisible("#toastUndo"), "the switch took the place of the Undo");
   });
 
+  await test("after the app has been in the background the sound button turns red, and a tap gives fresh sound", async () => {
+    const page = await open({ total: 45 });
+    await page.addInitScript(() => { const A = window.AudioContext; window.__made = 0; window.AudioContext = function (...a) { window.__made++; return new A(...a); }; window.AudioContext.prototype = A.prototype; });
+    await page.reload();
+    await page.click("#tabRun"); await page.click("#bMain");
+    const before = await page.evaluate(() => window.__made);
+    const away = (h) => page.evaluate((h) => { Object.defineProperty(document, "hidden", { configurable: true, get: () => h }); Object.defineProperty(document, "visibilityState", { configurable: true, get: () => (h ? "hidden" : "visible") }); document.dispatchEvent(new Event("visibilitychange")); }, h);
+    await away(true); await away(false);
+    await page.waitForTimeout(300);
+    assert(await page.getAttribute("#fSnd", "data-s") === "warn", "the button does not show that the sound must be woken: " + await page.getAttribute("#fSnd", "data-s"));
+    await page.click("#rClock");
+    await page.waitForTimeout(300);
+    assert(await page.evaluate(() => window.__made) === before + 1, "not exactly one fresh audio on the tap: " + (await page.evaluate(() => window.__made) - before));
+    assert(await page.getAttribute("#fSnd", "data-s") === "on", "the button is still red after the tap");
+    // the same from the keyboard on the red button: it wakes the sound and does not turn it off
+    await away(true); await away(false);
+    await page.focus("#fSnd"); await page.keyboard.press("Enter");
+    assert(await page.getAttribute("#fSnd", "data-s") === "on" && (await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")))).sound !== false, "Enter on the red button turned the sound off");
+    // with the sound off, leaving the app does not mark the audio; on again makes fresh audio
+    await page.waitForTimeout(450);
+    const n = await page.evaluate(() => window.__made);
+    await page.click("#fSnd"); await away(true); await away(false);
+    assert(await page.getAttribute("#fSnd", "data-s") === "off", "the sound button changed while the sound was off");
+    await page.waitForTimeout(450);
+    await page.click("#fSnd");
+    assert(await page.evaluate(() => window.__made) > n && await page.getAttribute("#fSnd", "data-s") === "on", "off and on did not give fresh audio");
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;
