@@ -996,6 +996,35 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(n === 1, "next was sent " + n + " times after an unavailable answer");
   });
 
+  await test("the timer box shows instructor or own training in its left corner, and a tap switches", async () => {
+    const page = await open({ total: 45 });
+    await page.click("#tabRun");
+    assert(await page.isVisible("#fRole") && await page.getAttribute("#fRole", "data-r") === "coach", "no instructor icon");
+    assert(await page.isVisible(".adj"), "the ±30 s buttons should show for an instructor");
+    await page.click("#fRole");
+    assert(await page.getAttribute("#fRole", "data-r") === "self" && await page.isHidden(".adj"), "the tap did not switch to own training");
+    assert((await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")))).role === "self", "not saved");
+    assert(/Egen träning/.test(await page.textContent("#rFlash")), "no message: " + await page.textContent("#rFlash"));
+    await page.click("#tabSet");
+    assert(await page.getAttribute("#roleSelf", "aria-pressed") === "true", "Settings does not follow");
+    await page.click("#roleCoach"); await page.click("#tabRun");
+    assert(await page.getAttribute("#fRole", "data-r") === "coach", "the icon does not follow Settings");
+    const box = await page.evaluate(() => { const f = document.getElementById("face").getBoundingClientRect(), r = document.getElementById("fRole").getBoundingClientRect(), s = document.getElementById("fSnd").getBoundingClientRect(); return { left: r.left - f.left < 20, right: f.right - s.right < 20 }; });
+    assert(box.left && box.right, "the buttons are not in the corners: " + JSON.stringify(box));
+    // during a workout with demos left it says when they change, and the workout's end does not move
+    await page.click("#bMain"); await page.click("#bMain");
+    const end = await page.textContent("#plEnd"), st = await page.textContent("#plState");
+    await page.click("#fRole");
+    assert(/nästa start/.test(await page.textContent("#rFlash")), "no note about the next start: " + await page.textContent("#rFlash"));
+    assert(await page.textContent("#plEnd") === end && await page.textContent("#plState") === st, "the switch moved the end: " + st + " -> " + await page.textContent("#plState"));
+    // a pending Undo is kept
+    await page.evaluate(() => document.getElementById("toastUndo").click());
+    await page.click("#tabPass"); await page.click("#passList .item button:nth-child(4)");
+    await page.waitForFunction(() => !document.getElementById("toast").hidden && /Tog bort/.test(document.getElementById("toastMsg").textContent));
+    await page.click("#tabRun"); await page.click("#fRole");
+    assert(/Tog bort/.test(await page.textContent("#toastMsg")) && await page.isVisible("#toastUndo"), "the switch took the place of the Undo");
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;

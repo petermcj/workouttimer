@@ -267,7 +267,8 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
 @media (prefers-reduced-motion:reduce){.face{transition:none}}
 /* The sound button in the timer box. */
 .fsnd{position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(0,0,0,.16);color:inherit;display:grid;place-items:center;cursor:pointer;padding:0}
-.fsnd svg{width:24px;height:24px}.fsnd .off,.fsnd[data-s=off] .on{display:none}.fsnd[data-s=off] .off{display:block}
+.fsnd svg{width:24px;height:24px}
+.frole{right:auto;left:10px}.frole .self,.frole[data-r=self] .coach{display:none}.frole[data-r=self] .self{display:block}.fsnd .off,.fsnd[data-s=off] .on{display:none}.fsnd[data-s=off] .off{display:block}
 .fsnd[data-s=off]{opacity:.6}.fsnd[data-s=warn]{background:var(--danger);color:#fff;animation:sndpulse 1.2s ease-in-out infinite}
 @keyframes sndpulse{50%{box-shadow:0 0 0 6px rgba(255,107,90,.35)}}@media (prefers-reduced-motion:reduce){.fsnd[data-s=warn]{animation:none}}
 </style>
@@ -660,6 +661,7 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <section id="run" class="run" hidden>
     <button class="btn danger" id="audioWarn" hidden style="width:100%;padding:12px">Klockans ljud har stoppats av en annan app. Tryck här för att slå på ljudet igen.</button>
     <div class="face" id="face">
+      <button class="fsnd frole" id="fRole" data-r="coach" aria-label="Instruktörsläge. Tryck för egen träning."><svg class="coach" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5a5.5 5.5 0 1 0 11 0V9.5h7V6.5H8.5A5.5 5.5 0 0 0 3 11.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="8.5" cy="11.5" r="1.6" fill="currentColor"/><path d="M14 4.5V6.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><svg class="self" viewBox="0 0 24 24" aria-hidden="true"><circle cx="14.5" cy="4.5" r="2" fill="currentColor"/><path d="M8 10.5l3.5-3 3 2.5 2.5 2.5h3M11.5 7.5L10 13l3.5 3-1 5M10 13l-4 4H3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <button class="fsnd" id="fSnd" data-s="on" aria-label="Ljudet är på"><svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15 9a4.2 4.2 0 0 1 0 6M17.5 6.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9.5l5 5M20.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button>
       <div class="phase" id="rPhase">Redo</div>
       <div class="clock" id="rClock">0:00</div>
@@ -734,6 +736,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=workouttimer-v27"></script>
+<script src="app.js?v=workouttimer-v28"></script>
 </body>
 </html>
