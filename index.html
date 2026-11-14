@@ -245,6 +245,7 @@ body.self #instrBox,body.self .adj,body.self #bOpt{display:none!important}
 .rlabel{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.04em}
 .rval{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
 .music{display:flex;flex-direction:column;gap:8px;background:var(--panel);border-radius:10px;padding:8px 10px}
+.music .mopen{align-self:flex-start;background:#1db954;border-color:#1db954;color:#06210f;font-weight:600;text-decoration:none}
 .music .mrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px;align-items:center}
 .music button{background:none;border:1px solid var(--line);color:var(--fg);width:46px;height:46px;border-radius:10px;cursor:pointer;display:grid;place-items:center;padding:0}
 .music svg{width:24px;height:24px;fill:currentColor;flex:none}
@@ -715,6 +716,7 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
         <input type="range" id="mVol" min="0" max="100" step="5" value="50" aria-label="Musikens volym"><output id="mVolOut" for="mVol"></output>
       </div>
       <div class="sub" id="mMsg" role="status" style="color:var(--danger)" hidden></div>
+      <a class="btn mopen" id="mOpen" href="https://open.spotify.com" target="_blank" rel="noopener" hidden>Öppna Spotify</a>
     </div>
     <div class="runbar">
       <button id="bAwake" aria-pressed="true">☀ Skärm tänd</button>
@@ -762,6 +764,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=workouttimer-v30"></script>
+<script src="app.js?v=workouttimer-v31"></script>
 </body>
 </html>
