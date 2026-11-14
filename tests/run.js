@@ -988,7 +988,7 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.click("#mPlay");
     await page.waitForFunction(() => !document.getElementById("mMsg").hidden);
     assert(!calls.some((c) => /^PUT \/me\/player /.test(c)), "the music was moved to another device: " + calls.join(", "));
-    assert(/Ingen Spotify-enhet/.test(await page.textContent("#mMsg")), "the text: " + await page.textContent("#mMsg"));
+    assert(/vald under Inställningar är inte tillgänglig/.test(await page.textContent("#mMsg")) && await page.isHidden("#mOpen"), "the text: " + await page.textContent("#mMsg"));
     let n = 0;
     await page.context().route("https://api.spotify.com/v1/me/player/next**", (rt) => { n++; rt.fulfill({ status: 502, body: "" }); });
     await page.click("#mNext");
@@ -1086,6 +1086,34 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.click("#fRole");
     assert(await page.isHidden("#bInstr"), "the button shows for own training");
     assert(!page.errors.length, page.errors.join("; "));
+  });
+
+  await test("with no active Spotify device, Open Spotify shows by the message, play opens Spotify too, and back in the app the music starts", async () => {
+    const player = { is_playing: false, device: { id: "d1", volume_percent: 55, supports_volume: true } };
+    const { page, calls } = await spotify({}, player);
+    let asleep = true;
+    await page.context().route("https://api.spotify.com/v1/me/player/play**", (rt) => asleep ? rt.fulfill({ status: 404, json: { error: { status: 404, message: "No active device found" } } }) : rt.fallback());
+    await page.context().route("https://api.spotify.com/v1/me/player/devices**", (rt) => rt.fulfill({ json: { devices: [] } }));
+    await page.click("#mPlay");
+    await page.waitForFunction(() => !document.getElementById("mOpen").hidden);
+    assert(/Öppna Spotify/.test(await page.textContent("#mMsg")) && await page.textContent("#mOpen") === "Öppna Spotify", "no Open Spotify by the message");
+    // the play button now opens Spotify (a new window) instead of failing again; the timer's page stays
+    await page.context().route("https://open.spotify.com/**", (rt) => rt.fulfill({ contentType: "text/html", body: "<title>Spotify</title>" }));
+    const popup = page.waitForEvent("popup");
+    await page.click("#mPlay");
+    const w = await popup;
+    await w.waitForLoadState().catch(() => {});
+    assert(/open\.spotify\.com/.test(w.url()), "play did not open Spotify: " + w.url());
+    await w.close().catch(() => {});
+    assert(page.url().startsWith(URL0), "the timer's page was navigated away: " + page.url());
+    // back from Spotify, where a song now plays: the music is started
+    asleep = false;
+    // coming back without having left does nothing
+    const away = (h) => page.evaluate((h) => { Object.defineProperty(document, "hidden", { configurable: true, get: () => h }); document.dispatchEvent(new Event("visibilitychange")); }, h);
+    await away(true); await away(false);
+    for (let i = 0; i < 40 && !player.is_playing; i++) await page.waitForTimeout(50);
+    assert(player.is_playing, "the music was not started back in the app: " + calls.join(", "));
+    assert(await page.isHidden("#mOpen") && await page.isHidden("#mMsg"), "the message stayed after the music started");
   });
 
   await browser.close();
