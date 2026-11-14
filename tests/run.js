@@ -1053,6 +1053,41 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(await page.evaluate(() => window.__made) > n && await page.getAttribute("#fSnd", "data-s") === "on", "off and on did not give fresh audio");
   });
 
+  await test("during the workout the instructor can show any station's instructions, starting at the timer's station", async () => {
+    const page = await open({ total: 45, st: 3, ex: 2, names: [["Knäböj", "Armhävningar"], ["Kettlebell swing", ""], ["Planka", "Egen grej"]] });
+    await page.click("#tabRun");
+    assert(await page.isVisible("#bInstr"), "no instructions button for the instructor");
+    // let the timer reach station 2
+    await page.click("#bMain");
+    for (let i = 0; i < 80 && !/Station 2\//.test(await page.textContent("#rWhere")); i++) await page.click("#bNext");
+    await page.click("#bInstr");
+    assert(await page.isVisible("#instrSheet") && await page.textContent("#isPos") === "Station 2 av 3", "it did not open at the timer's station: " + await page.textContent("#isPos"));
+    let body = await page.textContent("#isBody");
+    assert(/Kettlebell swing/.test(body) && /Utförande/.test(body) && /Titta särskilt på/.test(body) && /Kraften kommer från höften/.test(body), "the instructions are not shown: " + body.slice(0, 160));
+    assert(/Ingen övning vald/.test(body), "the empty B slot is not shown");
+    assert(await page.textContent("#bMain") === "Paus", "the timer stopped");
+    await page.click("#isNext");
+    body = await page.textContent("#isBody");
+    assert(await page.textContent("#isPos") === "Station 3 av 3" && /Planka/.test(body) && /Ingen instruktion/.test(body), "station 3: " + body.slice(0, 160));
+    assert(await page.isDisabled("#isNext"), "next after the last station");
+    await page.click("#isChips button:nth-child(1)");
+    assert(/Knäböj/.test(await page.textContent("#isBody")) && /Armhävningar/.test(await page.textContent("#isBody")), "the chip did not show station 1");
+    assert(await page.evaluate(() => document.querySelector("#isChips button:nth-child(2)").classList.contains("now")), "the timer's station is not marked");
+    // the mark follows the timer while the sheet is open; during a switch it is the station people walk to
+    for (let i = 0; i < 80 && !/Byt station/i.test(await page.textContent("#rPhase")); i++) await page.evaluate(() => document.getElementById("bNext").click());
+    await page.waitForTimeout(250);
+    assert(await page.evaluate(() => document.querySelector("#isChips button:nth-child(3)").classList.contains("now")), "during the switch the mark is not on the next station");
+    await page.keyboard.press("Escape");
+    assert(await page.isHidden("#instrSheet"), "Escape did not close");
+    await page.click("#bInstr");
+    assert(await page.textContent("#isPos") === "Station 3 av 3", "during the switch it did not open at the next station: " + await page.textContent("#isPos"));
+    await page.keyboard.press("Escape");
+    // own training has no such button
+    await page.click("#fRole");
+    assert(await page.isHidden("#bInstr"), "the button shows for own training");
+    assert(!page.errors.length, page.errors.join("; "));
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;
