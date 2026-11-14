@@ -27,6 +27,7 @@ async function test(name, fn) {
   catch (e) { results.push(["FAIL", name]); console.log("FAIL " + name + "\n     " + String(e && e.message || e).split("\n").join("\n     ")); }
 }
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
+function document_class_quick(c) { return /\bquickmode\b/.test(c); }
 const mmss = (s) => { const [m, x] = s.split(":").map(Number); return m * 60 + x; };
 const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); return (m ? +m[1] * 60 : 0) + (x ? +x[1] : 0); };
 
@@ -1114,6 +1115,85 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     for (let i = 0; i < 40 && !player.is_playing; i++) await page.waitForTimeout(50);
     assert(player.is_playing, "the music was not started back in the app: " + calls.join(", "));
     assert(await page.isHidden("#mOpen") && await page.isHidden("#mMsg"), "the message stayed after the music started");
+  });
+
+  await test("the quick timer runs work, rest and sets with nothing else, and keeps its values", async () => {
+    const page = await open({ total: 45, st: 3 });
+    await page.clock.install();
+    await page.reload();
+    await page.evaluate(() => document.getElementById("passQuick").click());
+    await page.waitForFunction(() => !document.getElementById("quickBox").hidden);
+    assert(await page.isVisible("#quickBox") && await page.isHidden("#curBar"), "the quick timer did not open on the timer");
+    assert(await page.isHidden("#bInstr") && await page.isHidden("#fRole") && await page.isHidden("#qModeRow"), "a workout's extras show in the quick timer");
+    // 20 s work, 10 s rest, 2 sets, one station
+    await page.fill("#qWork", "20"); await page.dispatchEvent("#qWork", "change");
+    await page.click('[data-q="rest:-5"]');
+    await page.click('[data-q="sets:-1"]');
+    assert(JSON.stringify(await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_quick")))) === JSON.stringify({ work: 20, rest: 10, sets: 2, st: 1, stRest: 30, wait: false }), "the values: " + await page.evaluate(() => localStorage.getItem("ccage_quick")));
+    assert(await page.textContent("#mLeft") === "1:00", "10 s ready + 20 + 10 + 20: " + await page.textContent("#mLeft"));
+    await page.click("#bMain");
+    assert(await page.isDisabled("#qWork") && await page.isHidden("#passLeft"), "the settings can be changed during the run, or a workout's end shows");
+    const seen = [];
+    for (let i = 0; i < 70 && (await page.textContent("#bMain")) !== "Start"; i++) { const x = (await page.textContent("#rPhase")) + ":" + (await page.textContent("#rWhat")); if (seen[seen.length - 1] !== x) seen.push(x); await page.clock.runFor(1000); }
+    assert(seen.join(" | ") === "Gör dig redo:Snabbtimer | Arbete:Set 1 av 2 | Vila:Nästa: set 2 | Arbete:Set 2 av 2", "the run: " + seen.join(" | "));
+    // when the run is over the values can be changed again, without a question
+    assert(await page.isEnabled("#qWork"), "the settings stay locked after the run");
+    await page.click('[data-q="sets:1"]');
+    assert(await page.textContent("#mLeft") === "1:30" && await page.textContent("#rPhase") === "Gör dig redo", "a change after the run did not set up a new one: " + await page.textContent("#mLeft"));
+    // the open workout was closed, not changed; the quick timer is there after a reload
+    assert(JSON.parse((await passesIn(page))[0].cfg).st === 3, "the workout was changed by the quick timer");
+    await page.reload(); await page.click("#tabRun");
+    assert(await page.isVisible("#quickBox") && await page.inputValue("#qWork") === "20", "the quick timer did not come back after a reload");
+    // Close opens the workout that was open before, unchanged
+    await page.click("#qClose");
+    await page.waitForFunction(() => !document.getElementById("curBar").hidden);
+    assert(await page.isVisible("#passes") && await page.textContent("#edTitle") === "Test", "Close did not bring the workout back");
+    await page.click("#tabRun");
+    assert(await page.isHidden("#quickBox") && (await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")))).st === 3, "the timer does not show the workout again");
+    assert(!document_class_quick(await page.evaluate(() => document.body.className)), "the page is still marked as quick timer");
+    assert(!page.errors.length, page.errors.join("; "));
+  });
+
+  await test("with wait for me, the quick timer stops at each change of station until Continue", async () => {
+    const page = await open(null, { raw: { ccage_quick: { work: 10, rest: 5, sets: 1, st: 3, stRest: 40, wait: false } } });
+    await page.clock.install();
+    await page.reload();
+    await page.evaluate(() => document.getElementById("passQuick").click());
+    assert(await page.isVisible("#qModeRow") && await page.isVisible("#qStRestRow"), "no choice between the stations");
+    // running on: 10 ready + 3 x 10 work + 2 x 40 between
+    assert(await page.textContent("#mLeft") === "2:00", "running on: " + await page.textContent("#mLeft"));
+    await page.click("#qWait");
+    assert(await page.isHidden("#qStRestRow") && await page.isVisible("#qHint"), "the rest between stations still shows");
+    assert(await page.textContent("#mLeft") === "0:50", "waiting: 10 + 3 x 10 + 2 x 5: " + await page.textContent("#mLeft"));
+    await page.click("#bMain");
+    for (let i = 0; i < 40 && (await page.textContent("#bMain")) === "Paus"; i++) await page.clock.runFor(1000);
+    assert(await page.textContent("#bMain") === "Fortsätt" && await page.textContent("#rPhase") === "Byt station" && await page.textContent("#rWhat") === "→ Station 2", "it did not stop at the change: " + await page.textContent("#bMain") + " / " + await page.textContent("#rPhase") + " / " + await page.textContent("#rWhat"));
+    assert(/Tryck Fortsätt/.test(await page.textContent("#rWhere")) && await page.textContent("#rClock") === "0:05", "no prompt, or not a 5 s countdown: " + await page.textContent("#rClock"));
+    await page.clock.runFor(20000);
+    assert(await page.textContent("#rClock") === "0:05", "the timer went on while waiting");
+    await page.click("#bMain");
+    await page.clock.runFor(6000);
+    assert(await page.textContent("#rPhase") === "Arbete" && await page.textContent("#rWhere") === "Station 2 av 3", "it did not go on to station 2: " + await page.textContent("#rPhase") + " / " + await page.textContent("#rWhere"));
+    // going back into the change of station waits again
+    await page.click("#bPrev");
+    assert(await page.textContent("#bMain") === "Fortsätt" && await page.textContent("#rPhase") === "Byt station", "going back into the change did not wait: " + await page.textContent("#bMain") + " / " + await page.textContent("#rPhase"));
+    // Close leaves the quick timer; with no workout before, the timer goes back to the app's defaults
+    await page.click("#qClose");
+    await page.waitForFunction(() => !document.getElementById("passes").hidden);
+    assert(!(await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_qon")))), "Close did not leave the quick timer");
+    assert((await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")))).warm === 10, "the quick plan was left as the plan");
+    assert(!page.errors.length, page.errors.join("; "));
+  });
+
+  await test("the quick timer is not opened when the open workout cannot be saved, so no edits are lost", async () => {
+    const page = await open({ total: 45 });
+    await page.click("#tabPass"); await page.click("#passList .item button:nth-child(2)"); await page.click("#stepTime");
+    await page.evaluate(() => { Storage.prototype.__set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === "ccage_passes") throw new Error("full"); return this.__set(k, v); }; });
+    await page.fill("#total", "50"); await page.dispatchEvent("#total", "change");
+    await page.evaluate(() => document.getElementById("passQuick").click());
+    await page.waitForFunction(() => !document.getElementById("toast").hidden);
+    assert(/kunde inte sparas/.test(await page.textContent("#toastMsg")) && await page.isHidden("#quickBox"), "the quick timer opened over unsaved edits: " + await page.textContent("#toastMsg"));
+    assert((await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")))).total === 50 && (await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_cur")))) === "t1", "the edit or the open workout was lost");
   });
 
   await browser.close();
