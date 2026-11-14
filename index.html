@@ -86,6 +86,12 @@ h1 span{color:var(--work)}
 .sheet{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}
 .sheetbox{background:var(--bg);border:1px solid var(--line);border-radius:14px 14px 0 0;width:min(620px,100%);max-height:88vh;overflow:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
 .sheetbox .top{display:flex;align-items:center;justify-content:space-between}
+/* Quick timer: a few settings above the timer; a workout's extras are hidden. */
+.quick{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.quick .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.quick fieldset{border:0;margin:0;padding:0;min-width:0;display:flex;flex-direction:column;gap:8px}
+.quick fieldset:disabled{opacity:.5}
+body.quickmode #passLeft,body.quickmode #bInstr,body.quickmode #fRole,body.focus .quick{display:none!important}
 /* Instructions during the workout: large and easy to read at arm's length. */
 .instrbtn{width:100%;font-size:16px;padding:12px}
 body.self .instrbtn{display:none}
@@ -557,7 +563,7 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <!-- PASS -->
   <section id="passes" hidden>
     <div class="block" style="border-top:0;padding-top:0">
-      <div class="passrow"><button class="btn primary" id="passNew">+ Nytt pass</button></div>
+      <div class="passrow"><button class="btn primary" id="passNew">+ Nytt pass</button><button class="btn" id="passQuick">⏱ Snabbtimer</button></div>
       <div class="label">Mina pass</div>
       <div class="sub">Allt du ändrar i ett pass sparas automatiskt. Det senast använda passet ligger överst.</div>
       <div class="list" id="passList"></div>
@@ -703,6 +709,23 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
       <button id="bMain" class="main">Start</button>
       <button id="bNext" aria-label="Nästa intervall">Fram ▶</button>
     </div>
+    <div class="quick" id="quickBox" hidden>
+      <div class="top"><div><div class="label">Snabbtimer</div><div class="sub">Bara arbete, vila och set. Tryck Start när du är redo.</div></div><button class="smallbtn" id="qClose">Stäng</button></div>
+      <fieldset id="qSet">
+        <div class="row"><label for="qWork">Arbete</label>
+          <div class="num"><button data-q="work:-5" aria-label="Minska">−</button><input id="qWork" type="number" inputmode="numeric" min="5" max="600"><button data-q="work:5" aria-label="Öka">+</button></div><span class="unit">s</span></div>
+        <div class="row"><label for="qRest">Vila</label>
+          <div class="num"><button data-q="rest:-5" aria-label="Minska">−</button><input id="qRest" type="number" inputmode="numeric" min="0" max="600"><button data-q="rest:5" aria-label="Öka">+</button></div><span class="unit">s</span></div>
+        <div class="row"><label for="qSets">Antal set</label>
+          <div class="num"><button data-q="sets:-1" aria-label="Minska">−</button><input id="qSets" type="number" inputmode="numeric" min="1" max="20"><button data-q="sets:1" aria-label="Öka">+</button></div><span class="unit">st</span></div>
+        <div class="row"><label for="qSt">Stationer</label>
+          <div class="num"><button data-q="st:-1" aria-label="Minska">−</button><input id="qSt" type="number" inputmode="numeric" min="1" max="20"><button data-q="st:1" aria-label="Öka">+</button></div><span class="unit">st</span></div>
+        <div class="mode stack" role="group" aria-label="Mellan stationerna" id="qModeRow"><button id="qRun" aria-pressed="true">Löpande</button><button id="qWait" aria-pressed="false">Vänta på mig mellan stationerna</button></div>
+        <div class="row" id="qStRestRow"><label for="qStRest">Vila mellan stationer</label>
+          <div class="num"><button data-q="stRest:-5" aria-label="Minska">−</button><input id="qStRest" type="number" inputmode="numeric" min="0" max="600"><button data-q="stRest:5" aria-label="Öka">+</button></div><span class="unit">s</span></div>
+        <div class="sub" id="qHint" hidden>Klockan stannar efter varje station. Tryck Fortsätt när du är redo, så räknar den ned 5 sekunder.</div>
+      </fieldset>
+    </div>
     <div class="adj" role="group" aria-label="Ändra tiden"><button id="bMinus" aria-label="30 sekunder kortare">−30 s</button><button id="bPlus" aria-label="30 sekunder längre">+30 s</button></div>
     <div class="music" id="musicBar" hidden>
       <div class="mrow">
@@ -764,6 +787,6 @@ body.onrun .curbar .crun{background:none;color:var(--fg);border:1px solid var(--
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Ångra</button></div>
 </div>
 
-<script src="app.js?v=workouttimer-v31"></script>
+<script src="app.js?v=workouttimer-v32"></script>
 </body>
 </html>
