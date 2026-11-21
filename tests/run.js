@@ -1277,6 +1277,36 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     assert(!page.errors.length, page.errors.join("; "));
   });
 
+  await test("on its side the timer fills the screen, with time left, next and Pause on the right; a tablet keeps the menu", async () => {
+    const check = async (w, h, bars) => {
+      const page = await open({ total: 45, st: 3 }, { device: { viewport: { width: w, height: h }, isMobile: true, hasTouch: true } });
+      try {
+      await page.click("#tabRun");
+      // before the start the menu is there, so the phone can be used on its side too
+      assert(await page.evaluate(() => getComputedStyle(document.querySelector(".nav")).display) !== "none", w + "x" + h + ": no menu before the start");
+      await page.click("#bMain");
+      const r = await page.evaluate(() => { const b = (id) => document.getElementById(id).getBoundingClientRect();
+        return { face: b("face"), side: b("runSide"), main: b("bMain"), left: b("passLeft"), over: document.documentElement.scrollWidth > innerWidth || document.getElementById("scroller").scrollWidth > document.getElementById("scroller").clientWidth, nav: getComputedStyle(document.querySelector(".nav")).display }; });
+      assert(r.side.left >= r.face.right && r.face.height > h * 0.6, w + "x" + h + ": the timer box and the column are not side by side: " + JSON.stringify([r.face, r.side]));
+      assert(r.main.bottom <= h && r.left.bottom <= h && r.left.top >= r.side.top, w + "x" + h + ": Pause or the time left is off the screen");
+      assert(!r.over, w + "x" + h + ": the page scrolls sideways");
+      assert((r.nav !== "none") === bars, w + "x" + h + ": the menu " + (bars ? "is gone" : "shows"));
+      assert(await page.textContent("#bMain") === "Paus", "the button");
+      await page.click("#bMain");
+      assert(await page.textContent("#bMain") === "Fortsätt", "Pause did not work on its side");
+      assert(!page.errors.length, page.errors.join("; "));
+      } finally { await page.context().close(); }
+    };
+    await check(844, 390, false);
+    await check(667, 375, false);
+    await check(1180, 820, true);
+    // upright nothing changes: the column is not a box of its own
+    const page = await open({ total: 45 }, { device: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } });
+    await page.click("#tabRun");
+    assert(await page.evaluate(() => getComputedStyle(document.getElementById("runSide")).display) === "contents", "the upright layout changed");
+    await page.context().close();
+  });
+
   await browser.close();
   server.close();
   const failed = results.filter((r) => r[0] === "FAIL").length;
