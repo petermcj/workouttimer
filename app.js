@@ -607,7 +607,7 @@ function render(){
 
 // --- Tabs ---
 const TABS={passes:"tabPass",plan:"tabPass",run:"tabRun",exlib:"tabEx",settings:"tabSet"};
-function showTab(t){if(t==="run")try{spNowSoon()}catch(e){}document.body.classList.toggle("onrun",t==="run");Object.keys(TABS).forEach(sec=>{$(sec).hidden=sec!==t});Object.entries(TABS).forEach(([sec,btn])=>{if(sec!=="plan")$(btn).setAttribute("aria-selected",sec===t||(t==="plan"&&sec==="passes"))});
+function showTab(t){if(t==="run"){try{spNowSoon()}catch(e){}$("runSide").scrollTop=0}document.body.classList.toggle("onrun",t==="run");Object.keys(TABS).forEach(sec=>{$(sec).hidden=sec!==t});Object.entries(TABS).forEach(([sec,btn])=>{if(sec!=="plan")$(btn).setAttribute("aria-selected",sec===t||(t==="plan"&&sec==="passes"))});
   if(t==="exlib")renderLib();if(t==="passes")renderPasses();if(t==="plan"&&!$("paneEx").hidden)renderCards();curBar();$("scroller").scrollTo(0,0)}
 Object.entries(TABS).forEach(([sec,btn])=>{if(sec!=="plan")$(btn).onclick=()=>showTab(sec)});
 
@@ -825,6 +825,8 @@ function doneSecs(){let d=0;for(let i=0;i<idx;i++)d+=seq[i].d;if(seq[idx])d+=seq
 function draw(){
   if(quickOn)$("qSet").disabled=quickBusy();
   instrNow();
+  // a workout under way: on a phone on its side, the bars are then left out so the timer fills the screen
+  document.body.classList.toggle("live",started&&idx<seq.length);
   $("bReset").hidden=!started;sndShow();
   if(typeof updateLock==="function")updateLock(false);
   const it=seq[idx],lb=label(it);
