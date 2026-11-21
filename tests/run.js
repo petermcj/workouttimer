@@ -1129,13 +1129,17 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.fill("#qWork", "20"); await page.dispatchEvent("#qWork", "change");
     await page.click('[data-q="rest:-5"]');
     await page.click('[data-q="sets:-1"]');
-    assert(JSON.stringify(await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_quick")))) === JSON.stringify({ work: 20, rest: 10, sets: 2, st: 1, stRest: 30, wait: false }), "the values: " + await page.evaluate(() => localStorage.getItem("ccage_quick")));
+    const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_quick")));
+    assert(kept.work === 20 && kept.rest === 10 && kept.sets === 2 && kept.st === 1 && kept.rd === 1 && !kept.wait && !kept.fit, "the values: " + JSON.stringify(kept));
+    assert(await page.textContent("#qSum") === "Passet tar 0:50" && await page.isHidden("#qRdRestRow"), "the length: " + await page.textContent("#qSum"));
     assert(await page.textContent("#mLeft") === "1:00", "10 s ready + 20 + 10 + 20: " + await page.textContent("#mLeft"));
     await page.click("#bMain");
-    assert(await page.isDisabled("#qWork") && await page.isHidden("#passLeft"), "the settings can be changed during the run, or a workout's end shows");
+    assert(await page.isDisabled("#qWork"), "the settings can be changed during the run");
+    assert(await page.isVisible("#passLeft") && await page.isHidden("#bOpt"), "no time left of the workout, or Optimise shows");
     const seen = [];
     for (let i = 0; i < 70 && (await page.textContent("#bMain")) !== "Start"; i++) { const x = (await page.textContent("#rPhase")) + ":" + (await page.textContent("#rWhat")); if (seen[seen.length - 1] !== x) seen.push(x); await page.clock.runFor(1000); }
     assert(seen.join(" | ") === "Gör dig redo:Snabbtimer | Arbete:Set 1 av 2 | Vila:Nästa: set 2 | Arbete:Set 2 av 2", "the run: " + seen.join(" | "));
+    assert(await page.isHidden("#rTimes"), "the times show when the run is over");
     // when the run is over the values can be changed again, without a question
     assert(await page.isEnabled("#qWork"), "the settings stay locked after the run");
     await page.click('[data-q="sets:1"]');
@@ -1194,6 +1198,83 @@ const minsec = (s) => { const m = /(\d+) min/.exec(s), x = /(\d+) s/.exec(s); re
     await page.waitForFunction(() => !document.getElementById("toast").hidden);
     assert(/kunde inte sparas/.test(await page.textContent("#toastMsg")) && await page.isHidden("#quickBox"), "the quick timer opened over unsaved edits: " + await page.textContent("#toastMsg"));
     assert((await page.evaluate(() => JSON.parse(localStorage.getItem("ccage")))).total === 50 && (await page.evaluate(() => JSON.parse(localStorage.getItem("ccage_cur")))) === "t1", "the edit or the open workout was lost");
+  });
+
+  await test("the timer box shows the work and rest that apply now, also when they change between rounds", async () => {
+    const page = await open({ total: 45, mode: "manual", st: 2, ex: 1, sets: 2, rd: 2, warm: 0, instr: 0, ready: 0, stretch: 0, perRound: true,
+      rounds: [{ work: 35, setRest: 10, exRest: 10, stRest: 20 }, { work: 25, setRest: 15, exRest: 10, stRest: 20 }] });
+    await page.click("#tabRun");
+    assert(await page.isHidden("#rTimes"), "the times show before the start");
+    await page.click("#bMain");
+    const at = async (phase, r) => { for (let i = 0; i < 40; i++) { if (await page.textContent("#rPhase") === phase && (await page.textContent("#rWhere")).startsWith("Varv " + r)) return; await page.click("#bNext"); } throw new Error("never reached " + phase + " in round " + r); };
+    await at("Arbete", 1);
+    assert(await page.textContent("#rTimes") === "35 s arbete / 10 s vila", "round 1, work: " + await page.textContent("#rTimes"));
+    await at("Vila", 1);
+    assert(await page.textContent("#rTimes") === "35 s arbete / 10 s vila", "round 1, rest: " + await page.textContent("#rTimes"));
+    await at("Varvvila", 1);
+    assert(await page.textContent("#rTimes") === "25 s arbete / 15 s vila", "the round rest does not show the next round's times: " + await page.textContent("#rTimes"));
+    await at("Arbete", 2);
+    assert(await page.textContent("#rTimes") === "25 s arbete / 15 s vila", "round 2: " + await page.textContent("#rTimes"));
+    await page.click("#bFocus").catch(() => {});
+    assert(await page.isVisible("#rTimes"), "the times are hidden in focus mode");
+    assert(!page.errors.length, page.errors.join("; "));
+  });
+
+  await test("the quick timer has rounds, can fit a chosen length, and keeps favourites", async () => {
+    const page = await open(null, { raw: { ccage_quick: { work: 20, rest: 10, sets: 2, st: 2, stRest: 15, rd: 2, rdRest: 30, wait: false } } });
+    await page.clock.install();
+    await page.reload();
+    await page.evaluate(() => document.getElementById("passQuick").click());
+    await page.waitForFunction(() => !document.getElementById("quickBox").hidden);
+    // 8 x 20 work + 4 x 10 rest + 2 x 15 between stations + 30 between rounds
+    assert(await page.isVisible("#qRdRestRow") && await page.textContent("#qSum") === "Passet tar 4:20" && await page.textContent("#mLeft") === "4:30", "the length with rounds: " + await page.textContent("#qSum") + " / " + await page.textContent("#mLeft"));
+    // the workout's length: 6 min leaves 260 s for 8 work intervals, so 30 s each in steps of 5 s, and 20 s over
+    await page.click("#qFit");
+    assert(await page.isHidden("#qWorkRow") && await page.isVisible("#qLenRow"), "the length is not asked for");
+    await page.fill("#qLen", "6"); await page.dispatchEvent("#qLen", "change");
+    assert(await page.textContent("#qSum") === "Arbete blir 30 s. Passet tar 5:40 · 0:20 kvar i slutet", "fitting 6 min: " + await page.textContent("#qSum"));
+    await page.fill("#qLen", "1"); await page.dispatchEvent("#qLen", "change");
+    assert(/^Ryms inte/.test(await page.textContent("#qSum")) && await page.evaluate(() => document.getElementById("qSum").classList.contains("bad")), "too short is not told: " + await page.textContent("#qSum"));
+    await page.click('[data-q="len:1"]');
+    assert(await page.inputValue("#qLen") === "2", "+ did not add a minute");
+    await page.fill("#qLen", "5"); await page.dispatchEvent("#qLen", "change");
+    // a favourite: saved with a name, marked while the settings match, loaded with a tap
+    let answer = "Mitt pass";
+    page.on("dialog", (d) => d.accept(answer));
+    await page.click("#qFavAdd");
+    assert(await page.textContent("#qFavs button") === "Mitt pass" && await page.evaluate(() => document.querySelector("#qFavs button").classList.contains("on")), "the favourite is not shown as chosen");
+    assert(await page.isHidden("#qFavAdd") && await page.isVisible("#qFavTools"), "save shows for settings that are already a favourite");
+    await page.click('[data-q="rest:5"]');
+    assert(!(await page.evaluate(() => document.querySelector("#qFavs button").classList.contains("on"))) && await page.isVisible("#qFavAdd"), "the favourite is still marked after a change");
+    await page.click("#qFavs button");
+    assert(await page.inputValue("#qRest") === "10" && await page.inputValue("#qLen") === "5" && await page.inputValue("#qRd") === "2", "the favourite was not loaded");
+    answer = "Cirkel 5 min";
+    await page.click("#qFavRen");
+    assert(await page.textContent("#qFavs button") === "Cirkel 5 min", "rename did not work");
+    await page.click("#qFavDel");
+    assert(await page.isHidden("#qFavs"), "the favourite was not removed");
+    await page.click("#toastUndo");
+    assert(await page.textContent("#qFavs button") === "Cirkel 5 min", "undo did not bring the favourite back");
+    await page.reload(); await page.click("#tabRun");
+    assert(await page.textContent("#qFavs button") === "Cirkel 5 min", "the favourite was not kept");
+    // wait for me also between rounds (the 5 s countdowns leave room for 30 s of work), and the times show in the timer box
+    await page.click("#qWait");
+    assert(await page.isHidden("#qRdRestRow") && await page.isHidden("#qStRestRow"), "the rests show while waiting");
+    await page.click("#bMain");
+    const hold = async () => { for (let i = 0; i < 200 && (await page.textContent("#bMain")) === "Paus"; i++) await page.clock.runFor(1000); };
+    await hold();
+    assert(await page.textContent("#rPhase") === "Byt station" && await page.textContent("#bMain") === "Fortsätt", "no stop at the station: " + await page.textContent("#rPhase"));
+    assert(await page.textContent("#rTimes") === "30 s arbete / 10 s vila · Varv 1 av 2", "the times: " + await page.textContent("#rTimes"));
+    assert(await page.isVisible("#passLeft") && await page.isHidden("#bOpt"), "no time left of the workout");
+    // a minute of waiting moves the end, so the time left is the same and the plan is not late
+    const left = await page.textContent("#plTime");
+    await page.clock.runFor(60000);
+    await page.click("#bMain");
+    assert(await page.textContent("#plTime") === left && !(await page.evaluate(() => document.getElementById("passLeft").classList.contains("late"))), "the wait made the plan late: " + left + " -> " + await page.textContent("#plTime") + " " + await page.textContent("#plState"));
+    await page.clock.runFor(2000); await hold();
+    assert(await page.textContent("#rPhase") === "Varvvila" && await page.textContent("#rWhat") === "→ Varv 2" && await page.textContent("#bMain") === "Fortsätt", "no stop between the rounds: " + await page.textContent("#rPhase") + " / " + await page.textContent("#rWhat"));
+    assert(await page.textContent("#rTimes") === "30 s arbete / 10 s vila · Varv 2 av 2", "the next round's times: " + await page.textContent("#rTimes"));
+    assert(!page.errors.length, page.errors.join("; "));
   });
 
   await browser.close();

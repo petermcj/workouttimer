@@ -14,9 +14,9 @@ Intervallklocka för pass med stationer: cirkelträning, CrossCage och egen trä
 ## Det här gör den
 
 - **Bygg pass** med stationer, övningar, set och varv. Appen räknar ut arbete och vila så att allt ryms i passets tid.
-- **Klockan** visar fas, övning, nästa moment och tid kvar av passet, med ljudsignaler och röst. Optimera anpassar resten av passet om ni ligger efter.
+- **Klockan** visar fas, övning, aktuella tider för arbete och vila, nästa moment och tid kvar av passet, med ljudsignaler och röst. Optimera anpassar resten av passet om ni ligger efter.
 - **Instruktör eller egen träning.** Instruktören får genomgång av övningar och kan visa instruktioner för alla stationer under passet.
-- **Snabbtimer** med bara arbete, vila, set och stationer, utan att bygga ett pass.
+- **Snabbtimer** med arbete, vila, set, stationer och varv, utan att bygga ett pass. Välj en längd så räknar den ut arbetstiden, och spara dina favoriter.
 - **Övningsbank** med 48 övningar och instruktioner, plus egna övningar och kommentarer.
 - **Spotify** (Premium): spellista vid start, spela/pausa och nästa låt. Se [SPOTIFY.md](SPOTIFY.md).
 - **Säkerhetskopia** till fil, och svenska eller engelska.
